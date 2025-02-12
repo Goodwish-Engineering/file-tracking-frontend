@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+li{
+    list-style: bullet;
+}
+table,
+th,
+td {
+    border: 1px solid black;
+}
