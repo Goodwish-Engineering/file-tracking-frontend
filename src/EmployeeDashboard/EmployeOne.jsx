@@ -75,7 +75,7 @@ const EmployeOne = () => {
           </div>
         </div>
       )}
-      <div className="w-[20%] h-screen hidden bg-yellow-600 px-2 rounded-md  md:flex flex-col gap-3 items-center py-3 ">
+      <div className="w-[20%] h-screen hidden bg-orange-400 px-2 rounded-md  md:flex flex-col gap-3 items-center py-3 ">
         <div className="w-full flex flex-col justify-center bg-white border-2 border-red-600 rounded-lg py-2  items-center">
           <img src={logo} className="w-20 h-20 object-cover rounded-full" />
         </div>

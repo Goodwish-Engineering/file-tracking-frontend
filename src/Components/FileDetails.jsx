@@ -5,7 +5,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
   const empId = localStorage.getItem("empId");
-
+  const [show, setshow] = useState(true);
   const [formData, setFormData] = useState({
     file_name: "",
     subject: "",
@@ -36,6 +36,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
   };
   useEffect(() => {
     clearFeilds();
+    setshow(true);
   }, [clearData]);
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -124,6 +125,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
         alert("File details submitted successfully!");
         localStorage.setItem("fileId", data.id);
         setShowButton(true);
+        setshow(false);
       } else {
         alert("Failed to submit file details.");
       }
@@ -207,12 +209,14 @@ const FileDetails = ({ setShowButton, clearData }) => {
               )
           )}
           <div className="col-span-2 flex justify-center">
-            <button
-              type="submit"
-              className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
-            >
-              रेकर्ड थप्नुहोस्
-            </button>
+            {show && (
+              <button
+                type="submit"
+                className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
+              >
+                रेकर्ड थप्नुहोस्
+              </button>
+            )}
           </div>
         </form>
       </div>

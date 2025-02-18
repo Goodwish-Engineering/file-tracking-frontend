@@ -16,12 +16,14 @@ const VeiwMoreFileDetails = () => {
   const [editable, setEditable] = useState(false);
   const navigate = useNavigate();
   const [newTippani, setNewTippani] = useState({
+    subject: "",
     submitted_by: "",
     submitted_date: "",
     approved_by: "",
     approved_date: "",
     remarks: "",
     tippani_date: "",
+    page_no: "",
   });
   const [newDoc, setNewDoc] = useState({
     registration_no: "",
@@ -77,12 +79,14 @@ const VeiwMoreFileDetails = () => {
       tippani: [...prevState.tippani, newTippani],
     }));
     setNewTippani({
+      subject: "",
       submitted_by: "",
       submitted_date: "",
       approved_by: "",
       approved_date: "",
       remarks: "",
       tippani_date: "",
+      page_no: "",
     });
   };
 
@@ -247,17 +251,32 @@ const VeiwMoreFileDetails = () => {
           <table className="min-w-full table-auto border-collapse bg-gray-100 rounded-lg overflow-hidden">
             <thead>
               <tr className="bg-orange-500 text-white">
+                <th className="py-2 px-4 text-left">Subject</th>
                 <th className="py-2 px-4 text-left">Submitted By</th>
                 <th className="py-2 px-4 text-left">Submitted Date</th>
-                <th className="py-2 px-4 text-left">Approved By</th>
+                <th className="py-2 px-4 text-left">Submitted to</th>
                 <th className="py-2 px-4 text-left">Approval Date</th>
                 <th className="py-2 px-4 text-left">Remarks</th>
                 <th className="py-2 px-4 text-left">Tippani Date</th>
+                <th className="py-2 px-4 text-left">pages</th>
               </tr>
             </thead>
             <tbody>
               {tippani.map((tip, index) => (
                 <tr key={index} className="border-b">
+                  <td className="py-2 px-4">
+                    {editable ? (
+                      <input
+                        type="text"
+                        value={tip.subject || ""}
+                        onChange={(e) =>
+                          handleChange(e, "subject", index, "tippani")
+                        }
+                      />
+                    ) : (
+                      tip.submitted_by || "N/A"
+                    )}
+                  </td>
                   <td className="py-2 px-4">
                     {editable ? (
                       <input
@@ -336,6 +355,19 @@ const VeiwMoreFileDetails = () => {
                       tip.tippani_date || "N/A"
                     )}
                   </td>
+                  <td className="py-2 px-4">
+                    {editable ? (
+                      <input
+                        type="number"
+                        value={tip.page_no || ""}
+                        onChange={(e) =>
+                          handleChange(e, "page_no", index, "tippani")
+                        }
+                      />
+                    ) : (
+                      tip.page_no || "N/A"
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -361,7 +393,7 @@ const VeiwMoreFileDetails = () => {
             <thead>
               <tr className="bg-orange-500 text-white">
                 <th className="py-2 px-4 text-left">Registration No</th>
-                <th className="py-2 px-4 text-left">Invoice No</th>
+                <th className="py-2 px-4 text-left">Chalani No</th>
                 <th className="py-2 px-4 text-left">Date</th>
                 <th className="py-2 px-4 text-left">Subject</th>
                 <th className="py-2 px-4 text-left">Letter Date</th>

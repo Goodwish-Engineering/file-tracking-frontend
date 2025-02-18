@@ -6,6 +6,7 @@ const PanjikaTippani = () => {
   const [rows, setRows] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const fileId = localStorage.getItem("fileId");
+  const [showButton, setShowButton] = useState(true);
 
   const handleChange = (index, field, value) => {
     const updatedRows = [...rows];
@@ -22,31 +23,17 @@ const PanjikaTippani = () => {
   const saveRow = async (index) => {
     const row = rows[index];
     const url = `${baseUrl}/tippani/`;
-    const method = row.id ? "PUT" : "POST";
+    const method = row.id ? "Patch" : "POST";
 
     try {
       const response = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          present_file: row.present_file,
-          present_subject: row.present_subject,
-          submitted_by: row.submitted_by,
-          submitted_date: row.submitted_date,
-          remarks: row.remarks,
-          approved_by: row.approved_by,
-          approve_date: row.approve_date,
-          tippani_date: row.tippani_date,
-          related_file: row.related_file,
-          page_no: row.page_no,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(row),
       });
 
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
-      }
 
       const savedRow = await response.json();
       const updatedRows = [...rows];
@@ -58,105 +45,138 @@ const PanjikaTippani = () => {
     }
   };
 
-  const [showButton, setShowButton] = useState(true);
   const addRow = () => {
     setShowButton(false);
-    const newRow = {
-      present_subject: "",
-      submitted_by: "",
-      submitted_date: "",
-      remarks: "",
-      approved_by: "",
-      approve_date: "",
-      tippani_date: "",
-      page_no: "",
-      isEditing: true,
-      related_file: fileId,
-    };
-    setRows([...rows, newRow]);
+    setRows([
+      ...rows,
+      {
+        subject: "",
+        submitted_by: "",
+        submitted_date: "",
+        remarks: "",
+        approved_by: "",
+        approved_date: "",
+        tippani_date: "",
+        page_no: "",
+        isEditing: true,
+        related_file: fileId,
+      },
+    ]);
+  };
+
+  const deleteRow = async (index) => {
+    const row = rows[index];
+    const url = `${baseUrl}/tippani/${row.id}`;
+
+    try {
+      const response = await fetch(url, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+
+      const updatedRows = rows.filter((_, i) => i !== index);
+      setRows(updatedRows);
+    } catch (error) {
+      console.error("Error deleting row:", error);
+    }
   };
 
   return (
-    <div className="p-3 w-full overflow-auto bg-white shadow-lg rounded-lg">
-      <h1 className="text-center font-bold text-xl mb-6 text-gray-700">
+    <div className="p-4 w-full overflow-auto bg-orange-100 shadow-lg rounded-lg">
+      <h1 className="text-center font-bold text-xl mb-6 text-orange-700">
         Panjika Details Tippani
       </h1>
       {isLoading ? (
-        <div className="text-center text-xl text-blue-500">Loading...</div>
+        <div className="text-center text-xl text-orange-500">Loading...</div>
       ) : (
         <>
-          <table className="table-auto border-collapse border w-full text-sm">
-            <thead className="bg-gray-200">
+          <table className="table-auto border-collapse border w-full text-sm shadow-md rounded-lg overflow-hidden">
+            <thead className="bg-orange-500 text-white">
               <tr>
-                <th className="px-4 py-2 text-left">Subject</th>
-                <th className="px-4 py-2 text-left">Submitted By</th>
-                <th className="px-4 py-2 text-left">Submitted Date</th>
-                <th className="px-4 py-2 text-left">Remarks</th>
-                <th className="px-4 py-2 text-left">Approved By</th>
-                <th className="px-4 py-2 text-left">Approval Date</th>
-                <th className="px-4 py-2 text-left">Tippani Date</th>
-                <th className="px-4 py-2 text-left">Page No</th>
-                <th className="px-4 py-2 text-left">Actions</th>
+                {[
+                  "Subject",
+                  "Submitted By",
+                  "Submitted Date",
+                  "Remarks",
+                  "Submitted to",
+                  "Approval Date",
+                  "Tippani Date",
+                  "Page No",
+                  "Actions",
+                ].map((head) => (
+                  <th key={head} className="px-4 py-2 text-left">
+                    {head}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="bg-white">
               {rows.map((row, index) => (
-                <tr key={row.id} className="hover:bg-gray-50">
-                  {row.isEditing ? (
-                    <>
-                      <td className="px-4 py-2">
-                        <input
-                          type="text"
-                          value={row.present_subject || ""}
-                          onChange={(e) =>
-                            handleChange(
-                              index,
-                              "present_subject",
-                              e.target.value
-                            )
-                          }
-                          className="border rounded-md px-3 py-1 w-full"
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <input
-                          type="text"
-                          value={row.page_no || ""}
-                          onChange={(e) =>
-                            handleChange(index, "page_no", e.target.value)
-                          }
-                          className="border rounded-md px-3 py-1 w-full"
-                        />
-                      </td>
-                      <td className="px-4 py-2 flex space-x-2">
+                <tr key={index} className="hover:bg-orange-50 border-b">
+                  {row.isEditing
+                    ? [
+                        "subject",
+                        "submitted_by",
+                        "submitted_date",
+                        "remarks",
+                        "approved_by",
+                        "approved_date",
+                        "tippani_date",
+                        "page_no",
+                      ].map((field) => (
+                        <td key={field} className="px-4 py-2">
+                          <input
+                            type={field.includes("date") ? "date" : "text"}
+                            value={row[field] || ""}
+                            onChange={(e) =>
+                              handleChange(index, field, e.target.value)
+                            }
+                            className="border rounded-md px-3 py-1 w-32"
+                          />
+                        </td>
+                      ))
+                    : [
+                        "subject",
+                        "submitted_by",
+                        "submitted_date",
+                        "remarks",
+                        "approved_by",
+                        "approved_date",
+                        "tippani_date",
+                        "page_no",
+                      ].map((field) => (
+                        <td key={field} className="px-4 py-2">
+                          {row[field]}
+                        </td>
+                      ))}
+                  <td className="px-4 py-2 flex space-x-2">
+                    {row.isEditing ? (
+                      <>
                         <button
                           onClick={() => saveRow(index)}
-                          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                          className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                         >
                           Save
                         </button>
                         <button
                           onClick={() => toggleEdit(index)}
-                          className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+                          className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
                         >
                           Cancel
                         </button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="px-4 py-2">{row.present_subject}</td>
-                      <td className="px-4 py-2">{row.page_no}</td>
-                      <td className="px-4 py-2 flex space-x-2">
-                        <button
-                          onClick={() => toggleEdit(index)}
-                          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </>
-                  )}
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => deleteRow(index)}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -164,7 +184,7 @@ const PanjikaTippani = () => {
           {showButton && (
             <button
               onClick={addRow}
-              className="mt-6 w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+              className="mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600"
             >
               Add Row
             </button>

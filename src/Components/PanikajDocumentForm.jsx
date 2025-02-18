@@ -16,7 +16,7 @@ const PanjikaDocumentsForm = () => {
   };
 
   const addRow = () => {
-    setShowButton(true);
+    setShowButton(false);
     setRows((prevRows) => [
       ...prevRows,
       {
@@ -80,7 +80,7 @@ const PanjikaDocumentsForm = () => {
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md border border-orange-500">
+    <div className="p-6 bg-white rounded-lg shadow-md border border-orange-500 overflow-auto">
       <h1 className="text-center text-xl font-bold text-orange-600 mb-6">
         PANJIKA DOCUMENTS
       </h1>
@@ -96,7 +96,7 @@ const PanjikaDocumentsForm = () => {
                 <th className="px-4 py-2">Subject</th>
                 <th className="px-4 py-2">Darta No.</th>
                 <th className="px-4 py-2">Office</th>
-                <th className="px-4 py-2">Invoice No.</th>
+                <th className="px-4 py-2">Chalani No.</th>
                 <th className="px-4 py-2">Date</th>
                 <th className="px-4 py-2">Letter Date</th>
                 <th className="px-4 py-2">Total Pages</th>
@@ -113,7 +113,7 @@ const PanjikaDocumentsForm = () => {
                       onChange={(e) =>
                         handleInputChange(index, "subject", e.target.value)
                       }
-                      className="w-full border rounded px-2 py-1"
+                      className="w-32 border rounded px-2 py-1"
                     />
                   </td>
                   <td className="px-4 py-2">
@@ -180,11 +180,11 @@ const PanjikaDocumentsForm = () => {
                       className="w-full border rounded px-2 py-1"
                     />
                   </td>
-                  <td className="px-4 py-2 space-x-2">
+                  <td className="px-4 py-2 space-x-2 flex gap-1 items-center">
                     {!row.isSaved && (
                       <button
                         onClick={() => saveRow(index)}
-                        className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600"
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                       >
                         Save
                       </button>
@@ -203,7 +203,7 @@ const PanjikaDocumentsForm = () => {
           {showButton && (
             <button
               onClick={addRow}
-              className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+              className="mt-4 bg-orange-500 text-white w-full rounded-lg py-2  hover:bg-orange-600"
             >
               Add Row
             </button>
