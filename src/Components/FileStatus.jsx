@@ -6,6 +6,7 @@ const FileStatus = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
   const [fileStatuses, setFileStatuses] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,22 +21,50 @@ const FileStatus = () => {
         },
       });
       const data = await response.json();
-
-      // Filter out files where approvals exist and are transferred
-      const filteredData = data.filter(
-        (file) =>
-          file.approvals.length > 0 &&
-          file.approvals.some((approval) => approval.transferred_to !== null)
-      );
-      setFileStatuses(filteredData);
+      setFileStatuses(data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
+  const handleDelete = async (fileId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this file?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await fetch(`${baseUrl}/file/${fileId}/`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      });
+      setFileStatuses((prevStatuses) =>
+        prevStatuses.filter((file) => file.id !== fileId)
+      );
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
+  };
+
+  const filteredFiles = fileStatuses.filter(
+    (file) =>
+      file.file_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      file.subject.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <h2 className="text-2xl font-bold text-orange-600 mb-4">File Status</h2>
+      <div className="flex justify-between items-center mb-4">
+        <input
+          type="text"
+          placeholder="Search by file name or subject..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="p-2 border rounded-lg border-orange-700 outline-orange-700 w-1/3"
+        />
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse shadow-md bg-white rounded-lg">
           <thead className="bg-orange-500 text-white">
@@ -44,60 +73,39 @@ const FileStatus = () => {
               <th className="p-3 text-left">File No</th>
               <th className="p-3 text-left">File Name</th>
               <th className="p-3 text-left">Subject</th>
-              <th className="p-3 text-left">Pages</th>
-              <th className="p-3 text-left">Submitted By</th>
-              <th className="p-3 text-left">Transferred To</th>
-              <th className="p-3 text-left">Status</th>
-              <th className="p-3 text-left">Remarks</th>
-              <th className="p-3 text-left">Approved Date</th>
+              <th className="p-3 text-left">Days Submitted</th>
               <th className="p-3 text-left">Action</th>
             </tr>
           </thead>
           <tbody>
-            {fileStatuses.length > 0 ? (
-              fileStatuses.map((file) =>
-                file.approvals.map((approval) => (
-                  <tr
-                    key={approval.id}
-                    className="border-b hover:bg-orange-100"
-                  >
-                    <td className="p-3">{file.id}</td>
-                    <td className="p-3">{file.file_number}</td>
-                    <td className="p-3">{file.file_name}</td>
-                    <td className="p-3">{file.subject}</td>
-                    <td className="p-3">
-                      {file.page_no}/{file.total_page}
-                    </td>
-                    <td className="p-3">
-                      {approval.submitted_by
-                        ? `${approval.submitted_by.first_name} ${approval.submitted_by.last_name}`
-                        : "N/A"}
-                    </td>
-                    <td className="p-3">
-                      {approval.transferred_to
-                        ? `${approval.transferred_to.first_name} ${approval.transferred_to.last_name}`
-                        : "N/A"}
-                    </td>
-                    <td className="p-3 font-medium text-orange-600">
-                      {approval.status}
-                    </td>
-                    <td className="p-3">{approval.remarks ?? "N/A"}</td>
-                    <td className="p-3">{approval.approved_date ?? "N/A"}</td>
-                    <td className="p-3">
-                      <button
-                        onClick={() => navigate(`/file-details/${file.id}`)}
-                        className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg transition-all"
-                      >
-                        View More
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )
+            {filteredFiles.length > 0 ? (
+              filteredFiles.map((file) => (
+                <tr key={file.id} className="border-b hover:bg-orange-100">
+                  <td className="p-3">{file.id}</td>
+                  <td className="p-3">{file.file_number}</td>
+                  <td className="p-3">{file.file_name}</td>
+                  <td className="p-3">{file.subject}</td>
+                  <td className="p-3">{file.days_submitted}</td>
+                  <td className="p-3 flex gap-2">
+                    <button
+                      onClick={() => navigate(`/file-details/${file.id}`)}
+                      className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg transition-all"
+                    >
+                      View More
+                    </button>
+                    <button
+                      onClick={() => handleDelete(file.id)}
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-all"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
             ) : (
               <tr>
-                <td colSpan="11" className="p-4 text-center text-gray-600">
-                  No transferred files available.
+                <td colSpan="6" className="p-4 text-center text-gray-600">
+                  No files available.
                 </td>
               </tr>
             )}

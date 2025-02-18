@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   isLogin: false, // ✅ Directly in the state, not inside "login"
   user: { id: 1 },
-  baseUrl: "http://192.168.1.34:8000/api",
+  baseUrl: "https://file-tracking.goodwish.com.np/api",
 };
 
 export const loginSlice = createSlice({

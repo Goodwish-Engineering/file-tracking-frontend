@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { ApiContext } from "../config/baseUrl";
 import logo from "/logo192.png";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,7 +13,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  useEffect(() => {
+    dispatch(addLogin(false));
+  }, []);
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(null);

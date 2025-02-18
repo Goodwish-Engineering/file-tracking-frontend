@@ -36,7 +36,8 @@ const EmployeeDetails = () => {
         },
       });
       const data = await response.json();
-      setEmpData(data);
+      const filteredData = data.filter((user) => !user.is_superuser);
+      setEmpData(filteredData);
     } catch (error) {
       console.log(error);
     }
@@ -84,10 +85,10 @@ const EmployeeDetails = () => {
                   </td>
                   <td className="border border-gray-300 px-4 py-2 text-center">
                     <button
-                      className="text-orange-500 hover:text-orange-700 text-xl"
+                      className="text-white px-1 py-1 rounded-lg font-semibold hover:bg-orange-900  bg-orange-600"
                       onClick={() => setSelectedEmployee(data)}
                     >
-                      &#x22EE; {/* Three dots */}
+                      see more
                     </button>
                   </td>
                 </tr>

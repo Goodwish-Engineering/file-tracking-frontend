@@ -7,28 +7,8 @@ const PanjikaDocumentsForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const fileId = localStorage.getItem("fileId");
   const token = localStorage.getItem("token");
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const apiBaseUrl = `${baseUrl}/letter-document/`;
-
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(apiBaseUrl);
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
-      const data = await response.json();
-      setRows(data || []);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  const [showButton, setShowButton] = useState(true);
   const handleInputChange = (index, field, value) => {
     const updatedRows = [...rows];
     updatedRows[index][field] = value;
@@ -36,19 +16,21 @@ const PanjikaDocumentsForm = () => {
   };
 
   const addRow = () => {
-    setRows([
-      ...rows,
+    setShowButton(true);
+    setRows((prevRows) => [
+      ...prevRows,
       {
         id: null,
         registration_no: "",
         invoice_no: "",
         date: "",
-        letter_date: "", // Added letter_date field
+        letter_date: "",
         subject: "",
         office: "",
         page_no: 0,
         tippani: "",
         related_file: fileId,
+        isSaved: false,
       },
     ]);
   };
@@ -71,24 +53,27 @@ const PanjikaDocumentsForm = () => {
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
       const savedRow = await response.json();
-      const updatedRows = [...rows];
-      updatedRows[index] = savedRow;
-      setRows(updatedRows);
+      setShowButton(true);
+      setRows((prevRows) => {
+        const updatedRows = [...prevRows];
+        updatedRows[index] = { ...savedRow, isSaved: true };
+        return updatedRows;
+      });
     } catch (error) {
       console.error("Error saving row:", error);
     }
   };
 
-  const deleteRow = async (id) => {
+  const deleteRow = async (index, id) => {
     if (!id) {
-      setRows(rows.filter((row) => row.id !== id));
+      setRows((prevRows) => prevRows.filter((_, i) => i !== index));
       return;
     }
     try {
       const response = await fetch(`${apiBaseUrl}${id}/`, { method: "DELETE" });
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
-      setRows(rows.filter((row) => row.id !== id));
+      setRows((prevRows) => prevRows.filter((row) => row.id !== id));
     } catch (error) {
       console.error("Error deleting row:", error);
     }
@@ -113,8 +98,7 @@ const PanjikaDocumentsForm = () => {
                 <th className="px-4 py-2">Office</th>
                 <th className="px-4 py-2">Invoice No.</th>
                 <th className="px-4 py-2">Date</th>
-                <th className="px-4 py-2">Letter Date</th>{" "}
-                {/* New Column for Letter Date */}
+                <th className="px-4 py-2">Letter Date</th>
                 <th className="px-4 py-2">Total Pages</th>
                 <th className="px-4 py-2">Actions</th>
               </tr>
@@ -178,7 +162,7 @@ const PanjikaDocumentsForm = () => {
                   </td>
                   <td className="px-4 py-2">
                     <input
-                      type="date" // letter_date should be a date input field
+                      type="date"
                       value={row.letter_date}
                       onChange={(e) =>
                         handleInputChange(index, "letter_date", e.target.value)
@@ -197,14 +181,16 @@ const PanjikaDocumentsForm = () => {
                     />
                   </td>
                   <td className="px-4 py-2 space-x-2">
+                    {!row.isSaved && (
+                      <button
+                        onClick={() => saveRow(index)}
+                        className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600"
+                      >
+                        Save
+                      </button>
+                    )}
                     <button
-                      onClick={() => saveRow(index)}
-                      className="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => deleteRow(row.id)}
+                      onClick={() => deleteRow(index, row.id)}
                       className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
                     >
                       Delete
@@ -214,12 +200,14 @@ const PanjikaDocumentsForm = () => {
               ))}
             </tbody>
           </table>
-          <button
-            onClick={addRow}
-            className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
-          >
-            Add Row
-          </button>
+          {showButton && (
+            <button
+              onClick={addRow}
+              className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+            >
+              Add Row
+            </button>
+          )}
         </>
       )}
     </div>
