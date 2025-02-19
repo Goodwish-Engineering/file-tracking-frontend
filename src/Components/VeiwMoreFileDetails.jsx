@@ -172,7 +172,7 @@ const VeiwMoreFileDetails = () => {
         onClick={() => {
           handleNavigate();
         }}
-        className="w-full justify-center items-center flex fixed top-0 text-white font-semibold bg-red-600 cursor-pointer gap-2 py-2 "
+        className="w-full justify-center items-center flex fixed top-0 left-0 text-white font-semibold bg-red-600 cursor-pointer gap-2 py-2 "
       >
         <h1>Home</h1>
         <FontAwesomeIcon icon={faHome} />

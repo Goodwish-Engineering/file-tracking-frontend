@@ -60,6 +60,9 @@ const Registration = () => {
     accumulation_fund_no: "",
     bank_account_no: "",
     bank_name: "",
+    duration: "",
+    office: "",
+    user_type: "",
     loan_type: "",
     loan_name: "",
     interest_rate: "",
@@ -76,10 +79,6 @@ const Registration = () => {
     award_description: "",
     punishment_name: "",
     punishment_description: "",
-    duration: "",
-    office_name: "",
-    office_position: "",
-    office_position_category: "",
   });
 
   const handleChange = (e) => {
@@ -185,12 +184,6 @@ const Registration = () => {
       punishments: {
         name: formData.punishment_name,
         description: formData.punishment_description,
-      },
-      office: {
-        duration: formData.duration,
-        office_name: formData.office_name,
-        position: formData.office_position,
-        position_category: formData.office_position_category,
       },
     };
 
@@ -380,14 +373,7 @@ const Registration = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
             <span className="text-sm font-medium text-gray-700">State</span>
-            {/* <input
-              type="text"
-              name="perm_state"
-              value={formData.perm_state}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              required
-            /> */}
+
             <select
               name="perm_state"
               value={formData.perm_state}
@@ -404,14 +390,7 @@ const Registration = () => {
           </label>
           <label className="flex flex-col">
             <span className="text-sm font-medium text-gray-700">District</span>
-            {/* <input
-              type="text"
-              name="perm_district"
-              value={formData.perm_district}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              required
-            /> */}
+
             <select
               name="perm_district"
               value={formData.perm_district}
@@ -430,14 +409,7 @@ const Registration = () => {
             <span className="text-sm font-medium text-gray-700">
               Municipality
             </span>
-            {/* <input
-              type="text"
-              name="perm_municipality"
-              value={formData.perm_municipality}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              required
-            /> */}
+
             <select
               name="perm_municipality"
               value={formData.perm_municipality}
@@ -466,7 +438,6 @@ const Registration = () => {
         </div>
       </fieldset>
 
-      {/* Temporary Address */}
       <fieldset className="border border-orange-300 p-4 rounded">
         <legend className="text-lg font-semibold text-orange-500">
           Temporary Address
@@ -474,13 +445,7 @@ const Registration = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
             <span className="text-sm font-medium text-gray-700">State</span>
-            {/* <input
-              type="text"
-              name="temp_state"
-              value={formData.temp_state}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            /> */}
+
             <select
               name="temp_state"
               value={formData.temp_state}
@@ -497,13 +462,7 @@ const Registration = () => {
           </label>
           <label className="flex flex-col">
             <span className="text-sm font-medium text-gray-700">District</span>
-            {/* <input
-              type="text"
-              name="temp_district"
-              value={formData.temp_district}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            /> */}
+
             <select
               name="temp_district"
               value={formData.temp_district}
@@ -522,13 +481,7 @@ const Registration = () => {
             <span className="text-sm font-medium text-gray-700">
               Municipality
             </span>
-            {/* <input
-              type="text"
-              name="temp_municipality"
-              value={formData.temp_municipality}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            /> */}
+
             <select
               name="temp_municipality"
               value={formData.temp_municipality}
@@ -668,13 +621,6 @@ const Registration = () => {
           </label>
           <label className="flex flex-col">
             Position Category:
-            {/* <input
-              type="text"
-              name="position_category"
-              value={formData.position_category}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            /> */}
             <select
               onChange={handleChange}
               name="position_category"
@@ -699,13 +645,6 @@ const Registration = () => {
           </label>
           <label className="flex flex-col">
             Employee Type:
-            {/* <input
-              type="text"
-              name="employee_type"
-              value={formData.employee_type}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            /> */}
             <select
               onChange={handleChange}
               name="employee_type"
@@ -718,6 +657,44 @@ const Registration = () => {
                   {types}
                 </option>
               ))}
+            </select>
+          </label>
+          <label className="flex flex-col">
+            Duration:
+            <input
+              type="date"
+              name="duration"
+              value={formData.duration}
+              onChange={handleChange}
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </label>
+          <label className="flex flex-col">
+            Office
+            <input
+              type="text"
+              name="office"
+              value={formData.office}
+              onChange={handleChange}
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </label>
+
+          <label className="flex flex-col">
+            User level :
+            <select
+              onChange={handleChange}
+              name="user_type"
+              value={formData.user_type}
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              <option>select level </option>
+
+              <option value={1}>Faat</option>
+              <option value={2}>Branch Head</option>
+              <option value={3}>Branch officer</option>
+              <option value={4}>Division Head</option>
+              <option value={5}>Admin</option>
             </select>
           </label>
         </div>
@@ -760,13 +737,6 @@ const Registration = () => {
           </label>
           <label className="flex flex-col">
             Bank Name:
-            {/* <input
-              type="text"
-              name="bank_name"
-              value={formData.bank_name}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            /> */}
             <select
               onChange={handleChange}
               name="bank_name"
@@ -791,13 +761,6 @@ const Registration = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
             Loan Type:
-            {/* <input
-              type="text"
-              name="loan_type"
-              value={formData.loan_type}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            /> */}
             <select
               onChange={handleChange}
               name="loan_type"
@@ -882,13 +845,6 @@ const Registration = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
             Education Level:
-            {/* <input
-              type="text"
-              name="education_level"
-              value={formData.education_level}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            /> */}
             <select
               onChange={handleChange}
               name="education_level"
@@ -998,65 +954,6 @@ const Registration = () => {
               onChange={handleChange}
               className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
-          </label>
-        </div>
-      </fieldset>
-
-      <fieldset className="border border-orange-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-orange-500">
-          Office Information
-        </legend>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="flex flex-col">
-            Duration:
-            <input
-              type="date"
-              name="duration"
-              value={formData.duration}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </label>
-          <label className="flex flex-col">
-            Office Name:
-            <input
-              type="text"
-              name="office_name"
-              value={formData.office_name}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </label>
-          <label className="flex flex-col">
-            Position:
-            <input
-              type="text"
-              name="office_position"
-              value={formData.office_position}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </label>
-          <label className="flex flex-col">
-            Position Category:
-            {/* <input
-              type="text"
-              name="office_position_category"
-              value={formData.office_position_category}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            /> */}
-            <select
-              onChange={handleChange}
-              name="office_position_category"
-              value={formData.office_position_category}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              <option>select office position category </option>
-
-              <option value={"Darbandi"}>Darbandi</option>
-              <option value={"Kaaj"}>Kaaj</option>
-            </select>
           </label>
         </div>
       </fieldset>

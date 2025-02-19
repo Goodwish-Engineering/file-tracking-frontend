@@ -48,10 +48,18 @@ const FileStatus = () => {
     }
   };
 
-  const filteredFiles = fileStatuses.filter(
-    (file) =>
-      file.file_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      file.subject.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredFiles = fileStatuses.filter((file) =>
+    searchQuery
+      .toLowerCase()
+      .split(" ")
+      .every((query) =>
+        [
+          file.file_name.toLowerCase(),
+          file.subject.toLowerCase(),
+          String(file.id),
+          String(file.file_number),
+        ].some((field) => field.includes(query))
+      )
   );
 
   return (
@@ -59,7 +67,7 @@ const FileStatus = () => {
       <div className="flex justify-between items-center mb-4">
         <input
           type="text"
-          placeholder="Search by file name or subject..."
+          placeholder="Search by ID, File No, Name, or Subject..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="p-2 border rounded-lg border-orange-700 outline-orange-700 w-1/3"

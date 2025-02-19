@@ -16,7 +16,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
     ward_no: "",
     tole: "",
     present_by: empId,
-    submited_by: "",
+    submitted_by: "",
     present_date: "",
   });
   const clearFeilds = () => {
