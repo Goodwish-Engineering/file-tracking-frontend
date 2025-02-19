@@ -45,10 +45,9 @@ const EmployeeDetails = () => {
       console.log(error);
     }
   };
-
   const updateRole = async () => {
     try {
-      await fetch(`${baseUrl}/user/${selectedEmployee.employee_id}/`, {
+      await fetch(`${baseUrl}/user/${roleModal.id}/update/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -56,6 +55,7 @@ const EmployeeDetails = () => {
         },
         body: JSON.stringify({ user_type: newRole }),
       });
+      console.log(roleModal);
       setRoleModal(null);
       fetchdata();
     } catch (error) {
