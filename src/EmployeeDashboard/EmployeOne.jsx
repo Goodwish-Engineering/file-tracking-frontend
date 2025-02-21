@@ -2,11 +2,19 @@ import React, { useState } from "react";
 import UploadTipanni from "../Components/UploadTipanni";
 import FileStatus from "../Components/FileStatus";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faClose, faSignOut } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBars,
+  faBell,
+  faClose,
+  faSignOut,
+} from "@fortawesome/free-solid-svg-icons";
 
 import logo from "/logo192.png";
+import NonTransferFile from "../Components/NonTranferFile";
+import Notification from "../Components/Notification";
+import FileRequest from "../Components/FileRequest";
 const EmployeOne = () => {
-  const [tab, setTab] = useState("uploadTippani");
+  const [tab, setTab] = useState("notification");
   const [menue, setMeue] = useState(false);
   const level = localStorage.getItem("level"); // Retrieve inside useEffect
 
@@ -15,6 +23,9 @@ const EmployeOne = () => {
       <div className="w-full md:w-[80%]  flex flex-col h-screen overflow-auto ">
         {tab == "uploadTippani" && <UploadTipanni />}
         {tab == "veiwStatus" && <FileStatus />}
+        {tab == "nontransfer" && <NonTransferFile />}
+        {tab == "filerequest" && <FileRequest />}
+        {tab == "notification" && <Notification />}
       </div>
       <div className="md:hidden fixed top-2 right-4">
         {menue ? (
@@ -39,17 +50,19 @@ const EmployeOne = () => {
             <img src={logo} className="w-20 h-20 object-cover rounded-full" />
           </div>
           <div className="w-full flex flex-col gap-3 px-5 py-4 font-semibold text-white text-lg">
-            <h3
-              onClick={() => {
-                setMeue(false);
-                setTab("uploadTippani");
-              }}
-              className={`w-full cursor-pointer ${
-                tab == "uploadTippani" && "bg-yellow-700"
-              } hover:bg-yellow-700 px-3 py-1 rounded-md`}
-            >
-              Upload File
-            </h3>
+            {level === "1" && (
+              <h3
+                onClick={() => {
+                  setMeue(false);
+                  setTab("uploadTippani");
+                }}
+                className={`w-full cursor-pointer ${
+                  tab == "uploadTippani" && "bg-yellow-700"
+                } hover:bg-yellow-700 px-3 py-1 rounded-md`}
+              >
+                Upload File
+              </h3>
+            )}
             <h3
               onClick={() => {
                 setMeue(false);
@@ -61,6 +74,41 @@ const EmployeOne = () => {
             >
               File status
             </h3>
+            {level === "1" ? (
+              <h3
+                onClick={() => {
+                  setMeue(false);
+                  setTab("nontransfer");
+                }}
+                className={`w-full cursor-pointer   ${
+                  tab == "nontransfer" && "bg-yellow-700"
+                } hover:bg-yellow-700 px-3 py-1 rounded-md`}
+              >
+                Non-transfer file
+              </h3>
+            ) : (
+              <h3
+                onClick={() => {
+                  setMeue(false);
+                  setTab("filerequest");
+                }}
+                className={`w-full cursor-pointer   ${
+                  tab == "filerequest" && "bg-yellow-700"
+                } hover:bg-yellow-700 px-3 py-1 rounded-md`}
+              >
+                File Request
+              </h3>
+            )}
+            <button
+              onClick={() => {
+                setTab("notification");
+              }}
+              className={`w-full cursor-pointer   ${
+                tab == "notification" && "bg-yellow-700"
+              } hover:bg-yellow-700 flex gap-2 items-center px-3 py-1 rounded-md`}
+            >
+              <h3>Notification</h3> <FontAwesomeIcon icon={faBell} />
+            </button>
           </div>
           <div>
             <button
@@ -80,16 +128,18 @@ const EmployeOne = () => {
           <img src={logo} className="w-20 h-20 object-cover rounded-full" />
         </div>
         <div className="w-full flex flex-col gap-3 px-5 py-4 font-semibold text-white text-lg">
-          <h3
-            onClick={() => {
-              setTab("uploadTippani");
-            }}
-            className={`w-full cursor-pointer ${
-              tab == "uploadTippani" && "bg-yellow-700"
-            } hover:bg-yellow-700 px-3 py-1 rounded-md`}
-          >
-            Upload File
-          </h3>
+          {level === "1" && (
+            <h3
+              onClick={() => {
+                setTab("uploadTippani");
+              }}
+              className={`w-full cursor-pointer ${
+                tab == "uploadTippani" && "bg-yellow-700"
+              } hover:bg-yellow-700 px-3 py-1 rounded-md`}
+            >
+              Upload File
+            </h3>
+          )}
           <h3
             onClick={() => {
               setTab("veiwStatus");
@@ -100,6 +150,39 @@ const EmployeOne = () => {
           >
             File Status
           </h3>
+          {level === "1" ? (
+            <h3
+              onClick={() => {
+                setTab("nontransfer");
+              }}
+              className={`w-full cursor-pointer   ${
+                tab == "nontransfer" && "bg-yellow-700"
+              } hover:bg-yellow-700 px-3 py-1 rounded-md`}
+            >
+              Non transfer file
+            </h3>
+          ) : (
+            <h3
+              onClick={() => {
+                setTab("filerequest");
+              }}
+              className={`w-full cursor-pointer   ${
+                tab == "filerequest" && "bg-yellow-700"
+              } hover:bg-yellow-700 px-3 py-1 rounded-md`}
+            >
+              File Request
+            </h3>
+          )}
+          <button
+            onClick={() => {
+              setTab("notification");
+            }}
+            className={`w-full cursor-pointer   ${
+              tab == "notification" && "bg-yellow-700"
+            } hover:bg-yellow-700 flex gap-2 items-center px-3 py-1 rounded-md`}
+          >
+            <h3>Notification</h3> <FontAwesomeIcon icon={faBell} />
+          </button>
         </div>
         <div>
           <button

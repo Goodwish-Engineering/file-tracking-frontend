@@ -13,7 +13,7 @@ const App = () => {
     if (isLogin) {
       if (level === "5") {
         navigate("/admindashboard");
-      } else if (level === "1") {
+      } else {
         navigate("/employee1");
       }
     } else {

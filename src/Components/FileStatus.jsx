@@ -27,27 +27,6 @@ const FileStatus = () => {
     }
   };
 
-  const handleDelete = async (fileId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this file?"
-    );
-    if (!confirmDelete) return;
-
-    try {
-      await fetch(`${baseUrl}/file/${fileId}/`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `token ${token}`,
-        },
-      });
-      setFileStatuses((prevStatuses) =>
-        prevStatuses.filter((file) => file.id !== fileId)
-      );
-    } catch (error) {
-      console.error("Error deleting file:", error);
-    }
-  };
-
   const filteredFiles = fileStatuses.filter((file) =>
     searchQuery
       .toLowerCase()
@@ -100,12 +79,6 @@ const FileStatus = () => {
                       className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg transition-all"
                     >
                       View More
-                    </button>
-                    <button
-                      onClick={() => handleDelete(file.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-all"
-                    >
-                      Delete
                     </button>
                   </td>
                 </tr>
