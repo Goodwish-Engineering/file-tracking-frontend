@@ -106,30 +106,30 @@ const NonTransferFile = () => {
         Non-Transferred Files
       </h2>
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse shadow-md bg-white rounded-lg">
+        <table className="w-full shadow-md bg-white rounded-lg border-none">
           <thead className="bg-orange-500 text-white">
-            <tr>
-              <th className="p-3 text-left">ID</th>
-              <th className="p-3 text-left">File Name</th>
-              <th className="p-3 text-left">Subject</th>
-              <th className="p-3 text-left">Presented By</th>
-              <th className="p-3 text-left">Presented Date</th>
-              <th className="p-3 text-left">File</th>
-              <th className="p-3 text-left">Actions</th>
+            <tr className="border border-b-2 border-white">
+              <th className="p-3 text-center font-mono text-pretty border-none">ID</th>
+              <th className="p-3 text-center font-mono text-pretty border-none">File Name</th>
+              <th className="p-3 text-center font-mono text-pretty border-none">Subject</th>
+              <th className="p-3 text-center font-mono text-pretty border-none">Presented By</th>
+              <th className="p-3 text-center font-mono text-pretty border-none">Presented Date</th>
+              <th className="p-3 text-center font-mono text-pretty border-none">File</th>
+              <th className="p-3 text-center font-mono text-pretty border-none">Actions</th>
             </tr>
           </thead>
           <tbody>
             {nonTransferredFiles.length > 0 ? (
-              nonTransferredFiles.map((file) => (
-                <tr key={file.id} className="border-b hover:bg-orange-100">
-                  <td className="p-3">{file.id}</td>
-                  <td className="p-3">{file.file_name}</td>
-                  <td className="p-3">{file.subject}</td>
-                  <td className="p-3">
+              nonTransferredFiles.map((file,index) => (
+                <tr key={file.id} className={`hover:bg-orange-100 text-gray-700 text-center text-nowrap border-t-2 border-b-2`}>
+                  <td className="p-3 border-none">{file.id}</td>
+                  <td className="p-3 border-none">{file.file_name}</td>
+                  <td className="p-3 border-none">{file.subject}</td>
+                  <td className="p-3 border-none">
                     {file.present_by?.first_name} {file.present_by?.last_name}
                   </td>
-                  <td className="p-3">{file.present_date}</td>
-                  <td className="p-3">
+                  <td className="p-3 border-none">{file.present_date}</td>
+                  <td className="p-3 border-none">
                     <button
                       onClick={() => navigate(`/file-details/${file.id}`)}
                       className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg transition-all"
@@ -137,7 +137,7 @@ const NonTransferFile = () => {
                       View More
                     </button>
                   </td>
-                  <td className="p-3 flex gap-2">
+                  <td className="p-3 gap-3 border-none flex items-center justify-center">
                     <button
                       onClick={() => {
                         setFileToTransfer(file.id);
@@ -157,8 +157,8 @@ const NonTransferFile = () => {
                 </tr>
               ))
             ) : (
-              <tr>
-                <td colSpan="7" className="p-4 text-center text-gray-600">
+              <tr className="border-none">
+                <td colSpan="7" className="p-4 text-center border-none text-gray-700">
                   No non-transferred files available.
                 </td>
               </tr>

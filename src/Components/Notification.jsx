@@ -27,7 +27,7 @@ const Notification = () => {
   };
 
   return (
-    <div className="p-4 bg-orange-100 rounded-md w-full max-w-md mx-auto shadow-lg">
+    <div className="p-4 bg-orange-100 rounded-md my-7 w-[90%] max-w-md mx-auto shadow-lg">
       <h2 className="text-lg font-semibold mb-2 text-orange-800">
         Notifications
       </h2>

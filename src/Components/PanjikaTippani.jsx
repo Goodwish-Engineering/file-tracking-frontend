@@ -1,55 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 
 const PanjikaTippani = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
-  const [rows, setRows] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const fileId = localStorage.getItem("fileId");
-  const [showButton, setShowButton] = useState(true);
+  const [tippanis, setTippanis] = useState([]);
+  const [currentTippani, setCurrentTippani] = useState({
+    subject: "",
+    submitted_by: "",
+    submitted_date: "",
+    remarks: "",
+    approved_by: "",
+    approved_date: "",
+    tippani_date: "",
+    page_no: "",
+    related_file: fileId,
+  });
+  const [showAddButton, setShowAddButton] = useState(false);
 
-  const handleChange = (index, field, value) => {
-    const updatedRows = [...rows];
-    updatedRows[index][field] = value;
-    setRows(updatedRows);
+  const handleChange = (e) => {
+    setCurrentTippani({
+      ...currentTippani,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const toggleEdit = (index) => {
-    const updatedRows = [...rows];
-    updatedRows[index].isEditing = !updatedRows[index].isEditing;
-    setRows(updatedRows);
-  };
-
-  const saveRow = async (index) => {
-    const row = rows[index];
-    const url = `${baseUrl}/tippani/`;
-    const method = row.id ? "Patch" : "POST";
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      const response = await fetch(url, {
-        method,
+      const response = await fetch(`${baseUrl}/tippani/`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(row),
+        body: JSON.stringify(currentTippani),
       });
-
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
-
-      const savedRow = await response.json();
-      const updatedRows = [...rows];
-      updatedRows[index] = { ...savedRow, isEditing: false };
-      setRows(updatedRows);
-      setShowButton(true);
-    } catch (error) {
-      console.error("Error saving row:", error);
-    }
-  };
-
-  const addRow = () => {
-    setShowButton(false);
-    setRows([
-      ...rows,
-      {
+      if (!response.ok) throw new Error("Failed to save Tippani");
+      const newTippani = await response.json();
+      setTippanis([...tippanis, newTippani]);
+      setShowAddButton(true);
+      setCurrentTippani({
         subject: "",
         submitted_by: "",
         submitted_date: "",
@@ -58,139 +46,64 @@ const PanjikaTippani = () => {
         approved_date: "",
         tippani_date: "",
         page_no: "",
-        isEditing: true,
         related_file: fileId,
-      },
-    ]);
-  };
-
-  const deleteRow = async (index) => {
-    const row = rows[index];
-    const url = `${baseUrl}/tippani/${row.id}`;
-
-    try {
-      const response = await fetch(url, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
       });
-
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
-
-      const updatedRows = rows.filter((_, i) => i !== index);
-      setRows(updatedRows);
     } catch (error) {
-      console.error("Error deleting row:", error);
+      console.error("Error saving Tippani:", error);
     }
   };
 
+  const addNewForm = () => {
+    setShowAddButton(false);
+  };
+
   return (
-    <div className="p-4 w-full overflow-auto bg-orange-100 shadow-lg rounded-lg">
-      <h1 className="text-center font-bold text-xl mb-6 text-orange-700">
+    <div className="p-4 w-[90%] mx-auto my-4 bg-orange-50 shadow-lg rounded-lg border-orange-300 border-2">
+      <h1 className="text-center font-bold text-2xl mb-6 text-orange-500">
         Panjika Details Tippani
       </h1>
-      {isLoading ? (
-        <div className="text-center text-xl text-orange-500">Loading...</div>
-      ) : (
-        <>
-          <table className="table-auto border-collapse border w-full text-sm shadow-md rounded-lg overflow-hidden">
-            <thead className="bg-orange-500 text-white">
-              <tr>
-                {[
-                  "Subject",
-                  "Submitted By",
-                  "Submitted Date",
-                  "Remarks",
-                  "Submitted to",
-                  "Approval Date",
-                  "Tippani Date",
-                  "Page No",
-                  "Actions",
-                ].map((head) => (
-                  <th key={head} className="px-4 py-2 text-left">
-                    {head}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white">
-              {rows.map((row, index) => (
-                <tr key={index} className="hover:bg-orange-50 border-b">
-                  {row.isEditing
-                    ? [
-                        "subject",
-                        "submitted_by",
-                        "submitted_date",
-                        "remarks",
-                        "approved_by",
-                        "approved_date",
-                        "tippani_date",
-                        "page_no",
-                      ].map((field) => (
-                        <td key={field} className="px-4 py-2">
-                          <input
-                            type={field.includes("date") ? "date" : "text"}
-                            value={row[field] || ""}
-                            onChange={(e) =>
-                              handleChange(index, field, e.target.value)
-                            }
-                            className="border rounded-md px-3 py-1 w-32"
-                          />
-                        </td>
-                      ))
-                    : [
-                        "subject",
-                        "submitted_by",
-                        "submitted_date",
-                        "remarks",
-                        "approved_by",
-                        "approved_date",
-                        "tippani_date",
-                        "page_no",
-                      ].map((field) => (
-                        <td key={field} className="px-4 py-2">
-                          {row[field]}
-                        </td>
-                      ))}
-                  <td className="px-4 py-2 flex space-x-2">
-                    {row.isEditing ? (
-                      <>
-                        <button
-                          onClick={() => saveRow(index)}
-                          className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => toggleEdit(index)}
-                          className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => deleteRow(index)}
-                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {showButton && (
-            <button
-              onClick={addRow}
-              className="mt-6 w-full bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600"
-            >
-              Add Row
-            </button>
-          )}
-        </>
-      )}
+      <form className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[
+          { label: "Subject", name: "subject", type: "text" },
+          { label: "Submitted By", name: "submitted_by", type: "text" },
+          { label: "Submitted Date", name: "submitted_date", type: "date" },
+          { label: "Remarks", name: "remarks", type: "text" },
+          { label: "Approved By", name: "approved_by", type: "text" },
+          { label: "Approval Date", name: "approved_date", type: "date" },
+          { label: "Tippani Date", name: "tippani_date", type: "date" },
+          { label: "Page No", name: "page_no", type: "text" },
+        ].map(({ label, name, type }) => (
+          <div key={name}>
+            <label className="block text-orange-800 font-medium">{label}</label>
+            <input
+              type={type}
+              name={name}
+              value={currentTippani[name]}
+              onChange={handleChange}
+              className="w-full px-3 py-2 mt-1 border border-orange-400 rounded-md shadow-sm"
+              required
+            />
+          </div>
+        ))}
+      </form>
+      <div className="flex items-center gap-5 justify-center my-3">
+        <button
+          onClick={handleSubmit}
+          type="submit"
+          className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-green-600"
+        >
+          Save Tippani
+        </button>
+
+        {showAddButton && (
+          <button
+            onClick={addNewForm}
+            className="mt-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+          >
+            Add Another Tippani
+          </button>
+        )}
+      </div>
     </div>
   );
 };

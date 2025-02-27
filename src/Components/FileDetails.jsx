@@ -136,7 +136,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
 
   return (
     <>
-      <div className="w-full mx-auto p-6 bg-orange-50 border border-orange-300 rounded-lg mt-8 shadow-lg">
+      <div className="w-[90%] mt-12 mx-auto p-6 bg-orange-50 border border-orange-300 rounded-lg shadow-lg">
         <h1 className="text-center text-2xl font-bold mb-6 text-orange-700">
           फारामको विवरण
         </h1>

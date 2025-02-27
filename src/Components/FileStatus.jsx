@@ -49,43 +49,60 @@ const FileStatus = () => {
           placeholder="Search by ID, File No, Name, or Subject..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="p-2 border rounded-lg border-orange-700 outline-orange-700 w-1/3"
+          className="p-2 border rounded-lg focus:border-orange-700 w-1/3"
         />
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse shadow-md bg-white rounded-lg">
-          <thead className="bg-orange-500 text-white">
-            <tr>
-              <th className="p-3 text-left">ID</th>
-              <th className="p-3 text-left">File No</th>
-              <th className="p-3 text-left">File Name</th>
-              <th className="p-3 text-left">Subject</th>
-              <th className="p-3 text-left">Days Submitted</th>
-              <th className="p-3 text-left">Action</th>
+        <table className="w-full shadow-md bg-white rounded-lg border-none">
+          <thead className="bg-orange-400 border border-b-2 border-white text-white">
+            <tr className="border border-white border-t-2 border-b-2">
+              <th className="p-3 text-center border-none text-nowrap font-mono">
+                ID
+              </th>
+              <th className="p-3 text-center border-none text-nowrap font-mono">
+                File No
+              </th>
+              <th className="p-3 text-center border-none text-nowrap font-mono">
+                File Name
+              </th>
+              <th className="p-3 text-center border-none text-nowrap font-mono">
+                Subject
+              </th>
+              <th className="p-3 text-center border-none text-nowrap font-mono">
+                Days Submitted
+              </th>
+              <th className="p-3 text-center border-none text-nowrap font-mono">
+                Action
+              </th>
             </tr>
           </thead>
           <tbody>
             {filteredFiles.length > 0 ? (
-              filteredFiles.map((file) => (
-                <tr key={file.id} className="border-b hover:bg-orange-100">
-                  <td className="p-3">{file.id}</td>
-                  <td className="p-3">{file.file_number}</td>
-                  <td className="p-3">{file.file_name}</td>
-                  <td className="p-3">{file.subject}</td>
-                  <td className="p-3">{file.days_submitted}</td>
-                  <td className="p-3 flex gap-2">
-                    <button
-                      onClick={() => navigate(`/file-details/${file.id}`)}
-                      className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg transition-all"
-                    >
-                      View More
-                    </button>
+              filteredFiles.map((file, index) => (
+                <tr
+                  key={file.id}
+                  className={`hover:bg-orange-100 text-gray-700 text-center text-nowrap border-t-2 border-b-2`}
+                >
+                  <td className="p-3 border-none">
+                    {file.id}
+                  </td>
+                  <td className="p-3 border-none">{file.file_number}</td>
+                  <td className="p-3 border-none">{file.file_name}</td>
+                  <td className="p-3 border-none">{file.subject}</td>
+                  <td className="p-3 border-none">{file.days_submitted}</td>
+                  <td className="p-3 border-none flex justify-center items-center">
+                      <button
+                        onClick={() => navigate(`/file-details/${file.id}`)}
+                        className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg transition-all"
+                      >
+                        View More
+                      </button>
                   </td>
                 </tr>
               ))
             ) : (
-              <tr>
-                <td colSpan="6" className="p-4 text-center text-gray-600">
+              <tr className="border-none border-t-0 border-b-2 border-white">
+                <td colSpan="6" className="p-4 text-center text-gray-600 border-none border-b-2">
                   No files available.
                 </td>
               </tr>

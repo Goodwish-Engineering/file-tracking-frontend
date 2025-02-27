@@ -27,9 +27,10 @@ const EmployeOne = () => {
         {tab == "filerequest" && <FileRequest />}
         {tab == "notification" && <Notification />}
       </div>
-      <div className="md:hidden fixed top-2 right-4">
+      <div className="md:hidden lg:hidden fixed top-2 py-4 right-4">
         {menue ? (
           <FontAwesomeIcon
+          className="text-2xl"
             icon={faClose}
             onClick={() => {
               setMeue(!menue);
@@ -37,6 +38,7 @@ const EmployeOne = () => {
           />
         ) : (
           <FontAwesomeIcon
+          className="text-2xl"
             icon={faBars}
             onClick={() => {
               setMeue(!menue);
@@ -44,8 +46,9 @@ const EmployeOne = () => {
           />
         )}
       </div>
+      {/* small screen */}
       {menue && (
-        <div className="w-[50%] bg-orange-400 h-screen fixed py-4">
+        <div className="w-[50%] md:hidden lg:hidden bg-orange-400 h-screen fixed py-4 px-3">
           <div className="w-full flex flex-col justify-center items-center">
             <img src={logo} className="w-20 h-20 object-cover rounded-full" />
           </div>
@@ -123,7 +126,8 @@ const EmployeOne = () => {
           </div>
         </div>
       )}
-      <div className="w-[20%] h-screen hidden bg-orange-400 px-2 rounded-md  md:flex flex-col gap-3 items-center py-3 ">
+      {/* large screen */}
+      <div className="w-[20%] h-screen hidden bg-orange-400 px-2 z-30 md:flex flex-col gap-3 items-center py-3 ">
         <div className="w-full flex flex-col justify-center bg-white border-2 border-red-600 rounded-lg py-2  items-center">
           <img src={logo} className="w-20 h-20 object-cover rounded-full" />
         </div>
