@@ -16,7 +16,8 @@ import FileRequest from "../Components/FileRequest";
 const EmployeOne = () => {
   const [tab, setTab] = useState("notification");
   const [menue, setMeue] = useState(false);
-  const level = localStorage.getItem("level"); // Retrieve inside useEffect
+  // const level = localStorage.getItem("level"); // Retrieve inside useEffect
+  // console.log(level);
 
   return (
     <div className="flex w-full h-screen">
@@ -53,7 +54,7 @@ const EmployeOne = () => {
             <img src={logo} className="w-20 h-20 object-cover rounded-full" />
           </div>
           <div className="w-full flex flex-col gap-3 px-5 py-4 font-semibold text-white text-lg">
-            {level === "1" && (
+            {/* {level === "2" && ( */}
               <h3
                 onClick={() => {
                   setMeue(false);
@@ -65,7 +66,7 @@ const EmployeOne = () => {
               >
                 Upload File
               </h3>
-            )}
+            {/* )} */}
             <h3
               onClick={() => {
                 setMeue(false);
@@ -77,7 +78,7 @@ const EmployeOne = () => {
             >
               File status
             </h3>
-            {level === "1" ? (
+            {/* {level === "2" ? ( */}
               <h3
                 onClick={() => {
                   setMeue(false);
@@ -89,7 +90,7 @@ const EmployeOne = () => {
               >
                 Non-transfer file
               </h3>
-            ) : (
+            {/* ) : ( */}
               <h3
                 onClick={() => {
                   setMeue(false);
@@ -101,7 +102,7 @@ const EmployeOne = () => {
               >
                 File Request
               </h3>
-            )}
+            {/* )} */}
             <button
               onClick={() => {
                 setTab("notification");
@@ -132,7 +133,7 @@ const EmployeOne = () => {
           <img src={logo} className="w-20 h-20 object-cover rounded-full" />
         </div>
         <div className="w-full flex flex-col gap-3 px-5 py-4 font-semibold text-white text-lg">
-          {level === "1" && (
+          {/* {level === "2" && ( */}
             <h3
               onClick={() => {
                 setTab("uploadTippani");
@@ -143,7 +144,7 @@ const EmployeOne = () => {
             >
               Upload File
             </h3>
-          )}
+          {/* )} */}
           <h3
             onClick={() => {
               setTab("veiwStatus");
@@ -154,7 +155,7 @@ const EmployeOne = () => {
           >
             File Status
           </h3>
-          {level === "1" ? (
+          {/* {level === "2" ? ( */}
             <h3
               onClick={() => {
                 setTab("nontransfer");
@@ -165,7 +166,7 @@ const EmployeOne = () => {
             >
               Non transfer file
             </h3>
-          ) : (
+          {/* ) : ( */}
             <h3
               onClick={() => {
                 setTab("filerequest");
@@ -176,7 +177,7 @@ const EmployeOne = () => {
             >
               File Request
             </h3>
-          )}
+          {/* )} */}
           <button
             onClick={() => {
               setTab("notification");

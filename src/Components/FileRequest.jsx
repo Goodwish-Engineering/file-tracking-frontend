@@ -116,30 +116,30 @@ const FileRequest = () => {
     <div className="p-6 bg-gray-100 min-h-screen">
       <h2 className="text-2xl font-bold text-orange-600 mb-4">File Request</h2>
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse shadow-md bg-white rounded-lg">
+        <table className="w-full border-none shadow-md bg-white rounded-lg">
           <thead className="bg-orange-500 text-white">
-            <tr>
-              <th className="p-3 text-left">ID</th>
-              <th className="p-3 text-left">File Name</th>
-              <th className="p-3 text-left">Subject</th>
-              <th className="p-3 text-left">Presented By</th>
-              <th className="p-3 text-left">Presented Date</th>
-              <th className="p-3 text-left">File</th>
-              <th className="p-3 text-left">Actions</th>
+            <tr className="border-white border-b-2 rounded-md">
+              <th className="p-3 text-center border-none">ID</th>
+              <th className="p-3 text-center border-none">File Name</th>
+              <th className="p-3 text-center border-none">Subject</th>
+              <th className="p-3 text-center border-none">Presented By</th>
+              <th className="p-3 text-center border-none">Presented Date</th>
+              <th className="p-3 text-center border-none">File</th>
+              <th className="p-3 text-center border-none">Actions</th>
             </tr>
           </thead>
           <tbody>
             {nonTransferredFiles.length > 0 ? (
               nonTransferredFiles.map((file) => (
-                <tr key={file.id} className="border-b hover:bg-orange-100">
-                  <td className="p-3">{file.id}</td>
-                  <td className="p-3">{file.file_name}</td>
-                  <td className="p-3">{file.subject}</td>
-                  <td className="p-3">
+                <tr key={file.id} className="border-b-2 border-gray-300 hover:bg-orange-100 text-center">
+                  <td className="p-3 border-none">{file.id}</td>
+                  <td className="p-3 border-none">{file.file_name}</td>
+                  <td className="p-3 border-none">{file.subject}</td>
+                  <td className="p-3 border-none">
                     {file.present_by?.first_name} {file.present_by?.last_name}
                   </td>
-                  <td className="p-3">{file.present_date}</td>
-                  <td className="p-3">
+                  <td className="p-3 border-none">{file.present_date}</td>
+                  <td className="p-3 border-none">
                     <button
                       onClick={() => navigate(`/file-details/${file.id}`)}
                       className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg transition-all"
@@ -147,7 +147,7 @@ const FileRequest = () => {
                       View More
                     </button>
                   </td>
-                  <td className="p-3 flex gap-2 ">
+                  <td className="p-3 flex gap-2 border-none items-center justify-center">
                     <button
                       onClick={() => {
                         setFileToTransfer(file.id);
@@ -172,7 +172,7 @@ const FileRequest = () => {
             ) : (
               <tr>
                 <td colSpan="7" className="p-4 text-center text-gray-600">
-                  No File Requests Till Now 😎
+                  No File Requests Till Now 
                 </td>
               </tr>
             )}

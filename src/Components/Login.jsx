@@ -37,8 +37,10 @@ const Login = () => {
       dispatch(addLogin(true));
       if (data.user.is_admin) {
         localStorage.setItem("level", 5);
+        console.log(localStorage.getItem('level'));
       } else {
         localStorage.setItem("level", data.user.user_type);
+        console.log(localStorage.getItem('level'));
       }
     } catch (err) {
       setError(err.message);
