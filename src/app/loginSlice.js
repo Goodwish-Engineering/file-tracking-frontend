@@ -1,8 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+// Load stored login state from localStorage
+const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+const storedLoginStatus = JSON.parse(localStorage.getItem("isLogin") || "false");
+
 const initialState = {
-  isLogin: false, // ✅ Directly in the state, not inside "login"
-  user: { id: 1 },
+  isLogin: storedLoginStatus, 
+  user: storedUser, 
   baseUrl: "https://file-tracking.goodwish.com.np/api",
 };
 
@@ -11,20 +15,23 @@ export const loginSlice = createSlice({
   initialState,
   reducers: {
     addUser: (state, action) => {
-      state.user = action.payload; // ✅ Fix: directly modify state.user
+      state.user = action.payload;
+      localStorage.setItem("user", JSON.stringify(action.payload));
     },
     addLogin: (state, action) => {
       state.isLogin = action.payload;
+      localStorage.setItem("isLogin", JSON.stringify(action.payload));
     },
     removeLogin: (state) => {
       state.isLogin = false;
+      localStorage.removeItem("isLogin");
     },
     removeUser: (state) => {
-      state.user = {}; // ✅ Reset user
+      state.user = {};
+      localStorage.removeItem("user");
     },
   },
 });
 
-export const { addLogin, removeLogin, addUser, removeUser } =
-  loginSlice.actions;
+export const { addLogin, removeLogin, addUser, removeUser } = loginSlice.actions;
 export default loginSlice.reducer;

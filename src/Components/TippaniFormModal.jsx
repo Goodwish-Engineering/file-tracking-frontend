@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
-    console.log(fileId);
+    // console.log(fileId);
+  const navigate = useNavigate('');
   const [tippanis, setTippanis] = useState([]);
   const [currentTippani, setCurrentTippani] = useState({
     subject: "",
@@ -50,6 +52,7 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
       });
       if (response) {
         alert("Tippani added successfully");
+        window.location.reload();
       }
     } catch (error) {
       console.error("Error saving Tippani:", error);

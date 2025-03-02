@@ -176,7 +176,7 @@ const VeiwMoreFileDetails = () => {
     if (level === "5") {
       navigate("/admindashboard");
     } else if (level === "1") {
-      navigate("/employee1");
+      navigate("/employeeheader");
     } else {
       navigate("/login");
     }
@@ -187,7 +187,7 @@ const VeiwMoreFileDetails = () => {
         onClick={() => {
           handleNavigate();
         }}
-        className="w-full justify-center items-center flex fixed top-0 left-0 text-white font-semibold bg-red-600 cursor-pointer gap-2 py-2 "
+        className="w-full justify-center items-center flex fixed top-0 left-0 text-white font-semibold bg-orange-500 cursor-pointer gap-2 py-2 "
       >
         <h1 className="text-lg">Home</h1>
         <FontAwesomeIcon className="text-xl" icon={faHome} />

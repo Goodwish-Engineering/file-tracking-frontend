@@ -54,6 +54,7 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
 
       if(response){
         alert("Letters and document added successfully");
+        window.location.reload();
       }
     } catch (error) {
       console.error("Error submitting form:", error);

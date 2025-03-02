@@ -4,7 +4,8 @@ import { useSelector } from "react-redux";
 const FileDetails = ({ setShowButton, clearData }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
-  const empId = localStorage.getItem("empId");
+  const empId = localStorage.getItem("userId");
+  // console.log(empId);
   const [show, setshow] = useState(true);
   const [formData, setFormData] = useState({
     file_name: "",
@@ -136,7 +137,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
 
   return (
     <>
-      <div className="w-[90%] mt-12 mx-auto p-6 bg-orange-50 border border-orange-300 rounded-lg shadow-lg">
+      <div className="w-[90%] md:w-[80%] mt-12 md:mt-5 md:my-5 mx-auto p-6 bg-orange-50 border border-orange-300 rounded-lg shadow-lg">
         <h1 className="text-center text-2xl font-bold mb-6 text-orange-700">
           फारामको विवरण
         </h1>

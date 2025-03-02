@@ -11,6 +11,8 @@ import Registration from "./Components/Register.jsx";
 import AdminDashboard from "./AdminDashboard/AdminDashboard.jsx";
 import EmployeOne from "./EmployeeDashboard/EmployeOne.jsx";
 import VeiwMoreFileDetails from "./Components/VeiwMoreFileDetails.jsx";
+import EmployeHeader from "./EmployeeDashboard/EmployeeHeader.jsx";
+import UserDetails from "./EmployeeDashboard/UserDetails.jsx";
 const router = createBrowserRouter([
   {
     element: <App />,
@@ -21,6 +23,8 @@ const router = createBrowserRouter([
       { element: <AdminDashboard />, path: "/admindashboard" },
       { element: <EmployeOne />, path: "/employee1" },
       { element: <VeiwMoreFileDetails />, path: "/file-details/:id" },
+      { element: <EmployeHeader/>, path:"/employeeheader"},
+      { element: <UserDetails/>, path:'/userDetails'},
     ],
   },
 ]);

@@ -1,40 +1,37 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import FileDetails from "./Components/FileDetails";
+import { useSelector, useDispatch } from "react-redux";
+import { addLogin } from "./app/loginSlice"; // Import action
 
 const App = () => {
   const isLogin = useSelector((state) => state.login?.isLogin);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Load login state from localStorage on first render
+  useEffect(() => {
+    const storedLoginStatus = JSON.parse(localStorage.getItem("isLogin")) || false;
+    if (storedLoginStatus) {
+      dispatch(addLogin(true)); // Restore login state
+    }
+  }, [dispatch]);
 
   useEffect(() => {
     const level = localStorage.getItem("level"); // Retrieve inside useEffect
+    const currentPath = window.location.pathname; // Get current route
 
     if (isLogin) {
       if (level === "5") {
-        navigate("/admindashboard");
+        navigate(currentPath !== "/" ? currentPath : "/admindashboard");
       } else {
-        navigate("/employee1");
+        navigate(currentPath !== "/" ? currentPath : "/employeeheader");
       }
     } else {
       navigate("/login");
     }
   }, [isLogin, navigate]);
 
-  useEffect(() => {
-    const clearStorage = () => localStorage.clear();
-    window.addEventListener("beforeunload", clearStorage);
-
-    return () => {
-      window.removeEventListener("beforeunload", clearStorage); // ✅ Cleanup
-    };
-  }, []);
-
-  return (
-    <>
-      <Outlet />
-    </>
-  );
+  return <Outlet />;
 };
 
 export default App;
