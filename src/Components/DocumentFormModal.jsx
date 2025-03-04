@@ -65,15 +65,15 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-orange-50 p-6 rounded-lg w-full max-w-2xl relative">
+      <div className="bg-white p-6 rounded-lg w-full max-w-2xl relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
         >
-          <span className="text-2xl font-semibold text-orange-600">×</span>
+          <span className="text-2xl font-bold text-blue-600 hover:text-blue-700">×</span>
         </button>
 
-        <h2 className="text-2xl font-semibold text-orange-500 mb-2 text-center">
+        <h2 className="text-2xl font-semibold text-blue-600 mb-2 text-center">
           Add New Document
         </h2>
         <form onSubmit={handleSubmit}>
@@ -88,13 +88,13 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
               { label: "Page No", name: "page_no", type: "number" },
             ].map(({ label, name, type }) => (
               <div key={name} className="mb-2">
-                <label className="block text-orange-800 mb-2">{label}</label>
+                <label className="block text-gray-800 mb-2">{label}</label>
                 <input
                   type={type}
                   name={name}
                   value={formData[name]}
                   onChange={handleInputChange}
-                  className="w-full p-2 border border-orange-300 rounded"
+                  className="w-full p-2 border border-gray-300 rounded"
                 />
               </div>
             ))}
@@ -103,7 +103,7 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
           <div className="flex justify-center items-center mt-4 space-x-2">
             <button
               type="submit"
-              className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               Add Document
             </button>

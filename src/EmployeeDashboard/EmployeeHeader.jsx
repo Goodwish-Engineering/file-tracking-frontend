@@ -8,6 +8,7 @@ import logo from "/logo192.png";
 import NonTransferFile from "../Components/NonTranferFile";
 // import Notification from "../Components/Notification";
 import FileRequest from "../Components/FileRequest";
+import TransferedFile from "../Components/TransferedFiles";
 import EmployeeHome from "./EmployeeHome";
 import Notification from "../Components/Notification";
 import { useSelector } from "react-redux";
@@ -104,12 +105,12 @@ const EmployeHeader = () => {
   return (
     <div className="flex flex-col w-full relative">
       {/* Large Screen Top Bar - Full Width */}
-      <div className="w-full sticky top-0 z-10 hidden md:flex bg-orange-400 p-4 justify-between items-center">
+      <div className="w-full sticky top-0 z-10 hidden md:flex bg-[#3F84E5] p-2 justify-between items-center">
         <div className="flex items-center">
           <img
             // onClick={() => setTab("employeehome")}
             src={logo}
-            className="w-12 h-12 object-cover rounded-full cursor-pointer"
+            className="w-16 h-16 object-cover rounded-full cursor-pointer"
             alt="Logo"
           />
         </div>
@@ -118,8 +119,8 @@ const EmployeHeader = () => {
             <h3
               onClick={() => setTab("uploadTippani")}
               className={`cursor-pointer ${
-                tab === "uploadTippani" ? "bg-yellow-700" : ""
-              } hover:bg-yellow-700 text-white font-semibold text-lg px-3 py-1 rounded-md`}
+                tab === "uploadTippani" ? "bg-[#3571C5]" : ""
+              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-1 rounded-md`}
             >
               Upload File
             </h3>
@@ -127,34 +128,44 @@ const EmployeHeader = () => {
           <h3
             onClick={() => setTab("veiwStatus")}
             className={`cursor-pointer ${
-              tab === "veiwStatus" ? "bg-yellow-700" : ""
-            } hover:bg-yellow-700 text-white font-semibold text-lg px-3 py-1 rounded-md`}
+              tab === "veiwStatus" ? "bg-[#3571C5]" : ""
+            } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-1 rounded-md`}
           >
             File Status
           </h3>
           <h3
             onClick={() => setTab("notification")}
             className={`cursor-pointer ${
-              tab === "notification" ? "bg-yellow-700" : ""
-            } hover:bg-yellow-700 text-white font-semibold text-lg px-3 py-1 rounded-md`}
+              tab === "notification" ? "bg-[#3571C5]" : ""
+            } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-1 rounded-md`}
           >
             Notification
           </h3>
           {level === "1" ? (
-            <h3
+            <>
+              <h3
               onClick={() => setTab("nontransfer")}
               className={`cursor-pointer ${
-                tab === "nontransfer" ? "bg-yellow-700" : ""
-              } hover:bg-yellow-700 text-white font-semibold text-lg px-3 py-1 rounded-md`}
+                tab === "nontransfer" ? "bg-[#3571C5]" : ""
+              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-1 rounded-md`}
             >
               Non-transfer file
             </h3>
+            <h3
+              onClick={() => setTab("transfered")}
+              className={`cursor-pointer ${
+                tab === "transfered" ? "bg-[#3571C5]" : ""
+              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-1 rounded-md`}
+            >
+              Transfered file
+            </h3>
+            </>
           ) : (
             <h3
               onClick={() => setTab("filerequest")}
               className={`cursor-pointer ${
-                tab === "filerequest" ? "bg-yellow-700" : ""
-              } hover:bg-yellow-700 text-white font-semibold text-lg px-3 py-1 rounded-md`}
+                tab === "filerequest" ? "bg-[#3571C5]" : ""
+              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-1 rounded-md`}
             >
               File Request
             </h3>
@@ -166,7 +177,7 @@ const EmployeHeader = () => {
       </div>
 
       {/* Small Screen Header */}
-      <div className="md:hidden sticky top-0 z-10 flex bg-orange-400 p-4 justify-between items-center">
+      <div className="md:hidden sticky top-0 z-10 flex bg-[#3F84E5] p-4 justify-between items-center">
         <div className="flex items-center">
           <img
             // onClick={() => handleTabChange("employeehome")}
@@ -185,7 +196,7 @@ const EmployeHeader = () => {
 
       {/* Small Screen Sliding Navigation Menu */}
       <div 
-        className={`fixed top-0 right-0 h-screen bg-orange-400 z-50 shadow-lg transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-screen bg-[#3F84E5] z-50 shadow-lg transition-all duration-300 ease-in-out ${
           menue ? "w-64" : "w-0 overflow-hidden"
         }`}
       >
@@ -216,8 +227,8 @@ const EmployeHeader = () => {
             <h3
               onClick={() => handleTabChange("uploadTippani")}
               className={`cursor-pointer ${
-                tab === "uploadTippani" ? "bg-yellow-700" : ""
-              } hover:bg-yellow-700 text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
+                tab === "uploadTippani" ? "bg-[#3571C5]" : ""
+              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
             >
               Upload File
             </h3>
@@ -226,27 +237,37 @@ const EmployeHeader = () => {
           <h3
             onClick={() => handleTabChange("veiwStatus")}
             className={`cursor-pointer ${
-              tab === "veiwStatus" ? "bg-yellow-700" : ""
-            } hover:bg-yellow-700 text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
+              tab === "veiwStatus" ? "bg-[#3571C5]" : ""
+            } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
           >
             File Status
           </h3>
           
           {level === "1" ? (
-            <h3
+            <>
+              <h3
               onClick={() => handleTabChange("nontransfer")}
               className={`cursor-pointer ${
-                tab === "nontransfer" ? "bg-yellow-700" : ""
-              } hover:bg-yellow-700 text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
+                tab === "nontransfer" ? "bg-[#3571C5]" : ""
+              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
             >
               Non-transfer file
             </h3>
+            <h3
+              onClick={() => handleTabChange("transfered")}
+              className={`cursor-pointer ${
+                tab === "transfered" ? "bg-[#3571C5]" : ""
+              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
+            >
+              Transfered file
+            </h3>
+            </>           
           ) : (
             <h3
               onClick={() => handleTabChange("filerequest")}
               className={`cursor-pointer ${
-                tab === "filerequest" ? "bg-yellow-700" : ""
-              } hover:bg-yellow-700 text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
+                tab === "filerequest" ? "bg-[#3571C5]" : ""
+              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
             >
               File Request
             </h3>
@@ -255,8 +276,8 @@ const EmployeHeader = () => {
           <h3
             onClick={() => handleTabChange("notification")}
             className={`cursor-pointer ${
-              tab === "notification" ? "bg-yellow-700" : ""
-            } hover:bg-yellow-700 text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
+              tab === "notification" ? "bg-[#3571C5]" : ""
+            } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
           >
             Notifications
           </h3>
@@ -281,7 +302,7 @@ const EmployeHeader = () => {
           )}
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="p-3 bg-orange-400 rounded-full shadow-lg hover:bg-orange-500 transition"
+            className="p-3 bg-[#3F84E5] rounded-full shadow-lg hover:bg-orange-500 transition"
           >
             <FontAwesomeIcon icon={faBell} className="text-white text-2xl" />
           </button>
@@ -329,7 +350,7 @@ const EmployeHeader = () => {
           )}
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="p-3 bg-orange-400 rounded-full shadow-lg hover:bg-orange-500 transition"
+            className="p-3 bg-[#3F84E5] rounded-full shadow-lg hover:bg-orange-500 transition"
           >
             <FontAwesomeIcon icon={faBell} className="text-white text-xl" />
           </button>
@@ -383,6 +404,7 @@ const EmployeHeader = () => {
         {/* {tab === "notification" && <Notification />} */}
         {tab === "employeehome" && <EmployeeHome />}
         {tab === "notification" && <Notification/>}
+        {tab === "transfered" && <TransferedFile/>}
       </div>
     </div>
   );

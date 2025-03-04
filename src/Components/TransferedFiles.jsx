@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-const NonTransferFile = () => {
+const TransferedFile = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
-  const [nonTransferredFiles, setNonTransferredFiles] = useState([]);
+  const [TransferedFiles, setTransferedFiles] = useState([]);
   const [admins, setAdmins] = useState([]);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,7 +45,7 @@ const NonTransferFile = () => {
   //     const filteredData = data.filter(
   //       (file) => !(file.is_transferred || file.is_approved)
   //     );
-  //     setNonTransferredFiles(filteredData);
+  //     setTransferedFiles(filteredData);
   //   } catch (error) {
   //     console.error("Error fetching files:", error);
   //   }
@@ -62,10 +62,10 @@ const NonTransferFile = () => {
   
       const filteredData = data.filter((file) => {
         const isTransferred = file.approvals?.some((approval) => approval.is_transferred);
-        return !isTransferred;
+        return isTransferred;
       });
   
-      setNonTransferredFiles(filteredData);
+      setTransferedFiles(filteredData);
     } catch (error) {
       console.error("Error fetching files:", error);
     }
@@ -125,7 +125,7 @@ const NonTransferFile = () => {
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <h2 className="text-2xl font-bold text-[#3F84E5] mb-4">
-        Non-Transferred Files
+        Transferred Files
       </h2>
       <div className="overflow-x-auto">
         <table className="w-full shadow-md bg-white rounded-lg border-none">
@@ -141,8 +141,8 @@ const NonTransferFile = () => {
             </tr>
           </thead>
           <tbody>
-            {nonTransferredFiles.length > 0 ? (
-              nonTransferredFiles.map((file,index) => (
+            {TransferedFiles.length > 0 ? (
+              TransferedFiles.map((file,index) => (
                 <tr key={file.id} className={`hover:bg-gray-50 text-gray-700 text-center text-nowrap border-t-2 border-b-2`}>
                   <td className="p-3 border-none">{file.id}</td>
                   <td className="p-3 border-none">{file.file_name}</td>
@@ -160,7 +160,7 @@ const NonTransferFile = () => {
                     </button>
                   </td>
                   <td className="p-3 gap-3 border-none flex items-center justify-center">
-                    <button
+                    {/* <button
                       onClick={() => {
                         setFileToTransfer(file.id);
                         setIsModalOpen(true);
@@ -168,7 +168,7 @@ const NonTransferFile = () => {
                       className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg transition-all"
                     >
                       Transfer
-                    </button>
+                    </button> */}
                     <button
                       onClick={() => handleDelete(file.id)}
                       className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-all"
@@ -231,4 +231,4 @@ const NonTransferFile = () => {
   );
 };
 
-export default NonTransferFile;
+export default TransferedFile;

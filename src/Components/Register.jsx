@@ -249,13 +249,13 @@ const Registration = () => {
       className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg space-y-6"
       onSubmit={handleSubmit}
     >
-      <h1 className="text-2xl font-bold text-orange-600">
+      <h1 className="text-2xl font-bold text-blue-600">
         Employee Registration Form
       </h1>
 
       {/* Account Information */}
-      <fieldset className="border border-orange-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-orange-500">
+      <fieldset className="border border-blue-300 p-4 rounded">
+        <legend className="text-lg font-semibold text-blue-500">
           Personal Information
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -268,7 +268,7 @@ const Registration = () => {
               name="first_name"
               value={formData.first_name}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </label>
@@ -279,7 +279,7 @@ const Registration = () => {
               name="last_name"
               value={formData.last_name}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </label>
@@ -292,7 +292,7 @@ const Registration = () => {
               name="father_name"
               value={formData.father_name}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </label>
@@ -305,7 +305,7 @@ const Registration = () => {
               name="mother_name"
               value={formData.mother_name}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </label>
@@ -318,14 +318,14 @@ const Registration = () => {
               name="grand_father_name"
               value={formData.grand_father_name}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </label>
         </div>
       </fieldset>
-      <fieldset className="border border-orange-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-orange-500">
+      <fieldset className="border border-blue-300 p-4 rounded">
+        <legend className="text-lg font-semibold text-blue-500">
           Account Information
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -336,7 +336,7 @@ const Registration = () => {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </label>
@@ -347,7 +347,7 @@ const Registration = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </label>
@@ -358,7 +358,7 @@ const Registration = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </label>
@@ -366,8 +366,8 @@ const Registration = () => {
       </fieldset>
 
       {/* Permanent Address */}
-      <fieldset className="border border-orange-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-orange-500">
+      <fieldset className="border border-blue-300 p-4 rounded">
+        <legend className="text-lg font-semibold text-blue-500">
           Permanent Address
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -378,7 +378,7 @@ const Registration = () => {
               name="perm_state"
               value={formData.perm_state}
               onChange={handleProvinceChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select a Province</option>{" "}
               {provinces.map((province, index) => (
@@ -395,7 +395,7 @@ const Registration = () => {
               name="perm_district"
               value={formData.perm_district}
               onChange={handleDistrictChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select a district</option>{" "}
               {district.map((district, index) => (
@@ -414,7 +414,7 @@ const Registration = () => {
               name="perm_municipality"
               value={formData.perm_municipality}
               onChange={handleMunicipalityChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select a municipalities</option>{" "}
               {municipalities.map((municipalities, index) => (
@@ -431,15 +431,15 @@ const Registration = () => {
               name="perm_ward_no"
               value={formData.perm_ward_no}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </label>
         </div>
       </fieldset>
 
-      <fieldset className="border border-orange-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-orange-500">
+      <fieldset className="border border-blue-300 p-4 rounded">
+        <legend className="text-lg font-semibold text-blue-500">
           Temporary Address
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -450,7 +450,7 @@ const Registration = () => {
               name="temp_state"
               value={formData.temp_state}
               onChange={handleProvinceChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select a Province</option>{" "}
               {provinces.map((province, index) => (
@@ -467,7 +467,7 @@ const Registration = () => {
               name="temp_district"
               value={formData.temp_district}
               onChange={handleDistrictChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select a district</option>{" "}
               {tempDistrict.map((district, index) => (
@@ -486,7 +486,7 @@ const Registration = () => {
               name="temp_municipality"
               value={formData.temp_municipality}
               onChange={handleMunicipalityChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select a municipalities</option>{" "}
               {tempMunicipalities.map((municipalities, index) => (
@@ -503,13 +503,13 @@ const Registration = () => {
               name="temp_ward_no"
               value={formData.temp_ward_no}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
         </div>
       </fieldset>
-      <fieldset className="border border-orange-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-orange-500">
+      <fieldset className="border border-blue-300 p-4 rounded">
+        <legend className="text-lg font-semibold text-blue-500">
           Citizenship Information
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -520,7 +520,7 @@ const Registration = () => {
               name="citizenship_id"
               value={formData.citizenship_id}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -530,7 +530,7 @@ const Registration = () => {
               name="citizenship_date_of_issue"
               value={formData.citizenship_date_of_issue}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -540,14 +540,14 @@ const Registration = () => {
               name="citizenship_district"
               value={formData.citizenship_district}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
         </div>
       </fieldset>
 
-      <fieldset className="border border-orange-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-orange-500">
+      <fieldset className="border border-blue-300 p-4 rounded">
+        <legend className="text-lg font-semibold text-blue-500">
           Contact Information
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -558,7 +558,7 @@ const Registration = () => {
               name="home_number"
               value={formData.home_number}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -568,7 +568,7 @@ const Registration = () => {
               name="phone_number"
               value={formData.phone_number}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -578,14 +578,14 @@ const Registration = () => {
               name="mobile_number"
               value={formData.mobile_number}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
         </div>
       </fieldset>
 
-      <fieldset className="border border-orange-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-orange-500">
+      <fieldset className="border border-blue-300 p-4 rounded">
+        <legend className="text-lg font-semibold text-blue-500">
           Job Details
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -596,7 +596,7 @@ const Registration = () => {
               name="date_joined"
               value={formData.date_joined}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -606,7 +606,7 @@ const Registration = () => {
               name="recess_date"
               value={formData.recess_date}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -616,7 +616,7 @@ const Registration = () => {
               name="position"
               value={formData.position}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -625,7 +625,7 @@ const Registration = () => {
               onChange={handleChange}
               name="position_category"
               value={formData.position_category}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option>select position category </option>
 
@@ -640,7 +640,7 @@ const Registration = () => {
               name="employee_id"
               value={formData.employee_id}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -649,7 +649,7 @@ const Registration = () => {
               onChange={handleChange}
               name="employee_type"
               value={formData.employee_type}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option>select employee type</option>
               {registerdetails.employment_types.map((types, index) => (
@@ -666,7 +666,7 @@ const Registration = () => {
               name="duration"
               value={formData.duration}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -676,7 +676,7 @@ const Registration = () => {
               name="office"
               value={formData.office}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
 
@@ -686,7 +686,7 @@ const Registration = () => {
               onChange={handleChange}
               name="user_type"
               value={formData.user_type}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option>select level </option>
 
@@ -700,8 +700,8 @@ const Registration = () => {
         </div>
       </fieldset>
 
-      <fieldset className="border border-orange-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-orange-500">
+      <fieldset className="border border-blue-300 p-4 rounded">
+        <legend className="text-lg font-semibold text-blue-500">
           Bank Details
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -712,7 +712,7 @@ const Registration = () => {
               name="na_la_kos_no"
               value={formData.na_la_kos_no}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -722,7 +722,7 @@ const Registration = () => {
               name="accumulation_fund_no"
               value={formData.accumulation_fund_no}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -732,7 +732,7 @@ const Registration = () => {
               name="bank_account_no"
               value={formData.bank_account_no}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -741,7 +741,7 @@ const Registration = () => {
               onChange={handleChange}
               name="bank_name"
               value={formData.bank_name}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option className="bg-gray-400">select bank</option>
               {registerdetails.banks.map((banks, index) => (
@@ -754,8 +754,8 @@ const Registration = () => {
         </div>
       </fieldset>
 
-      <fieldset className="border border-orange-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-orange-500">
+      <fieldset className="border border-blue-300 p-4 rounded">
+        <legend className="text-lg font-semibold text-blue-500">
           Loan Information
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -765,7 +765,7 @@ const Registration = () => {
               onChange={handleChange}
               name="loan_type"
               value={formData.loan_type}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option>select loan type</option>
               {loanType.map((types, index) => (
@@ -782,7 +782,7 @@ const Registration = () => {
               name="loan_name"
               value={formData.loan_name}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -792,7 +792,7 @@ const Registration = () => {
               name="interest_rate"
               value={formData.interest_rate}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -802,7 +802,7 @@ const Registration = () => {
               name="max_amount"
               value={formData.max_amount}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -812,7 +812,7 @@ const Registration = () => {
               name="min_amount"
               value={formData.min_amount}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -822,7 +822,7 @@ const Registration = () => {
               name="max_tenure"
               value={formData.max_tenure}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -832,14 +832,14 @@ const Registration = () => {
               name="min_tenure"
               value={formData.min_tenure}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
         </div>
       </fieldset>
 
-      <fieldset className="border border-orange-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-orange-500">
+      <fieldset className="border border-blue-300 p-4 rounded">
+        <legend className="text-lg font-semibold text-blue-500">
           Education
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -849,7 +849,7 @@ const Registration = () => {
               onChange={handleChange}
               name="education_level"
               value={formData.education_level}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option>select education Level</option>
               {educationLevel.map((types, index) => (
@@ -866,7 +866,7 @@ const Registration = () => {
               name="institution"
               value={formData.institution}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -876,7 +876,7 @@ const Registration = () => {
               name="board"
               value={formData.board}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -886,7 +886,7 @@ const Registration = () => {
               name="percentage"
               value={formData.percentage}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -896,14 +896,14 @@ const Registration = () => {
               name="year"
               value={formData.year}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
         </div>
       </fieldset>
 
-      <fieldset className="border border-orange-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-orange-500">
+      <fieldset className="border border-blue-300 p-4 rounded">
+        <legend className="text-lg font-semibold text-blue-500">
           Awards
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -914,7 +914,7 @@ const Registration = () => {
               name="award_name"
               value={formData.award_name}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -924,14 +924,14 @@ const Registration = () => {
               name="award_description"
               value={formData.award_description}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
         </div>
       </fieldset>
 
-      <fieldset className="border border-orange-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-orange-500">
+      <fieldset className="border border-blue-300 p-4 rounded">
+        <legend className="text-lg font-semibold text-blue-500">
           Punishments
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -942,7 +942,7 @@ const Registration = () => {
               name="punishment_name"
               value={formData.punishment_name}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
           <label className="flex flex-col">
@@ -952,7 +952,7 @@ const Registration = () => {
               name="punishment_description"
               value={formData.punishment_description}
               onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
         </div>
@@ -960,7 +960,7 @@ const Registration = () => {
 
       <button
         type="submit"
-        className="w-full bg-orange-500 text-white font-semibold py-2 rounded hover:bg-orange-600 transition"
+        className="w-full bg-blue-500 text-white font-semibold py-2 rounded hover:bg-blue-600 transition"
       >
         Submit
       </button>

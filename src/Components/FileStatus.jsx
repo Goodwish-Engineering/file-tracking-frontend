@@ -49,12 +49,12 @@ const FileStatus = () => {
           placeholder="Search by ID, File No, Name, or Subject..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="p-2 border rounded-lg focus:border-orange-700 w-1/3"
+          className="p-2 border rounded-lg focus:border-blue-600 w-1/3"
         />
       </div>
       <div className="overflow-x-auto">
         <table className="w-full shadow-md bg-white rounded-lg border-none">
-          <thead className="bg-orange-400 border border-b-2 border-white text-white">
+          <thead className="bg-[#3F84E5] border border-b-2 border-white text-white">
             <tr className="border border-white border-t-2 border-b-2">
               <th className="p-3 text-center border-none text-nowrap font-mono">
                 ID
@@ -81,7 +81,7 @@ const FileStatus = () => {
               filteredFiles.map((file, index) => (
                 <tr
                   key={file.id}
-                  className={`hover:bg-orange-100 text-gray-700 text-center text-nowrap border-t-2 border-b-2`}
+                  className={`hover:bg-gray-50 text-gray-700 text-center text-nowrap border-t-2 border-b-2`}
                 >
                   <td className="p-3 border-none">
                     {file.id}
@@ -93,7 +93,7 @@ const FileStatus = () => {
                   <td className="p-3 border-none flex justify-center items-center">
                       <button
                         onClick={() => navigate(`/file-details/${file.id}`)}
-                        className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg transition-all"
+                        className="bg-[#3F84E5] hover:bg-[#3571C5] text-white px-3 py-1 rounded-lg transition-all"
                       >
                         View More
                       </button>

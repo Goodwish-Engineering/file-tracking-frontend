@@ -55,87 +55,87 @@ const PanjikaDocumentsForm = () => {
   };
 
   return (
-    <div className="p-6 mb-6 w-[90%] mx-auto bg-orange-50 rounded-lg shadow-md border-2 border-orange-300">
-      <h1 className="text-center text-xl font-bold text-orange-600 mb-6">
+    <div className="p-6 mb-6 w-[90%] md:w-[80%] mx-auto bg-white rounded-lg shadow-inner shadow-gray-200">
+      <h1 className="text-center text-xl font-bold text-blue-600 mb-6">
         PANJIKA DOCUMENTS
       </h1>
       <form
         className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 font-semibold"
       >
         <div>
-          <label className="block text-orange-800">Subject</label>
+          <label className="block text-gray-800">Subject</label>
           <input
             type="text"
             name="subject"
             value={formData.subject}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 mt-1 border border-orange-400 rounded-md shadow-sm"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
             required
           />
         </div>
         <div>
-          <label className="block text-orange-800">Darta No.</label>
+          <label className="block text-gray-800">Darta No.</label>
           <input
             type="text"
             name="registration_no"
             value={formData.registration_no}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 mt-1 border border-orange-400 rounded-md shadow-sm"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
             required
           />
         </div>
         <div>
-          <label className="block text-orange-800">Office</label>
+          <label className="block text-gray-800">Office</label>
           <input
             type="text"
             name="office"
             value={formData.office}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 mt-1 border border-orange-400 rounded-md shadow-sm"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
             required
           />
         </div>
         <div>
-          <label className="block text-orange-800">Chalani No.</label>
+          <label className="block text-gray-800">Chalani No.</label>
           <input
             type="text"
             name="invoice_no"
             value={formData.invoice_no}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 mt-1 border border-orange-400 rounded-md shadow-sm"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
             required
           />
         </div>
         <div>
-          <label className="block text-orange-800">Date</label>
+          <label className="block text-gray-800">Date</label>
           <input
             type="date"
             name="date"
             value={formData.date}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 mt-1 border border-orange-400 rounded-md shadow-sm"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
             required
           />
         </div>
         <div>
-          <label className="block text-orange-800">Letter Date</label>
+          <label className="block text-gray-800">Letter Date</label>
           <input
             type="date"
             name="letter_date"
             value={formData.letter_date}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 mt-1 border border-orange-400 rounded-md shadow-sm"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
             required
           />
         </div>
         <div>
-          <label className="block text-orange-800">Total Pages</label>
+          <label className="block text-gray-800">Total Pages</label>
           <input
             type="number"
             name="page_no"
             value={formData.page_no}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 mt-1 border border-orange-400 rounded-md shadow-sm"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
             required
           />
         </div>
@@ -144,7 +144,7 @@ const PanjikaDocumentsForm = () => {
         <button
           onClick={handleSubmit}
           type="submit"
-          className="mt-4 bg-orange-500 text-white px-4 rounded-lg py-2 hover:bg-orange-600"
+          className="mt-4 bg-blue-500 text-white px-4 rounded-lg py-2 hover:bg-blue-600"
         >
           Submit
         </button>

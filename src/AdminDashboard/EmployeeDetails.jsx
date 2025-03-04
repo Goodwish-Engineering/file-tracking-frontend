@@ -65,19 +65,19 @@ const EmployeeDetails = () => {
 
   return (
     <div className="flex w-full flex-col p-6">
-      <h1 className="text-2xl font-bold text-orange-600 mb-6">
+      <h1 className="text-2xl font-bold text-blue-600 mb-6">
         Employee Details
       </h1>
 
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300 text-gray-800">
+        <table className="w-full border-none border-gray-300 text-gray-800">
           <thead>
-            <tr className="bg-orange-500 text-white">
-              <th className="border border-gray-300 px-4 py-2">Employee ID</th>
-              <th className="border border-gray-300 px-4 py-2">First Name</th>
-              <th className="border border-gray-300 px-4 py-2">Last Name</th>
-              <th className="border border-gray-300 px-4 py-2">Position</th>
-              <th className="border border-gray-300 px-4 py-2">Actions</th>
+            <tr className="bg-[#3F84E5] py-2 text-white border-b-2 border-gray-300 text-nowrap">
+              <th className="px-4 border-none py-2 text-center">Employee ID</th>
+              <th className="px-4 border-none py-2 text-center">First Name</th>
+              <th className="px-4 border-none py-2 text-center">Last Name</th>
+              <th className="px-4 border-none py-2 text-center">Position</th>
+              <th className="px-4 border-none py-2 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -85,23 +85,23 @@ const EmployeeDetails = () => {
               empData.map((data, index) => (
                 <tr
                   key={data.employee_id || index}
-                  className="hover:bg-orange-100 transition"
+                  className="hover:bg-gray-50 transition text-nowrap border-gray-300 border-b"
                 >
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className="border-none px-4 py-2 text-center">
                     {data.employee_id}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className="border-none px-4 py-2 text-center">
                     {data.first_name}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className="border-none px-4 py-2 text-center">
                     {data.last_name}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className="border-none px-4 py-2 text-center">
                     {data.position}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2 flex gap-2 justify-center">
+                  <td className="border-none px-4 py-2 flex gap-2 justify-center">
                     <button
-                      className="text-white px-2 py-1 rounded-lg bg-orange-600 hover:bg-orange-900"
+                      className="text-white px-2 py-1 rounded-lg bg-green-600 hover:bg-green-900"
                       onClick={() => setSelectedEmployee(data)}
                     >
                       See More
@@ -132,7 +132,7 @@ const EmployeeDetails = () => {
             ref={modalRef}
             className="bg-white p-6 rounded-lg shadow-lg w-2/3 max-h-[80vh] overflow-y-auto"
           >
-            <h2 className="text-xl font-semibold text-orange-600 mb-4">
+            <h2 className="text-xl font-semibold text-blue-600 mb-4">
               Employee Details
             </h2>
             <div className="grid grid-cols-2 gap-4 text-gray-700">
@@ -261,7 +261,7 @@ const EmployeeDetails = () => {
 
             <div className="mt-6 flex justify-end">
               <button
-                className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                 onClick={() => setSelectedEmployee(null)}
               >
                 Close

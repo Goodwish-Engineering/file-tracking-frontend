@@ -137,8 +137,8 @@ const FileDetails = ({ setShowButton, clearData }) => {
 
   return (
     <>
-      <div className="w-[90%] md:w-[80%] mt-12 md:mt-5 md:my-5 mx-auto p-6 bg-orange-50 border border-orange-300 rounded-lg shadow-lg">
-        <h1 className="text-center text-2xl font-bold mb-6 text-orange-700">
+      <div className="w-[90%] md:w-[80%] mt-12 md:mt-5 md:my-10 mx-auto p-6 bg-white shadow-gray-300 rounded-lg shadow-inner">
+        <h1 className="text-center text-2xl font-bold mb-6 text-[#3F84E5]">
           फारामको विवरण
         </h1>
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
@@ -146,7 +146,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
             (key) =>
               key !== "present_by" && (
                 <div key={key}>
-                  <label className="block font-medium text-orange-800 capitalize">
+                  <label className="block font-medium text-gray-800 capitalize">
                     {key.replace("_", " ")}
                   </label>
                   {key === "province" ? (
@@ -154,7 +154,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
                       name={key}
                       value={formData[key]}
                       onChange={handleChange}
-                      className="mt-1 block w-full border border-orange-400 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 p-2"
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     >
                       <option value="">प्रदेश छान्नुहोस्</option>
                       {provinces.map((province) => (
@@ -168,7 +168,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
                       name={key}
                       value={formData[key]}
                       onChange={handleChange}
-                      className="mt-1 block w-full border border-orange-400 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 p-2"
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     >
                       <option value="">जिल्ला छान्नुहोस्</option>
                       {districts.map((district) => (
@@ -182,7 +182,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
                       name={key}
                       value={formData[key]}
                       onChange={handleChange}
-                      className="mt-1 block w-full border border-orange-400 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 p-2"
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     >
                       <option value="">नगरपालिका छान्नुहोस्</option>
                       {municipalities.map((municipality) => (
@@ -203,7 +203,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
                       name={key}
                       value={key === "file" ? undefined : formData[key]}
                       onChange={handleChange}
-                      className="mt-1 block w-full border border-orange-400 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 p-2"
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                     />
                   )}
                 </div>
@@ -213,7 +213,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
             {show && (
               <button
                 type="submit"
-                className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
+                className="px-6 py-2 bg-[#3F84E5] text-white rounded-lg hover:bg-[#3571C5] transition-all"
               >
                 रेकर्ड थप्नुहोस्
               </button>

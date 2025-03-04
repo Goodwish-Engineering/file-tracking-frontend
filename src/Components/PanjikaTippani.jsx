@@ -58,8 +58,8 @@ const PanjikaTippani = () => {
   };
 
   return (
-    <div className="p-4 w-[90%] mx-auto my-4 bg-orange-50 shadow-lg rounded-lg border-orange-300 border-2">
-      <h1 className="text-center font-bold text-2xl mb-6 text-orange-500">
+    <div className="p-4 w-[90%] md:w-[80%] mx-auto my-4 bg-white shadow-gray-200 rounded-lg shadow-inner border-2">
+      <h1 className="text-center font-bold text-2xl mb-6 text-blue-500">
         Panjika Details Tippani
       </h1>
       <form className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -74,13 +74,13 @@ const PanjikaTippani = () => {
           { label: "Page No", name: "page_no", type: "text" },
         ].map(({ label, name, type }) => (
           <div key={name}>
-            <label className="block text-orange-800 font-medium">{label}</label>
+            <label className="block text-gray-800 font-medium">{label}</label>
             <input
               type={type}
               name={name}
               value={currentTippani[name]}
               onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border border-orange-400 rounded-md shadow-sm"
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
               required
             />
           </div>
@@ -90,7 +90,7 @@ const PanjikaTippani = () => {
         <button
           onClick={handleSubmit}
           type="submit"
-          className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-green-600"
+          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
         >
           Save Tippani
         </button>
@@ -98,7 +98,7 @@ const PanjikaTippani = () => {
         {showAddButton && (
           <button
             onClick={addNewForm}
-            className="mt-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+            className="mt-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
           >
             Add Another Tippani
           </button>

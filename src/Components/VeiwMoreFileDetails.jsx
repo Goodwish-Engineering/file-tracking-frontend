@@ -117,7 +117,7 @@ const VeiwMoreFileDetails = () => {
 
   const handleSave = async () => {
     try {
-      await fetch(`${baseUrl}/file/${id}/`, {
+      const response = await fetch(`${baseUrl}/file/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -128,15 +128,27 @@ const VeiwMoreFileDetails = () => {
           letters_and_documents: fileDetails.letters_and_documents,
         }),
       });
+      
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      
+      await fetchFileDetails();
+      
       setEditable(false);
+      console.log(response);
+      alert("Changes saved successfully!");
     } catch (error) {
       console.error("Error updating file:", error);
+      alert(`Failed to save changes: ${error.message}`);
+    } finally {
+      
     }
   };
 
   if (loading) {
     return (
-      <div className="text-center mt-10 text-orange-600 text-lg">
+      <div className="text-center mt-10 text-[#3571C5] text-lg">
         Loading...
       </div>
     );
@@ -187,23 +199,23 @@ const VeiwMoreFileDetails = () => {
         onClick={() => {
           handleNavigate();
         }}
-        className="w-full justify-center items-center flex fixed top-0 left-0 text-white font-semibold bg-orange-500 cursor-pointer gap-2 py-2 "
+        className="w-full justify-center items-center flex fixed top-0 left-0 text-white font-semibold bg-[#3F84E5] cursor-pointer gap-2 py-2 "
       >
         <h1 className="text-lg">Home</h1>
         <FontAwesomeIcon className="text-xl" icon={faHome} />
       </div>
-      <h1 className="text-3xl font-bold text-orange-600 mb-6 mt-9 text-center">
+      <h1 className="text-3xl font-bold text-[#3571C5] mb-6 mt-9 text-center">
         File Details
       </h1>
 
       {/* File Information */}
       <div className="w-[94%] md:w-[98%] mx-auto md:flex">
         <div className="mb-8 md:w-1/2 w-[98%] mx-auto">
-          <h2 className="text-2xl font-semibold text-orange-500 mb-4">
+          <h2 className="text-2xl font-semibold text-[#3571C5] mb-4">
             File Information
           </h2>
-          <div className="w-[94%] border border-orange-500 rounded-md">
-            <div className="w-full py-2 px-3 bg-[#F86624] text-xl font-semibold text-left text-white rounded-t-md">
+          <div className="w-[94%] border border-blue-500 rounded-md">
+            <div className="w-full py-2 px-3 bg-[#3F84E5] text-xl font-semibold text-left text-white rounded-t-md">
               File Details
             </div>
             <div className="w-full p-1">
@@ -278,13 +290,13 @@ const VeiwMoreFileDetails = () => {
         {/* Tippani Table */}
         <div className="md:w-1/2 w-[98%] mx-auto">
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-orange-500 mb-4">
+            <h2 className="text-2xl font-semibold text-[#3571C5] mb-4">
               Tippani
             </h2>
             <div className="overflow-auto max-h-[400px] rounded-t-lg">
               <table className="min-w-full table-auto border-none bg-gray-100 rounded-sm overflow-hidden">
                 <thead>
-                  <tr className="bg-orange-500 text-white border-t-2 border-b-2 border-white text-nowrap py-3">
+                  <tr className="bg-[#3F84E5] text-white border-t-2 border-b-2 border-white text-nowrap py-3">
                     <th className="py-2 px-4 text-left border-none">Subject</th>
                     <th className="py-2 px-4 text-left border-none">
                       Submitted By
@@ -437,13 +449,13 @@ const VeiwMoreFileDetails = () => {
 
           {/* Letters and Documents Table */}
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-orange-500 mb-4">
+            <h2 className="text-2xl font-semibold text-[#3571C5] mb-4">
               Letters and Documents
             </h2>
             <div className="overflow-auto max-h-[400px] rounded-t-lg">
               <table className="min-w-full table-auto border-none bg-gray-100 overflow-hidden">
                 <thead>
-                  <tr className="bg-orange-500 text-white border-b-2 border-gray-300 text-nowrap">
+                  <tr className="bg-[#3F84E5] text-white border-b-2 border-gray-300 text-nowrap">
                     <th className="py-2 px-4 text-left border-none">
                       Registration No
                     </th>
@@ -589,7 +601,7 @@ const VeiwMoreFileDetails = () => {
 
             <div className="mt-4 text-center">
               <button
-                className="px-6 py-2 bg-yellow-500 text-white rounded"
+                className="px-6 py-2 bg-[#3571C5] text-white rounded"
                 onClick={handleEditToggle}
               >
                 {editable ? "Cancel" : "Edit"}

@@ -66,16 +66,16 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-      <div className="bg-orange-50 border-orange-500 p-6 rounded-lg w-full max-w-2xl relative">
+    <div className="fixed inset-0 flex shadow-inner justify-center items-center bg-black bg-opacity-50 z-50">
+      <div className="bg-white border-blue-600 p-6 rounded-lg w-full max-w-2xl relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-orange-600 hover:text-red-600"
+          className="absolute top-4 right-4 text-blue-600 hover:text-blue-700"
         >
           <h2 className="font-semibold text-2xl">x</h2>
         </button>
 
-        <h2 className="text-2xl font-semibold text-orange-500 mb-4 text-center">
+        <h2 className="text-2xl font-semibold text-blue-600 mb-4 text-center">
           Add New Tippani
         </h2>
 
@@ -91,7 +91,7 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
             { label: "Page No", name: "page_no", type: "text" },
           ].map(({ label, name, type }) => (
             <div key={name}>
-              <label className="block text-orange-800">
+              <label className="block text-gray-800">
                 {label}
               </label>
               <input
@@ -99,7 +99,7 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
                 name={name}
                 value={currentTippani[name]}
                 onChange={handleChange}
-                className="w-full px-3 py-2 mt-1 border border-orange-400 rounded-md shadow-sm"
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
                 required
               />
             </div>
@@ -110,7 +110,7 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
           <button
             onClick={handleSubmit}
             type="submit"
-            className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600"
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
             Save Tippani
           </button>

@@ -82,15 +82,15 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-orange-100">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
         <div className="w-full flex justify-center items-center">
           <img src={logo} className="h-10" />
         </div>
-        <h2 className="text-3xl font-bold text-orange-600 text-center mb-6">
+        <h2 className="text-3xl font-bold text-[#3F84E5] text-center mb-6">
           {isLogin ? "Welcome Back!" : "Login"}
         </h2>
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+        {error && <p className="text-red-500 text-md text-center">{error}</p>}
 
         {/* {isLogin ? (
           <button
@@ -102,12 +102,12 @@ const Login = () => {
         ) : ( */}
           <form onSubmit={handleLogin}>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md font-medium text-gray-800">
                 Username or Email
               </label>
               <input
                 type="text"
-                className="mt-1 w-full p-3 border border-orange-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+                className="mt-1 w-full p-3 border border-gray-300 rounded-lg "
                 placeholder="Enter your username or email"
                 value={username}
                 onChange={(e) => setUserName(e.target.value)}
@@ -115,12 +115,12 @@ const Login = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md font-medium text-gray-800">
                 Password
               </label>
               <input
                 type="password"
-                className="mt-1 w-full p-3 border border-orange-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+                className="mt-1 w-full p-3 border border-gray-300 rounded-lg "
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -129,7 +129,7 @@ const Login = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-orange-500 text-white p-3 rounded-lg hover:bg-orange-600 transition"
+              className="w-full bg-[#3F84E5] text-white p-3 rounded-lg hover:bg-[#3571C5] transition"
               disabled={loading}
             >
               {loading ? "Logging in..." : "Login"}
