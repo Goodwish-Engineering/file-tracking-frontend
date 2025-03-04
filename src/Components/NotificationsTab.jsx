@@ -173,8 +173,8 @@ const NotificationsTab = () => {
       {sortedNotifications.length > 0 ? (
         <ul className="list-none">
           {sortedNotifications.map((notification) => {
-            const firstName = notification.related_file.present_by.first_name;
-            const lastName = notification.related_file.present_by.last_name;
+            const firstName = notification?.related_file?.present_by?.first_name || "N/A";
+            const lastName = notification?.related_file?.present_by?.last_name || "N/A";
             const userColor = getUserColor(firstName, lastName);
             const initials = getInitials(firstName, lastName);
 
@@ -221,8 +221,9 @@ const NotificationsTab = () => {
                         </h3>
                       </div>
                       <div className="flex gap-20 items-center justify-around">
-                        <h3>{notification.related_file.file_number}</h3>
-                        <h3>{notification.related_file.subject}</h3>
+                        {/* <h3>{notification.related_file.file_number}</h3> */}
+                        <h3>{notification?.related_file?.file_number ?? "N/A"}</h3>
+                        <h3>{notification?.related_file?.subject ?? "N/A"}</h3>
                       </div>
                     </div>
                   </div>

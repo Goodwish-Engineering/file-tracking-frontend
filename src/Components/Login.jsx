@@ -59,8 +59,8 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("isLogin", true);
       localStorage.setItem("userId", data.user.id);
-      // const userid = localStorage.getItem('userId');
-      // console.log(userid);
+      const userid = localStorage.getItem('userId');
+      console.log(userid);
 
       dispatch(addUser(data.user));
       dispatch(addLogin(true));
