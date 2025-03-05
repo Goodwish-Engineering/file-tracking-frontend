@@ -4,6 +4,7 @@ import Registration from "../Components/Register";
 import FileStatus from "../Components/FileStatus";
 import Notification from "../Components/Notification";
 import UserDetails from "../EmployeeDashboard/UserDetails"
+import AddOffice from "./AddOffice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
@@ -155,6 +156,14 @@ const AdminDashboard = () => {
           >
             Register Employee
           </h3>
+          <h3
+            onClick={() => handleTabChange("add-office")}
+            className={`cursor-pointer ${
+              tab === "add-office" ? "bg-[#3571C5]" : ""
+            } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-1 rounded-md flex items-center gap-2`}
+          >
+            Add Office
+          </h3>
           <button
             onClick={() => handleTabChange("notification")}
             className={`cursor-pointer ${
@@ -235,6 +244,15 @@ const AdminDashboard = () => {
           >
             Register Employee
           </h3>
+
+          <h3
+            onClick={() => handleTabChange("add-office")}
+            className={`cursor-pointer ${
+              tab === "add-office" ? "bg-[#3571C5]" : ""
+            } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
+          >
+            Add Office
+          </h3>
           
           <button
             onClick={() => handleTabChange("notification")}
@@ -267,6 +285,7 @@ const AdminDashboard = () => {
         {tab === "filedetails" && <FileStatus />}
         {tab === "register" && <Registration />}
         {tab === "notification" && <Notification />}
+        {tab === "add-office" && <AddOffice/>}
       </div>
     </div>
   );
