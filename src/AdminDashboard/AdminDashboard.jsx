@@ -280,7 +280,7 @@ const AdminDashboard = () => {
       )}
 
       {/* Content Area */}
-      <div className="w-full flex-1 overflow-auto bg-gray-50">
+      <div className="w-full flex-1 overflow-auto">
         {tab === "empdetails" && <EmployeeDetails />}
         {tab === "filedetails" && <FileStatus />}
         {tab === "register" && <Registration />}

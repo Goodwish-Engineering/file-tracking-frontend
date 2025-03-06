@@ -11,6 +11,8 @@ const Registration = () => {
   const [tempDistrict, setTemptDistrict] = useState([]);
   const [municipalities, setMunicipalities] = useState([]);
   const [tempMunicipalities, setTempMunicipalities] = useState([]);
+  const [offices, setOffices] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState("");
   const loanType = [
     {
@@ -62,6 +64,7 @@ const Registration = () => {
     bank_name: "",
     duration: "",
     office: "",
+    department: "",
     user_type: "",
     loan_type: "",
     loan_name: "",
@@ -88,45 +91,57 @@ const Registration = () => {
       [name]: value,
     }));
   };
+
   useEffect(() => {
     fetchProvince();
+    fetchOffice();
   }, []);
+
+  useEffect(() => {
+    if (formData.office) {
+      fetchDepartment(formData.office);
+    }
+  }, [formData.office]);
+
   const fetchProvince = async () => {
     try {
       const response = await fetch(`${baseUrl}/provinces/`);
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      const data = await response.json(); // Correct way to parse JSON
+      const data = await response.json();
       setProvinces(data);
     } catch (error) {
       console.log("error", error);
     }
   };
+
   const fetchDistrict = async (province) => {
     try {
       const response = await fetch(`${baseUrl}/districts/${province}/`);
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      const data = await response.json(); // Correct way to parse JSON
+      const data = await response.json();
       setDistrict(data);
     } catch (error) {
       console.log("error", error);
     }
   };
+
   const fetchTempDistrict = async (province) => {
     try {
       const response = await fetch(`${baseUrl}/districts/${province}/`);
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      const data = await response.json(); // Correct way to parse JSON
+      const data = await response.json();
       setTemptDistrict(data);
     } catch (error) {
       console.log("error", error);
     }
   };
+
   const fetchMunicipality = async (district) => {
     try {
       const response = await fetch(
@@ -135,12 +150,13 @@ const Registration = () => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      const data = await response.json(); // Correct way to parse JSON
+      const data = await response.json();
       setMunicipalities(data);
     } catch (error) {
       console.log("error", error);
     }
   };
+
   const fetchTempMunicipality = async (district) => {
     try {
       const response = await fetch(
@@ -149,11 +165,50 @@ const Registration = () => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      const data = await response.json(); // Correct way to parse JSON
+      const data = await response.json();
       setTempMunicipalities(data);
     } catch (error) {
       console.log("error", error);
     }
+  };
+
+  const fetchOffice = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/offices/`);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      setOffices(data);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  const fetchDepartment = async (officeId) => {
+    try {
+      const response = await fetch(`${baseUrl}/offices/${officeId}`);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      console.log("Fetched Office Data:", data);
+
+      // Directly set departments from the response
+      setDepartments(data.departments || []); // Ensure it's always an array
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+      setDepartments([]); // Prevents UI crashes
+    }
+  };
+
+  const handleOfficeChange = (e) => {
+    const { value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      office: value,
+      department: "",
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -209,6 +264,7 @@ const Registration = () => {
       alert("An error occurred while submitting the form.");
     }
   };
+
   const handleProvinceChange = (event) => {
     setSelectedProvince(event.target.value);
     const { name, value } = event.target;
@@ -224,6 +280,7 @@ const Registration = () => {
       fetchTempDistrict(value);
     }
   };
+
   const handleDistrictChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
@@ -236,6 +293,7 @@ const Registration = () => {
       fetchTempMunicipality(value);
     }
   };
+
   const handleMunicipalityChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
@@ -669,15 +727,44 @@ const Registration = () => {
               className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
+
           <label className="flex flex-col">
-            Office
-            <input
-              type="text"
+            Office:
+            <select
               name="office"
               value={formData.office}
+              onChange={handleOfficeChange}
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select an Office</option>
+              {offices.map((office, index) => (
+                <option key={index} value={office.id}>
+                  {office.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col">
+            Department:
+            <select
+              name="department"
+              value={formData.department}
               onChange={handleChange}
               className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+              disabled={!formData.office}
+            >
+              <option value="">Select a Department</option>
+              {departments.length > 0 ? (
+                departments.map((department) => (
+                  <option key={department.id} value={department.id}>
+                    {department.name}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No departments available</option>
+              )}
+            </select>
           </label>
 
           <label className="flex flex-col">
@@ -903,9 +990,7 @@ const Registration = () => {
       </fieldset>
 
       <fieldset className="border border-blue-300 p-4 rounded">
-        <legend className="text-lg font-semibold text-blue-500">
-          Awards
-        </legend>
+        <legend className="text-lg font-semibold text-blue-500">Awards</legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
             Award Name:

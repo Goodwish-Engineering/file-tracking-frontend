@@ -42,7 +42,7 @@ const AddOffice = () => {
     <>
       <div className="flex flex-col md:flex-row gap-4 p-4 h-screen">
         {/* Left Section */}
-        <div className="w-full md:w-[45%] ">
+        <div className="w-full md:w-[65%] ">
           <h2 className="text-center my-3 text-blue-500 font-semibold text-xl md:text-2xl">
             Add Office Name and Department
           </h2>
@@ -82,7 +82,7 @@ const AddOffice = () => {
         </div>
 
         {/* Right Section */}
-        <div className="w-full md:w-[55%] ">
+        <div className="w-full md:w-[35%] ">
           <DisplayEditOffice />
         </div>
       </div>
