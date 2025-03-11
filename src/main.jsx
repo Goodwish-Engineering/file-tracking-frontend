@@ -13,6 +13,7 @@ import EmployeOne from "./EmployeeDashboard/EmployeOne.jsx";
 import VeiwMoreFileDetails from "./Components/VeiwMoreFileDetails.jsx";
 import EmployeHeader from "./EmployeeDashboard/EmployeeHeader.jsx";
 import UserDetails from "./EmployeeDashboard/UserDetails.jsx";
+import AddDepartOfOffice from "./AdminDashboard/AddDepartOfOffice.jsx";
 const router = createBrowserRouter([
   {
     element: <App />,
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
       { element: <VeiwMoreFileDetails />, path: "/file-details/:id" },
       { element: <EmployeHeader/>, path:"/employeeheader"},
       { element: <UserDetails/>, path:'/userDetails'},
+      { element: <AddDepartOfOffice/>, path:'/addDepartment/:officeId'},
     ],
   },
 ]);

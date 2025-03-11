@@ -11,6 +11,7 @@ const TransferedFile = () => {
   const [fileToTransfer, setFileToTransfer] = useState(null);
   const token = localStorage.getItem("token");
   const Empid = localStorage.getItem("token");
+  const [deparetments, setDepartments] = useState([]);
 
   const navigate = useNavigate();
 
@@ -50,6 +51,30 @@ const TransferedFile = () => {
   //     console.error("Error fetching files:", error);
   //   }
   // };
+  const getDepartment = async (e) => {
+    e.preventDefault();
+
+    try {
+      const token = localStorage.getItem("token");
+      
+      const response = await axios.get(`${baseUrl}/department/`, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
+
+      if (response.data) {
+        setDepartments(response.data)
+      }
+    } catch (error) {
+      console.error("Error saving department:", error);
+      alert("Failed to add department. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    getDepartment();
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -123,43 +148,43 @@ const TransferedFile = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h2 className="text-2xl font-bold text-[#3F84E5] mb-4">
+    <div className="p-6 min-h-screen">
+      <h2 className="text-2xl font-bold text-[#E68332] mb-4">
         Transferred Files
       </h2>
       <div className="overflow-x-auto">
-        <table className="w-full shadow-md bg-white rounded-lg border-none">
-          <thead className="bg-[#3F84E5] text-white">
-            <tr className="border border-b-2 border-white">
-              <th className="p-3 text-center font-mono text-pretty border-none">ID</th>
-              <th className="p-3 text-center font-mono text-pretty border-none">File Name</th>
-              <th className="p-3 text-center font-mono text-pretty border-none">Subject</th>
-              <th className="p-3 text-center font-mono text-pretty border-none">Presented By</th>
-              <th className="p-3 text-center font-mono text-pretty border-none">Presented Date</th>
-              <th className="p-3 text-center font-mono text-pretty border-none">File</th>
-              <th className="p-3 text-center font-mono text-pretty border-none">Actions</th>
+        <table className="w-full shadow-md rounded-lg border-none border-separate border-spacing-y-4">
+          <thead className="text-gray-800">
+            <tr className="border">
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">ID</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">File Name</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Subject</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Presented By</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Presented Date</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">File</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Actions</th>
             </tr>
           </thead>
           <tbody>
             {TransferedFiles.length > 0 ? (
               TransferedFiles.map((file,index) => (
-                <tr key={file.id} className={`hover:bg-gray-50 text-gray-700 text-center text-nowrap border-t-2 border-b-2`}>
-                  <td className="p-3 border-none">{file.id}</td>
-                  <td className="p-3 border-none">{file.file_name}</td>
-                  <td className="p-3 border-none">{file.subject}</td>
-                  <td className="p-3 border-none">
+                <tr key={file.id} className={`text-black text-center text-nowrap border-t-2 border-b-2 my-4 gap-5 shadow-gray-100 border-none shadow-[4px_4px_5px_rgba(0,0,0,0.2)] rounded-lg`}>
+                  <td className="p-4 bg-gray-50 border-none">{file.id}</td>
+                  <td className="p-4 bg-gray-50 border-none">{file.file_name}</td>
+                  <td className="p-4 bg-gray-50 border-none">{file.subject}</td>
+                  <td className="p-4 bg-gray-50 border-none">
                     {file.present_by?.first_name} {file.present_by?.last_name}
                   </td>
-                  <td className="p-3 border-none">{file.present_date}</td>
-                  <td className="p-3 border-none">
+                  <td className="p-4 bg-gray-50 border-none">{file.present_date}</td>
+                  <td className="p-4 bg-gray-50 border-none">
                     <button
                       onClick={() => navigate(`/file-details/${file.id}`)}
-                      className="bg-[#3F84E5] hover:bg-[#3571C5] text-white px-3 py-1 rounded-lg transition-all"
+                      className="text-[#E68332] border-[#E68332] border-2 rounded-lg hover:bg-[#E68332] hover:text-white px-3 py-1 transition-all"
                     >
                       View More
                     </button>
                   </td>
-                  <td className="p-3 gap-3 border-none flex items-center justify-center">
+                  <td className="p-4 bg-gray-50 gap-3 border-none flex items-center justify-center">
                     {/* <button
                       onClick={() => {
                         setFileToTransfer(file.id);
@@ -171,7 +196,7 @@ const TransferedFile = () => {
                     </button> */}
                     <button
                       onClick={() => handleDelete(file.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-all"
+                      className="bg-[#F8B3B3] hover:bg-[#de7373] text-black px-3 py-1 rounded-lg transition-all"
                     >
                       Delete
                     </button>

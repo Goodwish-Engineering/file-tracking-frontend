@@ -9,8 +9,9 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import TippaniFormModal from "./TippaniFormModal";
 import DocumentFormModal from "./DocumentFormModal";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
-const VeiwMoreFileDetails = () => {
+const ViewMoreFileDetails = () => {
   const { id } = useParams();
   console.log(id);
   const baseUrl = useSelector((state) => state.login?.baseUrl);
@@ -148,7 +149,7 @@ const VeiwMoreFileDetails = () => {
 
   if (loading) {
     return (
-      <div className="text-center mt-10 text-[#3571C5] text-lg">
+      <div className="text-center mt-10 text-[#E68332] text-lg">
         Loading...
       </div>
     );
@@ -162,13 +163,12 @@ const VeiwMoreFileDetails = () => {
     );
   }
 
+  // Extracting properties safely from nested objects
   const {
     file_name,
     subject,
-    related_office,
     file,
     file_number,
-    present_by,
     present_date,
     days_submitted,
     total_tippani_pages,
@@ -176,46 +176,52 @@ const VeiwMoreFileDetails = () => {
     total_page_count,
     letters_and_documents,
     tippani,
-    related_guthi,
     province,
     district,
     municipality,
     ward_no,
     tole,
   } = fileDetails;
+
+  // Safely extract nested object properties
+  const related_guthi_name = fileDetails.related_guthi ? fileDetails.related_guthi.name : "N/A";
+  const related_department_name = fileDetails.related_department ? fileDetails.related_department.name : "N/A";
+  const submitted_by_name = fileDetails.submitted_by || "N/A";
+  
   const level = localStorage.getItem("level");
   const handleNavigate = () => {
     if (level === "5") {
       navigate("/admindashboard");
-    } else if (level === "1") {
-      navigate("/employeeheader");
     } else {
-      navigate("/login");
+      navigate("/employeeheader");
+    // } else {
+    //   navigate("/login");
     }
   };
+
   return (
     <div className="w-full mx-auto p-6">
       <div
         onClick={() => {
           handleNavigate();
         }}
-        className="w-full justify-center items-center flex fixed top-0 left-0 text-white font-semibold bg-[#3F84E5] cursor-pointer gap-2 py-2 "
+        className="justify-end px-4 py-1 items-end flex fixed top-2 left-2 text-white font-semibold bg-[#E68332] cursor-pointer gap-2 rounded-md"
       >
-        <h1 className="text-lg">Home</h1>
-        <FontAwesomeIcon className="text-xl" icon={faHome} />
+        <div className="text-lg flex items-center gap-2"><IoMdArrowRoundBack/> Home</div>
+        {/* <FontAwesomeIcon className="text-xl" icon={faHome} /> */}
       </div>
-      <h1 className="text-3xl font-bold text-[#3571C5] mb-6 mt-9 text-center">
+      <h1 className="text-3xl font-bold text-[#E68332] mb-3 text-center">
         File Details
       </h1>
 
       {/* File Information */}
       <div className="w-[94%] md:w-[98%] mx-auto md:flex">
         <div className="mb-8 md:w-1/2 w-[98%] mx-auto">
-          <h2 className="text-2xl font-semibold text-[#3571C5] mb-4">
+          <h2 className="text-2xl font-semibold text-[#E68332] mb-4">
             File Information
           </h2>
-          <div className="w-[94%] border border-blue-500 rounded-md">
-            <div className="w-full py-2 px-3 bg-[#3F84E5] text-xl font-semibold text-left text-white rounded-t-md">
+          <div className="w-[94%] border border-[#E68332] rounded-md">
+            <div className="w-full py-2 px-3 bg-[#E68332] text-xl font-semibold text-left text-white rounded-t-md">
               File Details
             </div>
             <div className="w-full p-1">
@@ -234,8 +240,10 @@ const VeiwMoreFileDetails = () => {
                   File Name: <span className="font-mono">{file_name}</span>
                 </p>
                 <p className="text-lg font-normal text-gray-800">
-                  Related Guthi:{" "}
-                  <span className="font-mono">{related_guthi || "N/A"}</span>
+                  Related Guthi: <span className="font-mono">{related_guthi_name}</span>
+                </p>
+                <p className="text-lg font-normal text-gray-800">
+                  Related Department: <span className="font-mono">{related_department_name}</span>
                 </p>
               </div>
               {/* second section */}
@@ -247,8 +255,7 @@ const VeiwMoreFileDetails = () => {
                   District: <span className="font-mono">{district}</span>
                 </p>
                 <p className="text-lg font-normal">
-                  Nagarpalika/Gaunpalika:{" "}
-                  <span className="font-mono">{municipality}</span>
+                  Nagarpalika/Gaunpalika: <span className="font-mono">{municipality}</span>
                 </p>
                 <p className="text-lg font-normal">
                   Ward No: <span className="font-mono">{ward_no}</span>
@@ -260,24 +267,22 @@ const VeiwMoreFileDetails = () => {
               {/* third section */}
               <div className="my-1 mx-auto w-[94%]">
                 <p className="text-lg font-normal text-gray-800">
-                  Present Date:{" "}
-                  <span className="font-mono">{present_date}</span>
+                  Present Date: <span className="font-mono">{present_date}</span>
                 </p>
                 <p className="text-lg font-normal text-gray-800">
-                  Days Submitted:{" "}
-                  <span className="font-mono">{days_submitted}</span>
+                  Submitted By: <span className="font-mono">{submitted_by_name}</span>
                 </p>
                 <p className="text-lg font-normal text-gray-800">
-                  Total tippani pages:{" "}
-                  <span className="font-mono">{total_tippani_pages}</span>
+                  Days Submitted: <span className="font-mono">{days_submitted}</span>
                 </p>
                 <p className="text-lg font-normal text-gray-800">
-                  Total Document pages:{" "}
-                  <span className="font-mono">{total_documents_pages}</span>
+                  Total tippani pages: <span className="font-mono">{total_tippani_pages}</span>
                 </p>
                 <p className="text-lg font-normal text-gray-800">
-                  Total page count:{" "}
-                  <span className="font-mono">{total_page_count || "N/A"}</span>
+                  Total Document pages: <span className="font-mono">{total_documents_pages}</span>
+                </p>
+                <p className="text-lg font-normal text-gray-800">
+                  Total page count: <span className="font-mono">{total_page_count || "N/A"}</span>
                 </p>
                 <p className="text-lg font-normal text-gray-800">
                   File: <span className="font-mono">{file || "N/A"}</span>
@@ -290,13 +295,13 @@ const VeiwMoreFileDetails = () => {
         {/* Tippani Table */}
         <div className="md:w-1/2 w-[98%] mx-auto">
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-[#3571C5] mb-4">
+            <h2 className="text-2xl font-semibold text-[#E68332] mb-4">
               Tippani
             </h2>
             <div className="overflow-auto max-h-[400px] rounded-t-lg">
               <table className="min-w-full table-auto border-none bg-gray-100 rounded-sm overflow-hidden">
                 <thead>
-                  <tr className="bg-[#3F84E5] text-white border-t-2 border-b-2 border-white text-nowrap py-3">
+                  <tr className="bg-[#E68332] text-white border-t-2 border-b-2 border-white text-nowrap py-3">
                     <th className="py-2 px-4 text-left border-none">Subject</th>
                     <th className="py-2 px-4 text-left border-none">
                       Submitted By
@@ -333,7 +338,7 @@ const VeiwMoreFileDetails = () => {
                             }
                           />
                         ) : (
-                          tip.submitted_by || "N/A"
+                          tip.subject || "N/A"
                         )}
                       </td>
                       <td className="py-2 px-4 border-none">
@@ -449,13 +454,13 @@ const VeiwMoreFileDetails = () => {
 
           {/* Letters and Documents Table */}
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-[#3571C5] mb-4">
+            <h2 className="text-2xl font-semibold text-[#E68332] mb-4">
               Letters and Documents
             </h2>
             <div className="overflow-auto max-h-[400px] rounded-t-lg">
               <table className="min-w-full table-auto border-none bg-gray-100 overflow-hidden">
                 <thead>
-                  <tr className="bg-[#3F84E5] text-white border-b-2 border-gray-300 text-nowrap">
+                  <tr className="bg-[#E68332] text-white border-b-2 border-gray-300 text-nowrap">
                     <th className="py-2 px-4 text-left border-none">
                       Registration No
                     </th>
@@ -591,7 +596,7 @@ const VeiwMoreFileDetails = () => {
             {editable && (
               <div className="mt-4 flex justify-center">
                 <button
-                  className="px-6 py-2 bg-blue-500 text-white rounded"
+                  className="px-6 py-2 bg-[#E68332] text-white rounded"
                   onClick={handleSave}
                 >
                   Save Changes
@@ -601,7 +606,7 @@ const VeiwMoreFileDetails = () => {
 
             <div className="mt-4 text-center">
               <button
-                className="px-6 py-2 bg-[#3571C5] text-white rounded"
+                className="px-6 py-2 bg-[#E68332] text-white rounded"
                 onClick={handleEditToggle}
               >
                 {editable ? "Cancel" : "Edit"}
@@ -628,4 +633,4 @@ const VeiwMoreFileDetails = () => {
   );
 };
 
-export default VeiwMoreFileDetails;
+export default ViewMoreFileDetails;

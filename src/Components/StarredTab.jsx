@@ -55,11 +55,11 @@ const StarredTab = ({ onToggleStarred }) => {
             return (
               <li
                 key={notification.id}
-                className={`p-3 px-6 py-6 hover:bg-gray-50 cursor-pointer border-b border-gray-200 shadow rounded-sm list-none text-nowrap items-center
+                className={`p-3 px-6 py-6 hover:bg-[#e8e6e6] cursor-pointer border bg-white mb-3 rounded-md border-gray-100 shadow list-none text-nowrap items-center w-[100%]
                   ${
                     notification.is_read
                       ? "bg-white"
-                      : "bg-gray-100 font-semibold"
+                      : "bg-[#F8F8F8] font-semibold"
                   }`}
                   onClick={() => {
                     navigate(`/file-details/${notification.related_file.id}/`);

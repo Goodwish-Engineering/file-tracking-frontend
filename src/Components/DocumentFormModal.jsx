@@ -70,10 +70,10 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
         >
-          <span className="text-2xl font-bold text-blue-600 hover:text-blue-700">×</span>
+          <span className="text-2xl font-bold text-[#E86332] hover:text-[#c36f2a]">×</span>
         </button>
 
-        <h2 className="text-2xl font-semibold text-blue-600 mb-2 text-center">
+        <h2 className="text-2xl font-semibold text-[#E86332] mb-2 text-center">
           Add New Document
         </h2>
         <form onSubmit={handleSubmit}>
@@ -103,7 +103,7 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
           <div className="flex justify-center items-center mt-4 space-x-2">
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-[#E86332] text-white rounded hover:bg-[#c36f2a]"
             >
               Add Document
             </button>

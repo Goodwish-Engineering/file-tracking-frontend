@@ -22,10 +22,10 @@ const UploadTipanni = () => {
           onClick={() => {
             handleNewFile();
           }}
-          className="w-full py-5 flex justify-center cursor-pointer gap-3 bg-green-500 items-center text-white fixed top-0 "
+          className="flex items-end justify-end "
         >
-          <h1>Add New File</h1>
-          <FontAwesomeIcon icon={faFile} />
+          <button className="cursor-pointer px-3 py-1 right-1 bg-[#E68332] rounded-lg text-white fixed top-3 ">Add New file</button>
+          {/* <FontAwesomeIcon icon={faFile} /> */}
         </div>
       )}
       <FileDetails setShowButton={setShowButton} clearData={clearData} />

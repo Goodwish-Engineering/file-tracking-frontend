@@ -67,15 +67,15 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
 
   return (
     <div className="fixed inset-0 flex shadow-inner justify-center items-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white border-blue-600 p-6 rounded-lg w-full max-w-2xl relative">
+      <div className="bg-white border-[#E68332] p-6 rounded-lg w-full max-w-2xl relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-blue-600 hover:text-blue-700"
+          className="absolute top-4 right-4 text-[#E68332] hover:text-[#c36f2a]"
         >
           <h2 className="font-semibold text-2xl">x</h2>
         </button>
 
-        <h2 className="text-2xl font-semibold text-blue-600 mb-4 text-center">
+        <h2 className="text-2xl font-semibold text-[#E68332] mb-4 text-center">
           Add New Tippani
         </h2>
 
@@ -110,7 +110,7 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
           <button
             onClick={handleSubmit}
             type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+            className="bg-[#E68332] text-white px-6 py-2 rounded-lg hover:bg-[#c36f2a]"
           >
             Save Tippani
           </button>
@@ -118,7 +118,7 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
           {/* {showAddButton && (
             <button
               onClick={addNewForm}
-              className="mt-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+              className="mt-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-[#E68332]"
             >
               Add Another Tippani
             </button>

@@ -113,47 +113,47 @@ const FileRequest = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 min-h-screen">
       <h2 className="text-2xl font-bold text-orange-600 mb-4">File Request</h2>
       <div className="overflow-x-auto">
-        <table className="w-full border-none shadow-md bg-white rounded-lg">
-          <thead className="bg-orange-500 text-white">
-            <tr className="border-white border-b-2 rounded-md">
-              <th className="p-3 text-center border-none">ID</th>
-              <th className="p-3 text-center border-none">File Name</th>
-              <th className="p-3 text-center border-none">Subject</th>
-              <th className="p-3 text-center border-none">Presented By</th>
-              <th className="p-3 text-center border-none">Presented Date</th>
-              <th className="p-3 text-center border-none">File</th>
-              <th className="p-3 text-center border-none">Actions</th>
+        <table className="w-full border-none border-separate border-spacing-y-4">
+          <thead className="text-gray-800">
+            <tr className=" rounded-md">
+              <th className="p-3 text-center font-normal border-none">ID</th>
+              <th className="p-3 text-center font-normal border-none">File Name</th>
+              <th className="p-3 text-center font-normal border-none">Subject</th>
+              <th className="p-3 text-center font-normal border-none">Presented By</th>
+              <th className="p-3 text-center font-normal border-none">Presented Date</th>
+              <th className="p-3 text-center font-normal border-none">File</th>
+              <th className="p-3 text-center font-normal border-none">Actions</th>
             </tr>
           </thead>
           <tbody>
             {nonTransferredFiles.length > 0 ? (
               nonTransferredFiles.map((file) => (
-                <tr key={file.id} className="border-b-2 border-gray-300 hover:bg-orange-100 text-center">
-                  <td className="p-3 border-none">{file.id}</td>
-                  <td className="p-3 border-none">{file.file_name}</td>
-                  <td className="p-3 border-none">{file.subject}</td>
-                  <td className="p-3 border-none">
+                <tr key={file.id} className="text-gray-900 text-center my-4 gap-5 shadow-gray-100 text-nowrap border-none shadow-[4px_4px_5px_rgba(0,0,0,0.2)] rounded-lg">
+                  <td className="py-4 px-4 border-none bg-gray-50 rounded-l-xl">{file.id}</td>
+                  <td className="px-4 py-4 border-none bg-gray-50">{file.file_name}</td>
+                  <td className="px-4 py-4 border-none bg-gray-50">{file.subject}</td>
+                  <td className="px-4 py-4 border-none bg-gray-50">
                     {file.present_by?.first_name} {file.present_by?.last_name}
                   </td>
-                  <td className="p-3 border-none">{file.present_date}</td>
-                  <td className="p-3 border-none">
+                  <td className="px-4 py-4 border-none bg-gray-50">{file.present_date}</td>
+                  <td className="px-4 py-4 border-none bg-gray-50">
                     <button
                       onClick={() => navigate(`/file-details/${file.id}`)}
-                      className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg transition-all"
+                      className="border-[#E68332] border-2 hover:bg-[#E68332] hover:text-white text-[#E68332] px-3 py-1 rounded-lg transition-all"
                     >
                       View More
                     </button>
                   </td>
-                  <td className="p-3 flex gap-2 border-none items-center justify-center">
+                  <td className="px-4 py-4 gap-2 border-none bg-gray-50 flex justify-center items-center rounded-r-xl">
                     <button
                       onClick={() => {
                         setFileToTransfer(file.id);
                         setIsModalOpen(true);
                       }}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg transition-all"
+                      className="bg-[#B3F8CC] hover:bg-[#84be99] text-black px-3 py-1 rounded-lg transition-all"
                     >
                       Transfer
                     </button>
@@ -162,7 +162,7 @@ const FileRequest = () => {
                         setFileToAccept(file.id);
                         setIsAcceptModalOpen(true);
                       }}
-                      className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg transition-all"
+                      className="bg-[#b3c9f8] hover:bg-[#8a9fcb] text-black px-3 py-1 rounded-lg transition-all"
                     >
                       Accept
                     </button>

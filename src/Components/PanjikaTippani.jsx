@@ -59,7 +59,7 @@ const PanjikaTippani = () => {
 
   return (
     <div className="p-4 w-[90%] md:w-[80%] mx-auto my-4 bg-white shadow-gray-200 rounded-lg shadow-inner border-2">
-      <h1 className="text-center font-bold text-2xl mb-6 text-blue-500">
+      <h1 className="text-center font-bold text-2xl mb-6 text-[#E68332]">
         Panjika Details Tippani
       </h1>
       <form className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -90,7 +90,7 @@ const PanjikaTippani = () => {
         <button
           onClick={handleSubmit}
           type="submit"
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+          className="bg-[#E68332] text-white px-6 py-2 rounded-lg hover:bg-[#c36f2a]"
         >
           Save Tippani
         </button>
@@ -98,7 +98,7 @@ const PanjikaTippani = () => {
         {showAddButton && (
           <button
             onClick={addNewForm}
-            className="mt-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            className="mt-1 bg-[#B3F8CC] text-white px-4 py-2 rounded-lg hover:bg-[#89c29e]"
           >
             Add Another Tippani
           </button>

@@ -42,7 +42,7 @@ const FileStatus = () => {
   );
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 min-h-screen">
       <div className="flex justify-between items-center mb-4">
         <input
           type="text"
@@ -53,25 +53,25 @@ const FileStatus = () => {
         />
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full shadow-md bg-white rounded-lg border-none">
-          <thead className="bg-[#3F84E5] border border-b-2 border-white text-white">
+        <table className="w-full mx-auto shadow-md rounded-lg border-none border-separate border-spacing-y-4">
+          <thead className="text-gray-800">
             <tr className="border border-white border-t-2 border-b-2">
-              <th className="p-3 text-center border-none text-nowrap font-mono">
+              <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
                 ID
               </th>
-              <th className="p-3 text-center border-none text-nowrap font-mono">
+              <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
                 File No
               </th>
-              <th className="p-3 text-center border-none text-nowrap font-mono">
+              <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
                 File Name
               </th>
-              <th className="p-3 text-center border-none text-nowrap font-mono">
+              <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
                 Subject
               </th>
-              <th className="p-3 text-center border-none text-nowrap font-mono">
+              <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
                 Days Submitted
               </th>
-              <th className="p-3 text-center border-none text-nowrap font-mono">
+              <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
                 Action
               </th>
             </tr>
@@ -81,28 +81,29 @@ const FileStatus = () => {
               filteredFiles.map((file, index) => (
                 <tr
                   key={file.id}
-                  className={`hover:bg-gray-50 text-gray-700 text-center text-nowrap border-t-2 border-b-2`}
+                  className="text-black text-center my-4 gap-5 shadow-gray-100 text-nowrap border-none shadow-[4px_4px_5px_rgba(0,0,0,0.2)] rounded-lg"
                 >
-                  <td className="p-3 border-none">
-                    {file.id}
-                  </td>
-                  <td className="p-3 border-none">{file.file_number}</td>
-                  <td className="p-3 border-none">{file.file_name}</td>
-                  <td className="p-3 border-none">{file.subject}</td>
-                  <td className="p-3 border-none">{file.days_submitted}</td>
-                  <td className="p-3 border-none flex justify-center items-center">
-                      <button
-                        onClick={() => navigate(`/file-details/${file.id}`)}
-                        className="bg-[#3F84E5] hover:bg-[#3571C5] text-white px-3 py-1 rounded-lg transition-all"
-                      >
-                        View More
-                      </button>
+                  <td className="py-4 px-4 border-none bg-gray-50 rounded-l-xl">{file.id}</td>
+                  <td className="py-4 px-4 border-none bg-gray-50">{file.file_number}</td>
+                  <td className="py-4 px-4 border-none bg-gray-50">{file.file_name}</td>
+                  <td className="py-4 px-4 border-none bg-gray-50">{file.subject}</td>
+                  <td className="py-4 px-4 border-none bg-gray-50">{file.days_submitted}</td>
+                  <td className="py-4 px-4 border-none bg-gray-50 flex justify-center items-center rounded-r-xl">
+                    <button
+                      onClick={() => navigate(`/file-details/${file.id}`)}
+                      className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-all"
+                    >
+                      View More
+                    </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr className="border-none border-t-0 border-b-2 border-white">
-                <td colSpan="6" className="p-4 text-center text-gray-600 border-none border-b-2">
+                <td
+                  colSpan="6"
+                  className="p-4 text-center text-gray-600 border-none border-b-2"
+                >
                   No files available.
                 </td>
               </tr>

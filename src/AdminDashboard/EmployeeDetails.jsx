@@ -5,8 +5,15 @@ const EmployeeDetails = () => {
   const token = localStorage.getItem("token");
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const [empData, setEmpData] = useState([]);
+  const [users, setUsers] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [roleModal, setRoleModal] = useState(null);
+  const [editOffice, setEditOffice] = useState(null);
+  const [offices, setOffices] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [selectedOfficeId, setSelectedOfficeId] = useState('');
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState(null); // Added missing state variable
   const [newRole, setNewRole] = useState("");
   const modalRef = useRef(null);
 
@@ -15,20 +22,22 @@ const EmployeeDetails = () => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
         setSelectedEmployee(null);
         setRoleModal(null);
+        setEditOffice(null);
       }
     };
 
-    if (selectedEmployee || roleModal) {
+    if (selectedEmployee || roleModal || editOffice) {
       document.addEventListener("mousedown", handleClickOutside);
     } else {
       document.removeEventListener("mousedown", handleClickOutside);
     }
 
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [selectedEmployee, roleModal]);
+  }, [selectedEmployee, roleModal, editOffice]);
 
   useEffect(() => {
     fetchdata();
+    fetchOffices();
   }, []);
 
   const fetchdata = async () => {
@@ -41,11 +50,15 @@ const EmployeeDetails = () => {
       const data = await response.json();
       const filteredData = data.filter((user) => !user.is_superuser);
       setEmpData(filteredData);
+      setUsers(data);
     } catch (error) {
       console.log(error);
     }
   };
+
   const updateRole = async () => {
+    if (!roleModal || !newRole) return;
+    
     try {
       await fetch(`${baseUrl}/user/${roleModal.id}/update/`, {
         method: "PATCH",
@@ -55,7 +68,6 @@ const EmployeeDetails = () => {
         },
         body: JSON.stringify({ user_type: newRole }),
       });
-      console.log(roleModal);
       setRoleModal(null);
       fetchdata();
     } catch (error) {
@@ -63,21 +75,128 @@ const EmployeeDetails = () => {
     }
   };
 
+  const fetchOffices = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/offices/`);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      setOffices(data);
+    } catch (error) {
+      console.log("Error fetching offices:", error);
+      setOffices([]);
+    }
+  };
+
+  const handleOfficeChange = (e) => {
+    const officeId = e.target.value;
+    setSelectedOfficeId(officeId);
+    setSelectedDepartmentId('');
+    
+    if (officeId) {
+      // Find the selected office from the offices array
+      const selectedOffice = offices.find(office => office.id.toString() === officeId);
+      if (selectedOffice && selectedOffice.departments) {
+        setDepartments(selectedOffice.departments);
+      } else {
+        setDepartments([]);
+      }
+    } else {
+      setDepartments([]);
+    }
+  };
+
+  const handleEditOfficeClick = (user) => {
+    setEditOffice(true);
+    setSelectedUserId(user.id); // Now using the properly defined state
+  };
+
+  const handleDepartmentChange = (e) => {
+    setSelectedDepartmentId(e.target.value);
+  };
+
+  const openEditOfficeModal = (employee) => {
+    setEditOffice(employee);
+    setSelectedUserId(employee.id); // Set the user ID when opening the modal
+    
+    // Set initial office and department values if employee has them
+    if (employee.office && employee.office.id) {
+      setSelectedOfficeId(employee.office.id.toString());
+      
+      // Find the office in the offices array to get its departments
+      const selectedOffice = offices.find(office => office.id === employee.office.id);
+      if (selectedOffice && selectedOffice.departments) {
+        setDepartments(selectedOffice.departments);
+        
+        // Set department if employee has one
+        if (employee.department && employee.department.id) {
+          setSelectedDepartmentId(employee.department.id.toString());
+        } else {
+          setSelectedDepartmentId('');
+        }
+      } else {
+        setDepartments([]);
+        setSelectedDepartmentId('');
+      }
+    } else {
+      setSelectedOfficeId('');
+      setDepartments([]);
+      setSelectedDepartmentId('');
+    }
+  };
+
+  const updateEmployeeOfficeAndDepartment = async () => {
+    if (!selectedUserId) {
+      console.error("No user selected");
+      return;
+    }
+  
+    const payload = {};
+    if (selectedOfficeId) payload.office = selectedOfficeId;
+    if (selectedDepartmentId) payload.department = selectedDepartmentId;
+  
+    if (Object.keys(payload).length === 0) {
+      console.log("No changes to update");
+      setEditOffice(null);
+      return;
+    }
+  
+    try {
+      const response = await fetch(`${baseUrl}/user/${selectedUserId}/update/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `token ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) throw new Error("Failed to update user");
+  
+      console.log(`User ${selectedUserId} updated successfully`);
+      setEditOffice(null);
+      fetchdata(); // Refresh data after update
+    } catch (error) {
+      console.error("Error updating user:", error);
+    }
+  };
+
   return (
     <div className="flex w-full flex-col p-6">
-      <h1 className="text-2xl font-bold text-blue-600 mb-6">
+      <h1 className="text-2xl font-bold text-[#E68332] mb-6">
         Employee Details
       </h1>
 
       <div className="overflow-x-auto">
-        <table className="w-full border-none border-gray-300 text-gray-800">
+        <table className="w-full border-none border-gray-300 text-gray-800 border-separate border-spacing-y-4">
           <thead>
-            <tr className="bg-[#3F84E5] py-2 text-white border-b-2 border-gray-300 text-nowrap">
-              <th className="px-4 border-none py-2 text-center">Employee ID</th>
-              <th className="px-4 border-none py-2 text-center">First Name</th>
-              <th className="px-4 border-none py-2 text-center">Last Name</th>
-              <th className="px-4 border-none py-2 text-center">Position</th>
-              <th className="px-4 border-none py-2 text-center">Actions</th>
+            <tr className="py-2 text-lg font-normal text-gray-800 text-nowrap">
+              <th className="px-4 border-none font-normal py-2 text-center">Employee ID</th>
+              <th className="px-4 border-none font-normal py-2 text-center">First Name</th>
+              <th className="px-4 border-none font-normal py-2 text-center">Last Name</th>
+              <th className="px-4 border-none font-normal py-2 text-center">Position</th>
+              <th className="px-4 border-none font-normal py-2 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -85,32 +204,38 @@ const EmployeeDetails = () => {
               empData.map((data, index) => (
                 <tr
                   key={data.employee_id || index}
-                  className="hover:bg-gray-50 transition text-nowrap border-gray-300 border-b"
+                  className="text-black text-center my-4 gap-5 shadow-gray-100 text-nowrap border-none shadow-[4px_4px_5px_rgba(0,0,0,0.2)] rounded-lg"
                 >
-                  <td className="border-none px-4 py-2 text-center">
+                  <td className="border-none p-5 text-center">
                     {data.employee_id}
                   </td>
-                  <td className="border-none px-4 py-2 text-center">
+                  <td className="border-none p-5 text-center">
                     {data.first_name}
                   </td>
-                  <td className="border-none px-4 py-2 text-center">
+                  <td className="border-none p-5 text-center">
                     {data.last_name}
                   </td>
-                  <td className="border-none px-4 py-2 text-center">
+                  <td className="border-none p-5 text-center">
                     {data.position}
                   </td>
-                  <td className="border-none px-4 py-2 flex gap-2 justify-center">
+                  <td className="border-none p-5 flex gap-2 justify-center">
                     <button
-                      className="text-white px-2 py-1 rounded-lg bg-green-600 hover:bg-green-900"
+                      className="text-[#E68332] border-[#E68332] border-2 px-2 py-1 rounded-lg hover:text-white hover:bg-[#E68332]"
                       onClick={() => setSelectedEmployee(data)}
                     >
                       See More
                     </button>
                     <button
-                      className="text-white px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-900"
+                      className="text-black px-2 py-1 rounded-lg bg-[#B3F8CC] hover:bg-[#84be99]"
                       onClick={() => setRoleModal(data)}
                     >
-                      Assign Role
+                      Edit Role
+                    </button>
+                    <button
+                      className="text-black px-2 py-1 rounded-lg bg-[#F8B3B3] hover:bg-[#c98e8e]"
+                      onClick={() => openEditOfficeModal(data)}
+                    >
+                      Edit Office
                     </button>
                   </td>
                 </tr>
@@ -132,7 +257,7 @@ const EmployeeDetails = () => {
             ref={modalRef}
             className="bg-white p-6 rounded-lg shadow-lg w-2/3 max-h-[80vh] overflow-y-auto"
           >
-            <h2 className="text-xl font-semibold text-blue-600 mb-4">
+            <h2 className="text-xl font-semibold text-[#E68332] mb-4">
               Employee Details
             </h2>
             <div className="grid grid-cols-2 gap-4 text-gray-700">
@@ -166,11 +291,11 @@ const EmployeeDetails = () => {
               </p>
               <p>
                 <strong>Permanent Address:</strong>{" "}
-                {`${selectedEmployee.perm_municipality}, ${selectedEmployee.perm_district}, ${selectedEmployee.perm_state}`}
+                {`${selectedEmployee.perm_municipality || ''}, ${selectedEmployee.perm_district || ''}, ${selectedEmployee.perm_state || ''}`}
               </p>
               <p>
                 <strong>Temporary Address:</strong>{" "}
-                {`${selectedEmployee.temp_municipality}, ${selectedEmployee.temp_district}, ${selectedEmployee.temp_state}`}
+                {`${selectedEmployee.temp_municipality || ''}, ${selectedEmployee.temp_district || ''}, ${selectedEmployee.temp_state || ''}`}
               </p>
               <p>
                 <strong>Citizenship ID:</strong>{" "}
@@ -218,7 +343,9 @@ const EmployeeDetails = () => {
               </p>
               <p>
                 <strong>Education:</strong>{" "}
-                {`${selectedEmployee.education.education_level} from ${selectedEmployee.education.institution} (${selectedEmployee.education.board}, ${selectedEmployee.education.year}), ${selectedEmployee.education.percentage}%`}
+                {selectedEmployee.education
+                  ? `${selectedEmployee.education.education_level || "N/A"} from ${selectedEmployee.education.institution || "N/A"} (${selectedEmployee.education.board || "N/A"}, ${selectedEmployee.education.year || "N/A"}), ${selectedEmployee.education.percentage || "N/A"}%`
+                  : "N/A"}
               </p>
               <p>
                 <strong>Awards:</strong>{" "}
@@ -243,6 +370,10 @@ const EmployeeDetails = () => {
                 {selectedEmployee.office?.office_name || "N/A"}
               </p>
               <p>
+                <strong>Department:</strong>{" "}
+                {selectedEmployee.department?.name || "N/A"}
+              </p>
+              <p>
                 <strong>Active:</strong>{" "}
                 {selectedEmployee.is_active ? "Yes" : "No"}
               </p>
@@ -261,7 +392,7 @@ const EmployeeDetails = () => {
 
             <div className="mt-6 flex justify-end">
               <button
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="p-2 bg-[#E68332] text-white rounded-lg hover:bg-[#c36f2a]"
                 onClick={() => setSelectedEmployee(null)}
               >
                 Close
@@ -273,8 +404,11 @@ const EmployeeDetails = () => {
 
       {roleModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <h2 className="text-xl font-semibold text-blue-600 mb-4">
+          <div 
+            ref={modalRef}
+            className="bg-white p-6 w-[90%] rounded-lg shadow-lg md:w-1/3"
+          >
+            <h2 className="text-xl font-semibold text-[#E68332] mb-4">
               Assign Role
             </h2>
             <select
@@ -282,6 +416,7 @@ const EmployeeDetails = () => {
               value={newRole}
               onChange={(e) => setNewRole(e.target.value)}
             >
+              <option value="">Select a role</option>
               <option value="1">Faat</option>
               <option value="2">Branch Head</option>
               <option value="3">Branch Officer</option>
@@ -296,8 +431,75 @@ const EmployeeDetails = () => {
                 Cancel
               </button>
               <button
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                className="px-4 py-2 bg-[#E68332] hover:bg-[#c36f2a] text-white rounded-lg"
                 onClick={updateRole}
+                disabled={!newRole}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {editOffice && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div 
+            ref={modalRef}
+            className="bg-white w-[90%] p-6 rounded-lg shadow-lg md:w-1/3"
+          >
+            <h2 className="text-xl font-semibold text-[#E68332] mb-4">
+              Edit Office and Department
+            </h2>
+            <div className="space-y-4">
+              <label className="block">
+                <span className="text-gray-700">Office:</span>
+                <select
+                  value={selectedOfficeId}
+                  onChange={handleOfficeChange} // Fixed to use the function that updates departments
+                  className="mt-1 block w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                >
+                  <option value="">Select an Office</option>
+                  {offices.map((office) => (
+                    <option key={office.id} value={office.id}>
+                      {office.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="text-gray-700">Department:</span>
+                <select
+                  value={selectedDepartmentId}
+                  onChange={handleDepartmentChange}
+                  className="mt-1 block w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  disabled={!selectedOfficeId || departments.length === 0}
+                >
+                  <option value="">Select a Department</option>
+                  {departments.length > 0 ? (
+                    departments.map((department) => (
+                      <option key={department.id} value={department.id}>
+                        {department.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>No departments available</option>
+                  )}
+                </select>
+              </label>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="px-4 py-2 bg-gray-400 text-white rounded-lg"
+                onClick={() => setEditOffice(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-[#E68332] hover:bg-[#c36f2a] text-white rounded-lg"
+                onClick={updateEmployeeOfficeAndDepartment}
+                disabled={!selectedOfficeId && !selectedDepartmentId}
               >
                 Save
               </button>

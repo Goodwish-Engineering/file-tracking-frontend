@@ -6,40 +6,26 @@ import { faBars, faBell, faClose } from "@fortawesome/free-solid-svg-icons";
 import UserDetails from "./UserDetails";
 import logo from "/logo192.png";
 import NonTransferFile from "../Components/NonTranferFile";
-// import Notification from "../Components/Notification";
 import FileRequest from "../Components/FileRequest";
 import TransferedFile from "../Components/TransferedFiles";
 import EmployeeHome from "./EmployeeHome";
 import Notification from "../Components/Notification";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { FaFile } from "react-icons/fa";
+import { AiFillAppstore } from "react-icons/ai";
+import { IoIosNotifications } from "react-icons/io";
+import { FiShieldOff } from "react-icons/fi";
+import { MdOutlineTurnRight } from "react-icons/md";
 
 const EmployeHeader = () => {
   const [tab, setTab] = useState("notification");
   const [menue, setMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const [readNotifications, setReadNotifications] = useState([]);
   const level = localStorage.getItem("level");
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
-
-  // Calculate unread notifications count
-  const unreadCount = notifications.filter(
-    notification => !readNotifications.includes(notification.id)
-  ).length;
-
-  // Fetch notifications when component mounts
-  useEffect(() => {
-    fetchNotifications();
-    
-    // Load read notifications from localStorage
-    const savedReadNotifications = localStorage.getItem("readNotifications");
-    if (savedReadNotifications) {
-      setReadNotifications(JSON.parse(savedReadNotifications));
-    }
-  }, []);
 
   const fetchNotifications = async () => {
     try {
@@ -56,355 +42,208 @@ const EmployeHeader = () => {
     }
   };
 
-  const markAsRead = (notificationId) => {
-    // Add to read notifications if not already read
-    if (!readNotifications.includes(notificationId)) {
-      const updatedReadNotifications = [...readNotifications, notificationId];
-      setReadNotifications(updatedReadNotifications);
-      
-      // Save to localStorage for persistence
-      localStorage.setItem("readNotifications", JSON.stringify(updatedReadNotifications));
-      
-      // Optionally notify backend that notification was read
-      updateNotificationOnServer(notificationId);
-    }
-  };
-  
-  const updateNotificationOnServer = async (notificationId) => {
-    try {
-      // You can implement this to update the read status on your backend
-      await fetch(`${baseUrl}/notification/${notificationId}/read/`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `token ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-    } catch (error) {
-      console.error("Error updating notification status:", error);
-    }
-  };
-
-  const handleNotificationClick = (notification) => {
-    // Mark the notification as read
-    markAsRead(notification.id);
-    
-    // Navigate to the file details page if there's a related file
-    if (notification.related_file_id) {
-      navigate(`/file-details/${notification.related_file_id}/`);
-    }
-    
-    setShowNotifications(false);
-  };
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
   const handleTabChange = (newTab) => {
     setTab(newTab);
-    setMenu(false); // Close the menu when a tab is selected
+    setMenu(false);
+  };
+
+  // Reusable NavItem component for both mobile and desktop
+  const NavItem = ({ onClick, isActive, icon, label }) => {
+    return (
+      <div
+        onClick={onClick}
+        className={`cursor-pointer transition-all duration-200 ${
+          isActive
+            ? "bg-[#E68332] text-white"
+            : "text-black hover:bg-[#E68332] hover:text-white"
+        } font-normal text-lg px-3 my-3 py-2 rounded-md flex items-center gap-2`}
+      >
+        {icon}
+        <span>{label}</span>
+      </div>
+    );
   };
 
   return (
-    <div className="flex flex-col w-full relative">
-      {/* Large Screen Top Bar - Full Width */}
-      <div className="w-full sticky top-0 z-10 hidden md:flex bg-[#3F84E5] p-2 justify-between items-center">
-        <div className="flex items-center">
-          <img
-            // onClick={() => setTab("employeehome")}
-            src={logo}
-            className="w-16 h-16 object-cover rounded-full cursor-pointer"
-            alt="Logo"
-          />
-        </div>
-        <div className="flex gap-5">
-          {level === "1" && (
-            <h3
-              onClick={() => setTab("uploadTippani")}
-              className={`cursor-pointer ${
-                tab === "uploadTippani" ? "bg-[#3571C5]" : ""
-              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-1 rounded-md`}
-            >
-              Upload File
-            </h3>
-          )}
-          <h3
-            onClick={() => setTab("veiwStatus")}
-            className={`cursor-pointer ${
-              tab === "veiwStatus" ? "bg-[#3571C5]" : ""
-            } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-1 rounded-md`}
-          >
-            File Status
-          </h3>
-          <h3
-            onClick={() => setTab("notification")}
-            className={`cursor-pointer ${
-              tab === "notification" ? "bg-[#3571C5]" : ""
-            } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-1 rounded-md`}
-          >
-            Notification
-          </h3>
-          {level === "1" ? (
-            <>
-              <h3
-              onClick={() => setTab("nontransfer")}
-              className={`cursor-pointer ${
-                tab === "nontransfer" ? "bg-[#3571C5]" : ""
-              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-1 rounded-md`}
-            >
-              Non-transfer file
-            </h3>
-            <h3
-              onClick={() => setTab("transfered")}
-              className={`cursor-pointer ${
-                tab === "transfered" ? "bg-[#3571C5]" : ""
-              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-1 rounded-md`}
-            >
-              Transfered file
-            </h3>
-            </>
-          ) : (
-            <h3
-              onClick={() => setTab("filerequest")}
-              className={`cursor-pointer ${
-                tab === "filerequest" ? "bg-[#3571C5]" : ""
-              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-1 rounded-md`}
-            >
-              File Request
-            </h3>
-          )}
-          <div>
+    <div className="flex flex-col md:flex-row w-full relative">
+      {/* Large Screen Sidebar - hidden on mobile */}
+      <div className="h-screen rounded-lg left-0 sticky w-[17%] top-0 z-10 hidden md:flex flex-col justify-between bg-[#e7e6e4] p-2 shadow-md">
+        <div className="h-[94%] md:flex flex-col justify-between">
+          <div className="mt-6 text-left ml-2 font-normal text-gray-900">
+          <div className="flex justify-center items-center pt-2">
+            <img
+              src={logo}
+              className="w-16 h-16 object-cover rounded-full cursor-pointer"
+              alt="Logo"
+            />
+          </div>
+            {level === "1" && (
+              <NavItem
+                className="text-md font-normal"
+                onClick={() => setTab("uploadTippani")}
+                isActive={tab === "uploadTippani"}
+                icon={<FaFile className="text-lg font-normal" />}
+                label="फाइल अपलोड"
+              />
+            )}
+            <NavItem
+              onClick={() => setTab("veiwStatus")}
+              isActive={tab === "veiwStatus"}
+              icon={<AiFillAppstore className="text-lg" />}
+              label="फाइलको स्थिति"
+            />
+            <NavItem
+              onClick={() => setTab("notification")}
+              isActive={tab === "notification"}
+              icon={<IoIosNotifications className="text-2xl" />}
+              label="सूचना"
+            />
+            {level === "1" ? (
+              <>
+                
+              </>
+            ) : (
+              <>
+                <NavItem
+                  onClick={() => setTab("nontransfer")}
+                  isActive={tab === "nontransfer"}
+                  icon={<FiShieldOff className="text-lg" />}
+                  label="स्थानान्तरण नगरिएको फाइल"
+                />
+                <NavItem
+                  onClick={() => setTab("transfered")}
+                  isActive={tab === "transfered"}
+                  icon={<MdOutlineTurnRight className="text-2xl" />}
+                  label="स्थानान्तरण गरिएको फाइल"
+                />
+                <NavItem
+                onClick={() => setTab("filerequest")}
+                isActive={tab === "filerequest"}
+                icon={<FaFile className="text-lg" />}
+                label="फाइल अनुरोध"
+              />
+              </>
+            )}
+          </div>
+          <div className="flex items-end justify-center mt-7">
             <UserDetails />
           </div>
         </div>
       </div>
 
-      {/* Small Screen Header */}
-      <div className="md:hidden sticky top-0 z-10 flex bg-[#3F84E5] p-4 justify-between items-center">
-        <div className="flex items-center">
-          <img
-            // onClick={() => handleTabChange("employeehome")}
-            src={logo}
-            className="w-10 h-10 object-cover rounded-full cursor-pointer"
-            alt="Logo"
-          />
-          {/* <h2 className="ml-2 text-white font-bold text-lg">File System</h2> */}
-        </div>
-        <FontAwesomeIcon
-          className="text-2xl text-white cursor-pointer"
-          icon={menue ? faClose : faBars}
-          onClick={() => setMenu(!menue)}
-        />
-      </div>
-
-      {/* Small Screen Sliding Navigation Menu */}
-      <div 
-        className={`fixed top-0 right-0 h-screen bg-[#3F84E5] z-50 shadow-lg transition-all duration-300 ease-in-out ${
-          menue ? "w-64" : "w-0 overflow-hidden"
-        }`}
-      >
-        <div className="flex justify-end p-4">
+      {/* Mobile Header - only visible on small screens */}
+      <div className="sticky top-0 z-20 md:hidden w-full bg-[#e7e6e4] shadow-md">
+        <div className="flex justify-between items-center p-4">
+          <div className="flex items-center">
+            <img
+              src={logo}
+              className="w-10 h-10 object-cover rounded-full"
+              alt="Logo"
+            />
+          </div>
           <FontAwesomeIcon
-            className="text-2xl text-white cursor-pointer"
-            icon={faClose}
-            onClick={() => setMenu(false)}
+            icon={faBars}
+            className="text-2xl text-[#E68332] cursor-pointer"
+            onClick={() => setMenu(true)}
           />
-        </div>
-        
-        <div className="flex flex-col items-center mt-4">
-          <img
-            src={logo}
-            onClick={() => setTab("employeehome")}
-            className="w-20 h-20 object-cover rounded-full"
-            alt="Logo"
-          />
-          {/* <h2 className="text-white font-bold text-xl mt-2">File System</h2> */}
-        </div>
-          <div className="mt-4 flex items-center justify-center">
-            <UserDetails />
-          </div>
-        
-        <div className="flex flex-col mt-8 px-4 gap-4">
-          
-          {level === "1" && (
-            <h3
-              onClick={() => handleTabChange("uploadTippani")}
-              className={`cursor-pointer ${
-                tab === "uploadTippani" ? "bg-[#3571C5]" : ""
-              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
-            >
-              Upload File
-            </h3>
-          )}
-          
-          <h3
-            onClick={() => handleTabChange("veiwStatus")}
-            className={`cursor-pointer ${
-              tab === "veiwStatus" ? "bg-[#3571C5]" : ""
-            } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
-          >
-            File Status
-          </h3>
-          
-          {level === "1" ? (
-            <>
-              <h3
-              onClick={() => handleTabChange("nontransfer")}
-              className={`cursor-pointer ${
-                tab === "nontransfer" ? "bg-[#3571C5]" : ""
-              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
-            >
-              Non-transfer file
-            </h3>
-            <h3
-              onClick={() => handleTabChange("transfered")}
-              className={`cursor-pointer ${
-                tab === "transfered" ? "bg-[#3571C5]" : ""
-              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
-            >
-              Transfered file
-            </h3>
-            </>           
-          ) : (
-            <h3
-              onClick={() => handleTabChange("filerequest")}
-              className={`cursor-pointer ${
-                tab === "filerequest" ? "bg-[#3571C5]" : ""
-              } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
-            >
-              File Request
-            </h3>
-          )}
-          
-          <h3
-            onClick={() => handleTabChange("notification")}
-            className={`cursor-pointer ${
-              tab === "notification" ? "bg-[#3571C5]" : ""
-            } hover:bg-[#3571C5] text-white font-semibold text-lg px-3 py-2 rounded-md text-center`}
-          >
-            Notifications
-          </h3>
         </div>
       </div>
 
-      {/* Semi-transparent overlay when menu is open */}
+      {/* Mobile Slide-in Menu - appears only when menu state is true */}
       {menue && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
           onClick={() => setMenu(false)}
         ></div>
       )}
 
-      {/* Large Screen Notification Icon - Bottom Left */}
-      {/* <div className="hidden md:flex fixed bottom-5 left-5 z-30"> */}
-        {/* <div className="relative">
-          {unreadCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
-              {unreadCount}
-            </span>
-          )}
-          <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="p-3 bg-[#3F84E5] rounded-full shadow-lg hover:bg-orange-500 transition"
-          >
-            <FontAwesomeIcon icon={faBell} className="text-white text-2xl" />
-          </button>
-        </div> */}
+      <div
+        className={`fixed top-0 right-0 h-screen bg-[#e7e6e4] z-40 transition-all duration-300 ease-in-out shadow-xl md:hidden ${
+          menue ? "w-64" : "w-0 opacity-0"
+        }`}
+      >
+        <div className="p-4 flex justify-end">
+          <FontAwesomeIcon
+            icon={faClose}
+            className="text-2xl text-[#E68332] cursor-pointer"
+            onClick={() => setMenu(false)}
+          />
+        </div>
 
-        {/* Large Screen Notification Popup */}
-        {/* {showNotifications && (
-          <div className="absolute bottom-16 left-0 w-80 bg-white shadow-lg rounded-md p-4 z-50 border border-gray-200">
-            <h3 className="text-lg font-semibold text-orange-700">Notifications</h3>
-            {notifications.length > 0 ? (
-              <ul className="mt-2 max-h-64 overflow-y-auto">
-                {notifications.map((notification) => (
-                  <li
-                    key={notification.id}
-                    className={`p-3 ${
-                      readNotifications.includes(notification.id) 
-                        ? "bg-gray-100 border-l-4 border-gray-400" 
-                        : "bg-orange-100 border-l-4 border-orange-500"
-                    } shadow-md rounded-md cursor-pointer mb-2`}
-                    onClick={() => handleNotificationClick(notification)}
-                  >
-                    <p className="text-sm font-medium text-orange-900">
-                      <span className="font-bold">{notification.sender_username}</span>: {notification.message}
-                    </p>
-                    <p className="text-xs text-orange-700">
-                      {new Date(notification.created_at).toLocaleString()}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-orange-700 mt-2">No new notifications</p>
-            )}
+        <div className="flex flex-col items-center">
+          <img
+            src={logo}
+            className="w-16 h-16 object-cover rounded-full"
+            alt="Logo"
+          />
+          <div className="mt-4">
+            <UserDetails />
           </div>
-        )}
-      </div> */}
+        </div>
 
-      {/* Small Screen Notification Icon - Bottom Right */}
-      {/* <div className="md:hidden fixed bottom-5 right-5 z-30"> */}
-        {/* <div className="relative">
-          {unreadCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
-              {unreadCount}
-            </span>
+        <div className="flex flex-col mt-6 px-4 text-gray-900">
+          {level === "1" && (
+            <NavItem
+              onClick={() => handleTabChange("uploadTippani")}
+              isActive={tab === "uploadTippani"}
+              icon={<FaFile className="text-lg" />}
+              label="फाइल अपलोड"
+            />
           )}
-          <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="p-3 bg-[#3F84E5] rounded-full shadow-lg hover:bg-orange-500 transition"
-          >
-            <FontAwesomeIcon icon={faBell} className="text-white text-xl" />
-          </button>
-        </div> */}
-
-        {/* Small Screen Notification Popup */}
-        {/* {showNotifications && (
-          <div className="absolute bottom-16 right-0 w-72 bg-white shadow-lg rounded-md p-4 z-50 border border-gray-200">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-semibold text-orange-700">Notifications</h3>
-              <FontAwesomeIcon
-                className="text-orange-700 cursor-pointer"
-                icon={faClose}
-                onClick={() => setShowNotifications(false)}
+          <NavItem
+            onClick={() => handleTabChange("veiwStatus")}
+            isActive={tab === "veiwStatus"}
+            icon={<AiFillAppstore className="text-lg" />}
+            label="फाइलको स्थिति"
+          />
+          <NavItem
+            onClick={() => handleTabChange("notification")}
+            isActive={tab === "notification"}
+            icon={<IoIosNotifications className="text-2xl" />}
+            label="सूचना"
+          />
+          {level === "1" ? (
+            <>
+              
+            </>
+          ) : (
+            <>
+              <NavItem
+                onClick={() => handleTabChange("nontransfer")}
+                isActive={tab === "nontransfer"}
+                icon={<FiShieldOff className="text-lg" />}
+                label="स्थानान्तरण नगरिएको फाइल"
               />
-            </div>
-            {notifications.length > 0 ? (
-              <ul className="mt-2 max-h-64 overflow-y-auto">
-                {notifications.map((notification) => (
-                  <li
-                    key={notification.id}
-                    className={`p-3 ${
-                      readNotifications.includes(notification.id) 
-                        ? "bg-gray-100 border-l-4 border-gray-400" 
-                        : "bg-orange-100 border-l-4 border-orange-500"
-                    } shadow-md rounded-md cursor-pointer mb-2`}
-                    onClick={() => handleNotificationClick(notification)}
-                  >
-                    <p className="text-sm font-medium text-orange-900">
-                      <span className="font-bold">{notification.sender_username}</span>: {notification.message}
-                    </p>
-                    <p className="text-xs text-orange-700">
-                      {new Date(notification.created_at).toLocaleString()}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-orange-700 mt-2">No new notifications</p>
-            )}
-          </div>
-        )}
-      </div> */}
+              <NavItem
+                onClick={() => handleTabChange("transfered")}
+                isActive={tab === "transfered"}
+                icon={<MdOutlineTurnRight className="text-2xl" />}
+                label="स्थानान्तरण गरिएको फाइल"
+              />
+              <NavItem
+              onClick={() => handleTabChange("filerequest")}
+              isActive={tab === "filerequest"}
+              icon={<FaFile className="text-lg" />}
+              label="फाइल अनुरोध"
+            />
+            </>
+          )}
+        </div>
+      </div>
 
-      {/* Content Area */}
-      <div className="w-full flex flex-col">
+      {/* Content Area - takes full width on mobile, partial width on desktop */}
+      <div className="w-full md:w-[83%] flex flex-col p-4">
         {tab === "uploadTippani" && <UploadTipanni />}
         {tab === "veiwStatus" && <FileStatus />}
         {tab === "nontransfer" && <NonTransferFile />}
         {tab === "filerequest" && <FileRequest />}
-        {/* {tab === "notification" && <Notification />} */}
         {tab === "employeehome" && <EmployeeHome />}
-        {tab === "notification" && <Notification/>}
-        {tab === "transfered" && <TransferedFile/>}
+        {tab === "notification" && <Notification />}
+        {tab === "transfered" && <TransferedFile />}
       </div>
     </div>
   );

@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { FaUserCircle } from "react-icons/fa";
-import { useSelector, useDispatch } from 'react-redux';
-import { addLogin, removeLogin, addUser, removeUser } from "../app/loginSlice"; // Assuming your slice has these actions
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from "react-redux";
+import { removeLogin, removeUser } from "../app/loginSlice"; 
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const UserDetails = () => {
   const [isLoggedin, setIsLoggedin] = useState(false);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const dispatch = useDispatch();
@@ -15,10 +15,8 @@ const UserDetails = () => {
 
   const fetchUsername = async () => {
     const token = localStorage.getItem("token");
-    // console.log(token);
-    const userid = localStorage.getItem('userId');
-    // console.log(userid);
-    
+    const userid = localStorage.getItem("userId");
+
     if (!token) {
       setIsLoggedin(false);
       setUsername("");
@@ -41,7 +39,6 @@ const UserDetails = () => {
     }
   };
 
-  // Logout function that clears localStorage and updates Redux state
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -54,45 +51,41 @@ const UserDetails = () => {
     setIsLoggedin(false);
     setUsername("");
     setMenuOpen(false);
-    navigate("/login"); // Redirect to login page after logout
+    navigate("/login");
   };
 
-  // Fetch user details when the component mounts
   useEffect(() => {
     fetchUsername();
   }, [baseUrl]);
 
   return (
-    <div>
-      <div className="relative">
-        {isLoggedin ? (
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="relative mt-2 md:mt-0"
+    <div className="relative">
+      {isLoggedin && (
+        <div className="flex flex-col items-center">
+          {/* User Icon */}
+          <button onClick={() => setMenuOpen(!menuOpen)} className="relative">
+            <FaUserCircle size={30} className="text-[#E68332]" />
+          </button>
+
+          {/* Dropdown Menu (below on small screens, above on large screens) */}
+          {menuOpen && (
+            <div
+              className="absolute w-40 bg-white border border-gray-300 rounded-lg shadow-md 
+                top-full mt-2 md:bottom-full md:mb-2 md:top-auto"
             >
-              <FaUserCircle size={30} className="text-white" />
-            </button>
-            {menuOpen && (
-              <div className="absolute md:right-1 md:ml-5 z-40 w-40 mt-28 bg-white border border-gray-300 rounded-lg shadow-md">
-                <div className="p-2 text-gray-700 text-center">
-                  <h2 className="font-poppins text-sm text-gray-800">
-                    {username}
-                  </h2>
-                  <button
-                    onClick={handleLogout}
-                    className="font-poppins text-center text-sm text-red-500 hover:text-red-700 w-full mt-2"
-                  >
-                    Logout
-                  </button>
-                </div>
+              <div className="p-2 text-gray-700 text-center">
+                <h2 className="font-poppins text-sm text-gray-800">{username}</h2>
+                <button
+                  onClick={handleLogout}
+                  className="font-poppins text-center text-sm text-red-500 hover:text-red-700 w-full mt-2"
+                >
+                  Logout
+                </button>
               </div>
-            )}
-          </div>
-        ) : (
-          ""
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

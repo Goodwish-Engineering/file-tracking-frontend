@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const NonTransferFile = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
@@ -9,8 +10,10 @@ const NonTransferFile = () => {
   const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fileToTransfer, setFileToTransfer] = useState(null);
+  const [departments, setDepartments] = useState([]);
   const token = localStorage.getItem("token");
-  const Empid = localStorage.getItem("token");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -34,23 +37,6 @@ const NonTransferFile = () => {
     }
   };
 
-  // const fetchData = async () => {
-  //   try {
-  //     const response = await fetch(`${baseUrl}/file/`, {
-  //       headers: {
-  //         Authorization: `token ${token}`,
-  //       },
-  //     });
-  //     const data = await response.json();
-  //     const filteredData = data.filter(
-  //       (file) => !(file.is_transferred || file.is_approved)
-  //     );
-  //     setNonTransferredFiles(filteredData);
-  //   } catch (error) {
-  //     console.error("Error fetching files:", error);
-  //   }
-  // };
-
   const fetchData = async () => {
     try {
       const response = await fetch(`${baseUrl}/file/`, {
@@ -59,10 +45,12 @@ const NonTransferFile = () => {
         },
       });
       const data = await response.json();
-  
+      const departId = localStorage.getItem("depart_id");
+      // console.log(departId);
       const filteredData = data.filter((file) => {
         const isTransferred = file.approvals?.some((approval) => approval.is_transferred);
-        return !isTransferred;
+        const belongsToFilteredDepartment = file.related_department?.id == departId;
+        return !isTransferred && !belongsToFilteredDepartment;
       });
   
       setNonTransferredFiles(filteredData);
@@ -71,8 +59,40 @@ const NonTransferFile = () => {
     }
   };
   
+  const fetchDepartments = async () => {
+    const officeId = localStorage.getItem("officeid");
+    console.log(officeId);
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`${baseUrl}/offices/${officeId}/`, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
+      
+      if (response.data && response.data.departments) {
+        setDepartments(response.data.departments); 
+      }
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOpenTransferModal = (fileId) => {
+    setFileToTransfer(fileId);
+    setIsModalOpen(true);
+    fetchDepartments();
+  };
 
   const handleTransfer = async () => {
+    if (!selectedDepartment) {
+      alert("Please select a department");
+      return;
+    }
+    
+    setIsLoading(true);
     try {
       const response = await fetch(
         `${baseUrl}/files/${fileToTransfer}/transfer/`,
@@ -83,21 +103,25 @@ const NonTransferFile = () => {
             Authorization: `token ${token}`,
           },
           body: JSON.stringify({
-            transferred_to: selectedAdmin,
+            related_department: selectedDepartment,
           }),
         }
       );
 
       if (response.ok) {
-        // File transfer successful, close modal and refetch data
+        alert("File transferred successfully");
         setIsModalOpen(false);
         fetchData();
       } else {
-        alert("File already transfered");
+        const errorData = await response.json();
+        alert(errorData.message || "Error transferring file");
         console.error("Error transferring file:", response.statusText);
       }
     } catch (error) {
       console.error("Error transferring file:", error);
+      alert("Failed to transfer file. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -108,70 +132,77 @@ const NonTransferFile = () => {
     if (!confirmDelete) return;
 
     try {
-      await fetch(`${baseUrl}/file/${fileId}/`, {
+      const response = await fetch(`${baseUrl}/file/${fileId}/`, {
         method: "DELETE",
         headers: {
           Authorization: `token ${token}`,
         },
       });
-      setFileStatuses((prevStatuses) =>
-        prevStatuses.filter((file) => file.id !== fileId)
-      );
+      
+      if (response.ok) {
+        // Update the UI by removing the deleted file
+        setNonTransferredFiles(prevFiles => 
+          prevFiles.filter(file => file.id !== fileId)
+        );
+        alert("File deleted successfully");
+      } else {
+        alert("Failed to delete file");
+      }
     } catch (error) {
       console.error("Error deleting file:", error);
+      alert("An error occurred while deleting the file");
     }
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h2 className="text-2xl font-bold text-[#3F84E5] mb-4">
+    <div className="p-6 min-h-screen">
+      <h2 className="text-2xl font-bold text-[#E68332] mb-4">
         Non-Transferred Files
       </h2>
       <div className="overflow-x-auto">
-        <table className="w-full shadow-md bg-white rounded-lg border-none">
-          <thead className="bg-[#3F84E5] text-white">
-            <tr className="border border-b-2 border-white">
-              <th className="p-3 text-center font-mono text-pretty border-none">ID</th>
-              <th className="p-3 text-center font-mono text-pretty border-none">File Name</th>
-              <th className="p-3 text-center font-mono text-pretty border-none">Subject</th>
-              <th className="p-3 text-center font-mono text-pretty border-none">Presented By</th>
-              <th className="p-3 text-center font-mono text-pretty border-none">Presented Date</th>
-              <th className="p-3 text-center font-mono text-pretty border-none">File</th>
-              <th className="p-3 text-center font-mono text-pretty border-none">Actions</th>
+        <table className="w-full shadow-md rounded-lg border-none border-separate border-spacing-y-4">
+          <thead className="text-gray-800">
+            <tr className="border-none">
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">ID</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">File Name</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">File Number</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Subject</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Presented By</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Presented Date</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">File</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="space-y-4">
             {nonTransferredFiles.length > 0 ? (
-              nonTransferredFiles.map((file,index) => (
-                <tr key={file.id} className={`hover:bg-gray-50 text-gray-700 text-center text-nowrap border-t-2 border-b-2`}>
-                  <td className="p-3 border-none">{file.id}</td>
-                  <td className="p-3 border-none">{file.file_name}</td>
-                  <td className="p-3 border-none">{file.subject}</td>
-                  <td className="p-3 border-none">
+              nonTransferredFiles.map((file) => (
+                <tr key={file.id} className={`text-black text-center my-4 gap-5 shadow-gray-100 text-nowrap border-none shadow-[4px_4px_5px_rgba(0,0,0,0.2)] rounded-lg`}>
+                  <td className="p-4 bg-gray-50 border-none rounded-l-xl">{file.id}</td>
+                  <td className="p-4 bg-gray-50 border-none">{file.file_name}</td>
+                  <td className="p-4 bg-gray-50 border-none">{file.file_number}</td>
+                  <td className="p-4 bg-gray-50 border-none">{file.subject}</td>
+                  <td className="p-4 bg-gray-50 border-none">
                     {file.present_by?.first_name} {file.present_by?.last_name}
                   </td>
-                  <td className="p-3 border-none">{file.present_date}</td>
-                  <td className="p-3 border-none">
+                  <td className="p-4 bg-gray-50 border-none">{file.present_date}</td>
+                  <td className="p-4 bg-gray-50 border-none  rounded-lg ">
                     <button
                       onClick={() => navigate(`/file-details/${file.id}`)}
-                      className="bg-[#3F84E5] hover:bg-[#3571C5] text-white px-3 py-1 rounded-lg transition-all"
+                      className="hover:text-white border-[#E68332] border-2 hover:bg-[#E68332] rounded-lg text-[#E68332] px-3 py-1 transition-all"
                     >
                       View More
                     </button>
                   </td>
-                  <td className="p-3 gap-3 border-none flex items-center justify-center">
+                  <td className="p-4 gap-4 bg-gray-50 border-none rounded-r-xl flex items-center justify-center">
                     <button
-                      onClick={() => {
-                        setFileToTransfer(file.id);
-                        setIsModalOpen(true);
-                      }}
-                      className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg transition-all"
+                      onClick={() => handleOpenTransferModal(file.id)}
+                      className="bg-[#B3F8CC] hover:bg-[#84be99] text-black px-3 py-1 rounded-lg transition-all"
                     >
                       Transfer
                     </button>
                     <button
                       onClick={() => handleDelete(file.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-all"
+                      className="bg-[#F8B3B3] hover:bg-[#be8484] text-black px-3 py-1 rounded-lg transition-all"
                     >
                       Delete
                     </button>
@@ -180,7 +211,7 @@ const NonTransferFile = () => {
               ))
             ) : (
               <tr className="border-none">
-                <td colSpan="7" className="p-4 text-center border-none text-gray-700">
+                <td colSpan="8" className="p-4 text-center border-none text-gray-700">
                   No non-transferred files available.
                 </td>
               </tr>
@@ -194,34 +225,44 @@ const NonTransferFile = () => {
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
             <h3 className="text-xl font-bold mb-4">Transfer File</h3>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Select Admin
+              <label className="block">
+                <span className="text-gray-700">Select Department:</span>
+                <select
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                  value={selectedDepartment}
+                  className="mt-1 block w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  disabled={isLoading}
+                >
+                  <option value="">Select a Department</option>
+                  {departments.length > 0 ? (
+                    departments.map((department) => (
+                      <option key={department.id} value={department.id}>
+                        {department.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>{isLoading ? "Loading departments..." : "No departments available"}</option>
+                  )}
+                </select>
               </label>
-              <select
-                className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                onChange={(e) => setSelectedAdmin(e.target.value)}
-                value={selectedAdmin || ""}
-              >
-                <option value="">Select Admin</option>
-                {admins.map((admin) => (
-                  <option key={admin.id} value={admin.id}>
-                    {admin.first_name} {admin.last_name} ({admin.username})
-                  </option>
-                ))}
-              </select>
             </div>
             <div className="flex justify-end space-x-4">
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setSelectedDepartment("");
+                }}
                 className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-lg"
+                disabled={isLoading}
               >
                 Cancel
               </button>
               <button
                 onClick={handleTransfer}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                className="bg-[#E68332] hover:bg-[#dd7a29] text-white px-4 py-2 rounded-lg"
+                disabled={!selectedDepartment || isLoading}
               >
-                Transfer
+                {isLoading ? "Transferring..." : "Transfer"}
               </button>
             </div>
           </div>

@@ -56,7 +56,7 @@ const PanjikaDocumentsForm = () => {
 
   return (
     <div className="p-6 mb-6 w-[90%] md:w-[80%] mx-auto bg-white rounded-lg shadow-inner shadow-gray-200">
-      <h1 className="text-center text-xl font-bold text-blue-600 mb-6">
+      <h1 className="text-center text-xl font-bold text-[#E68332] mb-6">
         PANJIKA DOCUMENTS
       </h1>
       <form
@@ -144,14 +144,14 @@ const PanjikaDocumentsForm = () => {
         <button
           onClick={handleSubmit}
           type="submit"
-          className="mt-4 bg-blue-500 text-white px-4 rounded-lg py-2 hover:bg-blue-600"
+          className="mt-4 bg-[#E68332] text-white px-4 rounded-lg py-2 hover:bg-[#c36F2a]"
         >
           Submit
         </button>
         {showNewForm && (
           <button
             onClick={() => setShowNewForm(false)}
-            className="mt-4 bg-blue-500 text-white px-4 rounded-lg py-2 hover:bg-green-600"
+            className="mt-4 bg-[#B3F8CC] text-white px-4 rounded-lg py-2 hover:bg-[#89c29e]"
           >
             Submit Another
           </button>
