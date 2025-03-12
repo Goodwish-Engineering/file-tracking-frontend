@@ -167,8 +167,8 @@ const NotificationsTab = () => {
 
   return (
     <>
-      <h2 className="text-lg font-semibold border-b border-gray-200 text-gray-800">
-        <p className="px-6 pt-2 mt-2">Notifications</p>
+      <h2 className="text-lg font-normal border-b border-gray-200 text-gray-800">
+        <p className="px-6 pt-2 mt-2">सूचना</p>
       </h2>
       {sortedNotifications.length > 0 ? (
         <ul className="list-none">
@@ -187,6 +187,7 @@ const NotificationsTab = () => {
                       ? "bg-white"
                       : "bg-[#F8F8F8] font-semibold"
                   }`}
+                // onClick={() => navigate(`/file-details/${file.id}`)}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex justify-between items-center border-gray-300 text-nowrap">

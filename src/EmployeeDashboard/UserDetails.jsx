@@ -7,15 +7,17 @@ import { useNavigate } from "react-router-dom";
 
 const UserDetails = () => {
   const [isLoggedin, setIsLoggedin] = useState(false);
-  const [username, setUsername] = useState("");
+  const [usernames, setUsername] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const username = localStorage.getItem("username");
 
   const fetchUsername = async () => {
     const token = localStorage.getItem("token");
     const userid = localStorage.getItem("userId");
+    // console.log(username);
 
     if (!token) {
       setIsLoggedin(false);

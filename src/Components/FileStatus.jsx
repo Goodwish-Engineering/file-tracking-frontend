@@ -57,22 +57,22 @@ const FileStatus = () => {
           <thead className="text-gray-800">
             <tr className="border border-white border-t-2 border-b-2">
               <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
-                ID
+                आईडी
               </th>
               <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
-                File No
+                फाइल नं
               </th>
               <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
-                File Name
+                फाइलको नाम 
               </th>
               <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
-                Subject
+                बिषय 
               </th>
               <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
-                Days Submitted
+                फाइल आएको समय
               </th>
               <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
-                Action
+                कार्य 
               </th>
             </tr>
           </thead>

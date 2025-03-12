@@ -35,47 +35,6 @@ const TransferedFile = () => {
     }
   };
 
-  // const fetchData = async () => {
-  //   try {
-  //     const response = await fetch(`${baseUrl}/file/`, {
-  //       headers: {
-  //         Authorization: `token ${token}`,
-  //       },
-  //     });
-  //     const data = await response.json();
-  //     const filteredData = data.filter(
-  //       (file) => !(file.is_transferred || file.is_approved)
-  //     );
-  //     setTransferedFiles(filteredData);
-  //   } catch (error) {
-  //     console.error("Error fetching files:", error);
-  //   }
-  // };
-  const getDepartment = async (e) => {
-    e.preventDefault();
-
-    try {
-      const token = localStorage.getItem("token");
-      
-      const response = await axios.get(`${baseUrl}/department/`, {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      });
-
-      if (response.data) {
-        setDepartments(response.data)
-      }
-    } catch (error) {
-      console.error("Error saving department:", error);
-      alert("Failed to add department. Please try again.");
-    }
-  };
-
-  useEffect(() => {
-    getDepartment();
-  }, []);
-
   const fetchData = async () => {
     try {
       const response = await fetch(`${baseUrl}/file/`, {
@@ -84,47 +43,34 @@ const TransferedFile = () => {
         },
       });
       const data = await response.json();
-  
-      const filteredData = data.filter((file) => {
-        const isTransferred = file.approvals?.some((approval) => approval.is_transferred);
-        return isTransferred;
-      });
-  
+      const filteredData = data.filter(
+        (file) => !(file.is_transferred || file.is_approved)
+      );
       setTransferedFiles(filteredData);
     } catch (error) {
       console.error("Error fetching files:", error);
     }
   };
+
+  // const fetchData = async () => {
+  //   try {
+  //     const response = await fetch(`${baseUrl}/file/`, {
+  //       headers: {
+  //         Authorization: `token ${token}`,
+  //       },
+  //     });
+  //     const data = await response.json();
   
-
-  const handleTransfer = async () => {
-    try {
-      const response = await fetch(
-        `${baseUrl}/files/${fileToTransfer}/transfer/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `token ${token}`,
-          },
-          body: JSON.stringify({
-            transferred_to: selectedAdmin,
-          }),
-        }
-      );
-
-      if (response.ok) {
-        // File transfer successful, close modal and refetch data
-        setIsModalOpen(false);
-        fetchData();
-      } else {
-        alert("File already transfered");
-        console.error("Error transferring file:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error transferring file:", error);
-    }
-  };
+  //     const filteredData = data.filter((file) => {
+  //       const isTransferred = file.approvals?.some((approval) => approval.is_transferred);
+  //       return isTransferred;
+  //     });
+  
+  //     setTransferedFiles(filteredData);
+  //   } catch (error) {
+  //     console.error("Error fetching files:", error);
+  //   }
+  // };
 
   const handleDelete = async (fileId) => {
     const confirmDelete = window.confirm(
@@ -149,20 +95,20 @@ const TransferedFile = () => {
 
   return (
     <div className="p-6 min-h-screen">
-      <h2 className="text-2xl font-bold text-[#E68332] mb-4">
-        Transferred Files
+      <h2 className="text-xl font-bold text-[#E68332] mb-4">
+        स्थानान्तरण गरिएको फाइल
       </h2>
       <div className="overflow-x-auto">
         <table className="w-full shadow-md rounded-lg border-none border-separate border-spacing-y-4">
           <thead className="text-gray-800">
             <tr className="border">
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">ID</th>
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">File Name</th>
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Subject</th>
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Presented By</th>
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Presented Date</th>
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">File</th>
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Actions</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">आईडी</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">फाइलको नाम</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">विषय</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">पेश गर्ने</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">पेश गरेको मिति</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">फाइल</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">कार्य</th>
             </tr>
           </thead>
           <tbody>
@@ -185,15 +131,6 @@ const TransferedFile = () => {
                     </button>
                   </td>
                   <td className="p-4 bg-gray-50 gap-3 border-none flex items-center justify-center">
-                    {/* <button
-                      onClick={() => {
-                        setFileToTransfer(file.id);
-                        setIsModalOpen(true);
-                      }}
-                      className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg transition-all"
-                    >
-                      Transfer
-                    </button> */}
                     <button
                       onClick={() => handleDelete(file.id)}
                       className="bg-[#F8B3B3] hover:bg-[#de7373] text-black px-3 py-1 rounded-lg transition-all"

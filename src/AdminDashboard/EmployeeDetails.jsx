@@ -185,18 +185,18 @@ const EmployeeDetails = () => {
   return (
     <div className="flex w-full flex-col p-6">
       <h1 className="text-2xl font-bold text-[#E68332] mb-6">
-        Employee Details
+        कर्मचारी विवरण
       </h1>
 
       <div className="overflow-x-auto">
         <table className="w-full border-none border-gray-300 text-gray-800 border-separate border-spacing-y-4">
           <thead>
             <tr className="py-2 text-lg font-normal text-gray-800 text-nowrap">
-              <th className="px-4 border-none font-normal py-2 text-center">Employee ID</th>
-              <th className="px-4 border-none font-normal py-2 text-center">First Name</th>
-              <th className="px-4 border-none font-normal py-2 text-center">Last Name</th>
-              <th className="px-4 border-none font-normal py-2 text-center">Position</th>
-              <th className="px-4 border-none font-normal py-2 text-center">Actions</th>
+              <th className="px-4 border-none font-normal py-2 text-center">कर्मचारी आईडी</th>
+              <th className="px-4 border-none font-normal py-2 text-center">पहिलो नाम</th>
+              <th className="px-4 border-none font-normal py-2 text-center">अन्तिम नाम</th>
+              <th className="px-4 border-none font-normal py-2 text-center">पद</th>
+              <th className="px-4 border-none font-normal py-2 text-center">कार्य</th>
             </tr>
           </thead>
           <tbody>

@@ -72,6 +72,7 @@ const Login = () => {
       localStorage.setItem("empId", data.user.id);
       localStorage.setItem("officeid", data.user.office);
       localStorage.setItem("depart_id",data.user.department);
+      localStorage.setItem("username", data.user.username);
       
       // Set expiry time for token (24 hours)
       const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000;

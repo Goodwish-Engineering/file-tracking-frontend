@@ -90,7 +90,7 @@ const Notification = () => {
               <span className="mr-2">
                 {/* <MdEmail /> */}
               </span>
-              <span>Inbox</span>
+              <span>इनबक्स</span>
               {unreadCount > 0 && (
                 <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                   {unreadCount}
@@ -100,7 +100,7 @@ const Notification = () => {
           </li>
           <li
             className={`px-6 py-3 flex items-center text-gray-900 font-semibold text-lg rounded-t-lg hover:text-[#E68332] mr-2 cursor-pointer ${
-              activeTab === "starred" ? "text-[#E68332]" : ""
+              activeTab === "starred" ? "text-[#E68332]" : "text-[#E68332]"
             }`}
             onClick={() => setActiveTab("starred")}
           >
@@ -108,7 +108,7 @@ const Notification = () => {
               <span className="mr-2">
                 {/* <FaStar /> */}
               </span>
-              <span>Starred</span>
+              <span>तारांकित</span>
             </div>
           </li>
         </ul>

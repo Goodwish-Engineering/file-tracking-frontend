@@ -127,22 +127,22 @@ const AdminDashboard = () => {
     <div className="flex h-screen w-full">
       {/* Large Screen Sidebar - Fixed and 17% width */}
       <div className="hidden md:flex flex-col justify-between fixed left-0 top-0 w-[17%] h-screen bg-[#e7e6e4] p-2 shadow-md z-10">
-        <div className="w-[94%]"> 
-        <div className="flex justify-center items-center">
+        <div className="w-[90%] h-[92%] my-auto mx-auto"> 
+        <div className="flex justify-center mt-8 items-center">
           <img
             src={logo}
             className="w-16 h-16 object-cover rounded-full cursor-pointer"
             alt="Logo"
           />
         </div>
-        <div className="flex flex-col gap-3 mt-4">
+        <div className="flex flex-col gap-3 mt-14">
           <h3
             onClick={() => handleTabChange("empdetails")}
             className={`cursor-pointer ${
               tab === "empdetails" ? "bg-[#E68332] text-white" : ""
             } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
           >
-            Employee Details
+            कर्मचारी विवरण
           </h3>
           <h3
             onClick={() => handleTabChange("filedetails")}
@@ -150,7 +150,7 @@ const AdminDashboard = () => {
               tab === "filedetails" ? "bg-[#E68332] text-white" : ""
             } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
           >
-            File Details
+            फाइल विवरण
           </h3>
           <h3
             onClick={() => handleTabChange("register")}
@@ -158,7 +158,7 @@ const AdminDashboard = () => {
               tab === "register" ? "bg-[#E68332] text-white" : ""
             } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
           >
-            Register Employee
+            कर्मचारी दर्ता
           </h3>
           <h3
             onClick={() => handleTabChange("add-office")}
@@ -166,7 +166,7 @@ const AdminDashboard = () => {
               tab === "add-office" ? "bg-[#E68332] text-white" : ""
             } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
           >
-            Add Office
+            शाखा थप्नुहोस्
           </h3>
           <button
             onClick={() => handleTabChange("notification")}
@@ -174,11 +174,11 @@ const AdminDashboard = () => {
               tab === "notification" ? "bg-[#E68332] text-white" : ""
             } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2 relative`}
           >
-            <span>Notifications</span>
+            <span>सूचना</span>
           </button>
         </div>
         </div>
-        <div className="flex items-center justify-center mt-5 mb-3">
+        <div className="flex items-center justify-center mb-8">
           <UserDetails />
         </div>
       </div>
@@ -229,7 +229,7 @@ const AdminDashboard = () => {
               tab === "empdetails" ? "bg-[#E68332] text-white" : ""
             } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
           >
-            Employee Details
+            कर्मचारी विवरण
           </h3>
 
           <h3
@@ -238,7 +238,7 @@ const AdminDashboard = () => {
               tab === "filedetails" ? "bg-[#E68332] text-white" : ""
             } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
           >
-            File Details
+            फाइल विवरण
           </h3>
 
           <h3
@@ -247,7 +247,7 @@ const AdminDashboard = () => {
               tab === "register" ? "bg-[#E68332] text-white" : ""
             } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
           >
-            Register Employee
+            कर्मचारी दर्ता
           </h3>
 
           <h3
@@ -256,7 +256,7 @@ const AdminDashboard = () => {
               tab === "add-office" ? "bg-[#E68332] text-white" : ""
             } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
           >
-            Add Office
+            शाखा थप्नुहोस्
           </h3>
 
           <button
@@ -265,13 +265,13 @@ const AdminDashboard = () => {
               tab === "notification" ? "bg-[#E68332] text-white" : ""
             } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center relative w-full`}
           >
-            <span>Notifications</span>
+            <span>सूचना</span>
             {/* <FontAwesomeIcon icon={faBell} /> */}
-            {unreadCount > 0 && (
+            {/* {unreadCount > 0 && (
               <span className="absolute top-0 right-2 bg-red-600 text-black text-xs w-5 h-5 flex items-center justify-center rounded-full">
                 {unreadCount}
               </span>
-            )}
+            )} */}
           </button>
         </div>
       </div>

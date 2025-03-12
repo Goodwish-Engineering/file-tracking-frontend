@@ -17,6 +17,7 @@ import { AiFillAppstore } from "react-icons/ai";
 import { IoIosNotifications } from "react-icons/io";
 import { FiShieldOff } from "react-icons/fi";
 import { MdOutlineTurnRight } from "react-icons/md";
+import NonTransferFile3 from "../Components/NonTransfer3";
 
 const EmployeHeader = () => {
   const [tab, setTab] = useState("notification");
@@ -74,13 +75,13 @@ const EmployeHeader = () => {
       <div className="h-screen rounded-lg left-0 sticky w-[17%] top-0 z-10 hidden md:flex flex-col justify-between bg-[#e7e6e4] p-2 shadow-md">
         <div className="h-[94%] md:flex flex-col justify-between">
           <div className="mt-6 text-left ml-2 font-normal text-gray-900">
-          <div className="flex justify-center items-center pt-2">
-            <img
-              src={logo}
-              className="w-16 h-16 object-cover rounded-full cursor-pointer"
-              alt="Logo"
-            />
-          </div>
+            <div className="flex justify-center items-center pt-2">
+              <img
+                src={logo}
+                className="w-16 h-16 object-cover rounded-full cursor-pointer"
+                alt="Logo"
+              />
+            </div>
             {level === "1" && (
               <NavItem
                 className="text-md font-normal"
@@ -96,24 +97,26 @@ const EmployeHeader = () => {
               icon={<AiFillAppstore className="text-lg" />}
               label="फाइलको स्थिति"
             />
-            <NavItem
-              onClick={() => setTab("notification")}
-              isActive={tab === "notification"}
-              icon={<IoIosNotifications className="text-2xl" />}
-              label="सूचना"
-            />
             {level === "1" ? (
-              <>
-                
-              </>
+              <></>
             ) : (
               <>
-                <NavItem
-                  onClick={() => setTab("nontransfer")}
-                  isActive={tab === "nontransfer"}
-                  icon={<FiShieldOff className="text-lg" />}
-                  label="स्थानान्तरण नगरिएको फाइल"
-                />
+                {level === "2" && (
+                  <NavItem
+                    onClick={() => setTab("nontransfer")}
+                    isActive={tab === "nontransfer"}
+                    icon={<FiShieldOff className="text-lg" />}
+                    label="स्थानान्तरण नगरिएको फाइल"
+                  />
+                )}
+                {(level === "3" || level === "4") && (
+                  <NavItem
+                    onClick={() => handleTabChange("nontransfer3")}
+                    isActive={tab === "nontransfer3"}
+                    icon={<FiShieldOff className="text-lg" />}
+                    label="स्थानान्तरण नगरिएको फाइल "
+                  />
+                )}
                 <NavItem
                   onClick={() => setTab("transfered")}
                   isActive={tab === "transfered"}
@@ -121,13 +124,19 @@ const EmployeHeader = () => {
                   label="स्थानान्तरण गरिएको फाइल"
                 />
                 <NavItem
-                onClick={() => setTab("filerequest")}
-                isActive={tab === "filerequest"}
-                icon={<FaFile className="text-lg" />}
-                label="फाइल अनुरोध"
-              />
+                  onClick={() => setTab("filerequest")}
+                  isActive={tab === "filerequest"}
+                  icon={<FaFile className="text-lg" />}
+                  label="फाइल अनुरोध"
+                />
               </>
             )}
+            <NavItem
+              onClick={() => setTab("notification")}
+              isActive={tab === "notification"}
+              icon={<IoIosNotifications className="text-2xl" />}
+              label="सूचना"
+            />
           </div>
           <div className="flex items-end justify-center mt-7">
             <UserDetails />
@@ -207,17 +216,25 @@ const EmployeHeader = () => {
             label="सूचना"
           />
           {level === "1" ? (
-            <>
-              
-            </>
+            <></>
           ) : (
             <>
-              <NavItem
-                onClick={() => handleTabChange("nontransfer")}
-                isActive={tab === "nontransfer"}
-                icon={<FiShieldOff className="text-lg" />}
-                label="स्थानान्तरण नगरिएको फाइल"
-              />
+              {level === "2" && (
+                <NavItem
+                  onClick={() => handleTabChange("nontransfer")}
+                  isActive={tab === "nontransfer"}
+                  icon={<FiShieldOff className="text-lg" />}
+                  label="स्थानान्तरण नगरिएको फाइल"
+                />
+              )}
+              {level === "3" && (
+                <NavItem
+                  onClick={() => handleTabChange("nontransfer3")}
+                  isActive={tab === "nontransfer3"}
+                  icon={<FiShieldOff className="text-lg" />}
+                  label="स्थानान्तरण नगरिएको फाइल"
+                />
+              )}
               <NavItem
                 onClick={() => handleTabChange("transfered")}
                 isActive={tab === "transfered"}
@@ -225,11 +242,11 @@ const EmployeHeader = () => {
                 label="स्थानान्तरण गरिएको फाइल"
               />
               <NavItem
-              onClick={() => handleTabChange("filerequest")}
-              isActive={tab === "filerequest"}
-              icon={<FaFile className="text-lg" />}
-              label="फाइल अनुरोध"
-            />
+                onClick={() => handleTabChange("filerequest")}
+                isActive={tab === "filerequest"}
+                icon={<FaFile className="text-lg" />}
+                label="फाइल अनुरोध"
+              />
             </>
           )}
         </div>
@@ -244,6 +261,7 @@ const EmployeHeader = () => {
         {tab === "employeehome" && <EmployeeHome />}
         {tab === "notification" && <Notification />}
         {tab === "transfered" && <TransferedFile />}
+        {tab === "nontransfer3" && <NonTransferFile3 />}
       </div>
     </div>
   );

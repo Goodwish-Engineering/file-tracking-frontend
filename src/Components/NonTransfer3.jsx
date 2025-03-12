@@ -2,24 +2,21 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-const FileRequest = () => {
+const NonTransferFile3 = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const [nonTransferredFiles, setNonTransferredFiles] = useState([]);
   const [admins, setAdmins] = useState([]);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fileToTransfer, setFileToTransfer] = useState(null);
-  const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
-  const [fileToAccept, setFileToAccept] = useState(null);
-  const [remarks, setRemarks] = useState("");
+  const [departments, setDepartments] = useState([]);
   const token = localStorage.getItem("token");
   const [offices, setOffices] = useState([]);
-  const [departments, setDepartments] = useState([]);
   const [selectedOffice, setSelectedOffice] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
-  const level = localStorage.getItem("level");
 
   useEffect(() => {
     fetchData();
@@ -50,6 +47,7 @@ const FileRequest = () => {
       console.error("Error fetching admins:", error);
     }
   };
+
   const fetchData = async () => {
     try {
       const response = await fetch(`${baseUrl}/file/`, {
@@ -57,13 +55,17 @@ const FileRequest = () => {
           Authorization: `token ${token}`,
         },
       });
-
       const data = await response.json();
-
-      // Exclude files where is_transferred and is_approved are both true
-      const filteredData = data.filter(
-        (file) => !(file.is_transferred || file.is_approved)
-      );
+      const departId = localStorage.getItem("depart_id");
+      
+      const filteredData = data.filter((file) => {
+        const isTransferred = file.approvals?.some(
+          (approval) => approval.is_transferred
+        );
+        const belongsToFilteredDepartment =
+          file.related_department?.id == departId;
+        return !isTransferred && !belongsToFilteredDepartment;
+      });
 
       setNonTransferredFiles(filteredData);
     } catch (error) {
@@ -127,9 +129,9 @@ const FileRequest = () => {
     setIsLoading(true);
     try {
       const payload = {
-        related_office: selectedOffice,
+        related_office: selectedOffice
       };
-
+      
       if (selectedDepartment) {
         payload.related_department = selectedDepartment;
       }
@@ -148,8 +150,8 @@ const FileRequest = () => {
 
       if (response.ok) {
         alert("File transferred successfully");
-        fetchData();
         setIsModalOpen(false);
+        fetchData();
       } else {
         const errorData = await response.json();
         alert(errorData.message || "Error transferring file");
@@ -163,136 +165,131 @@ const FileRequest = () => {
     }
   };
 
-  const handleAccept = async () => {
-    const approvedDate = new Date().toISOString().split("T")[0];
+  const handleDelete = async (fileId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this file?"
+    );
+    if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`${baseUrl}/files/${fileToAccept}/accept/`, {
-        method: "POST",
+      const response = await fetch(`${baseUrl}/file/${fileId}/`, {
+        method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `token ${token}`,
         },
-        body: JSON.stringify({
-          accepted: fileToAccept,
-          status: "approved",
-          remarks,
-          approved_date: approvedDate,
-        }),
       });
 
       if (response.ok) {
-        fetchData();
-        setIsAcceptModalOpen(false);
+        setNonTransferredFiles((prevFiles) =>
+          prevFiles.filter((file) => file.id !== fileId)
+        );
+        alert("File deleted successfully");
       } else {
-        console.error("Error accepting file:", response.statusText);
+        alert("Failed to delete file");
       }
     } catch (error) {
-      console.error("Error accepting file:", error);
+      console.error("Error deleting file:", error);
+      alert("An error occurred while deleting the file");
     }
   };
 
-  console.log("user type:" +level);
-
   return (
     <div className="p-6 min-h-screen">
-      <h2 className="text-xl font-bold text-orange-600 mb-4">फाइल अनुरोध</h2>
+      <h2 className="text-xl font-bold text-[#E68332] mb-4">
+       स्थानान्तरण नगरिएको फाइल
+      </h2>
       <div className="overflow-x-auto">
-        <table className="w-full border-none border-separate border-spacing-y-4">
+        <table className="w-full shadow-md rounded-lg border-none border-separate border-spacing-y-4">
           <thead className="text-gray-800">
-            <tr className=" rounded-md">
-              <th className="p-3 text-center font-normal border-none">आईडी</th>
-              <th className="p-3 text-center font-normal border-none">
-                फाइलको नाम
+            <tr className="border-none">
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">
+                आईडी
               </th>
-              <th className="p-3 text-center font-normal border-none">
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">
+                फाइलको नाम 
+              </th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">
+                फाइलको नम्बर 
+              </th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">
                 विषय
               </th>
-              <th className="p-3 text-center font-normal border-none">
-                पेश गर्ने
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">
+                पेश गर्ने 
               </th>
-              <th className="p-3 text-center font-normal border-none">
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">
                 पेश गरेको मिति
               </th>
-              <th className="p-3 text-center font-normal border-none">फाइल</th>
-              <th className="p-3 text-center font-normal border-none">
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">
+                फाइल 
+              </th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">
                 कार्य
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="space-y-4">
             {nonTransferredFiles.length > 0 ? (
               nonTransferredFiles.map((file) => (
                 <tr
                   key={file.id}
-                  className="text-gray-900 text-center my-4 gap-5 shadow-gray-100 text-nowrap border-none shadow-[4px_4px_5px_rgba(0,0,0,0.2)] rounded-lg"
+                  className={`text-black text-center my-4 gap-5 shadow-gray-100 text-nowrap border-none shadow-[4px_4px_5px_rgba(0,0,0,0.2)] rounded-lg`}
                 >
-                  <td className="py-4 px-4 border-none bg-gray-50 rounded-l-xl">
+                  <td className="p-4 bg-gray-50 border-none rounded-l-xl">
                     {file.id}
                   </td>
-                  <td className="px-4 py-4 border-none bg-gray-50">
+                  <td className="p-4 bg-gray-50 border-none">
                     {file.file_name}
                   </td>
-                  <td className="px-4 py-4 border-none bg-gray-50">
-                    {file.subject}
+                  <td className="p-4 bg-gray-50 border-none">
+                    {file.file_number}
                   </td>
-                  <td className="px-4 py-4 border-none bg-gray-50">
+                  <td className="p-4 bg-gray-50 border-none">{file.subject}</td>
+                  <td className="p-4 bg-gray-50 border-none">
                     {file.present_by?.first_name} {file.present_by?.last_name}
+                    {/* {file.present_by?.username} */}
                   </td>
-                  <td className="px-4 py-4 border-none bg-gray-50">
+                  <td className="p-4 bg-gray-50 border-none">
                     {file.present_date}
                   </td>
-                  <td className="px-4 py-4 border-none bg-gray-50">
+                  <td className="p-4 bg-gray-50 border-none rounded-lg">
                     <button
                       onClick={() => navigate(`/file-details/${file.id}`)}
-                      className="border-[#E68332] border-2 hover:bg-[#E68332] hover:text-white text-[#E68332] px-3 py-1 rounded-lg transition-all"
+                      className="hover:text-white border-[#E68332] border-2 hover:bg-[#E68332] rounded-lg text-[#E68332] px-3 py-1 transition-all"
                     >
                       View More
                     </button>
                   </td>
-                  <td className="px-4 py-4 gap-2 border-none bg-gray-50 flex justify-center items-center rounded-r-xl">
+                  <td className="p-4 gap-4 bg-gray-50 border-none rounded-r-xl flex items-center justify-center">
                     <button
-                      onClick={() => {
-                        setFileToTransfer(file.id);
-                        setIsModalOpen(true);
-                      }}
+                      onClick={() => handleOpenTransferModal(file.id)}
                       className="bg-[#B3F8CC] hover:bg-[#84be99] text-black px-3 py-1 rounded-lg transition-all"
                     >
                       Transfer
                     </button>
-                    {/* <button
-                      onClick={() => {
-                        setFileToAccept(file.id);
-                        setIsAcceptModalOpen(true);
-                      }}
-                      className="bg-[#b3c9f8] hover:bg-[#8a9fcb] text-black px-3 py-1 rounded-lg transition-all"
+                    <button
+                      onClick={() => handleDelete(file.id)}
+                      className="bg-[#F8B3B3] hover:bg-[#be8484] text-black px-3 py-1 rounded-lg transition-all"
                     >
-                      Approve
-                    </button> */}
-                    {level !== "2" && (
-                      <button
-                        onClick={() => {
-                          setFileToAccept(file.id);
-                          setIsAcceptModalOpen(true);
-                        }}
-                        className="bg-[#b3c9f8] hover:bg-[#8a9fcb] text-black px-3 py-1 rounded-lg transition-all"
-                      >
-                        Approve
-                      </button>
-                    )}
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))
             ) : (
-              <tr>
-                <td colSpan="7" className="p-4 text-center text-gray-600">
-                  No File Requests Till Now
+              <tr className="border-none">
+                <td
+                  colSpan="8"
+                  className="p-4 text-center border-none text-gray-700"
+                >
+                  No non-transferred files available.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
@@ -314,7 +311,7 @@ const FileRequest = () => {
                   ))}
                 </select>
               </label>
-
+              
               <label className="block">
                 <span className="text-gray-700">Select Department:</span>
                 <select
@@ -350,46 +347,16 @@ const FileRequest = () => {
                   setSelectedDepartment("");
                 }}
                 className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-lg"
+                disabled={isLoading}
               >
                 Cancel
               </button>
               <button
                 onClick={handleTransfer}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                className="bg-[#E68332] hover:bg-[#dd7a29] text-white px-4 py-2 rounded-lg"
+                disabled={!selectedOffice || isLoading}
               >
-                Transfer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {isAcceptModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h3 className="text-xl font-bold mb-4">Accept File</h3>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Remarks
-              </label>
-              <input
-                type="text"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                value={remarks}
-                onChange={(e) => setRemarks(e.target.value)}
-              />
-            </div>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setIsAcceptModalOpen(false)}
-                className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAccept}
-                className="bg-[#E68332] hover:bg-[#c6722d] text-white px-4 py-2 rounded-lg"
-              >
-                Accept
+                {isLoading ? "Transferring..." : "Transfer"}
               </button>
             </div>
           </div>
@@ -399,4 +366,4 @@ const FileRequest = () => {
   );
 };
 
-export default FileRequest;
+export default NonTransferFile3;

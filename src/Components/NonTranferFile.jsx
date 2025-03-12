@@ -49,8 +49,9 @@ const NonTransferFile = () => {
       // console.log(departId);
       const filteredData = data.filter((file) => {
         const isTransferred = file.approvals?.some((approval) => approval.is_transferred);
-        const belongsToFilteredDepartment = file.related_department?.id == departId;
-        return !isTransferred && !belongsToFilteredDepartment;
+        // const belongsToFilteredDepartment = file.related_department?.id == departId;
+        // return !isTransferred && !belongsToFilteredDepartment;
+        return !isTransferred;
       });
   
       setNonTransferredFiles(filteredData);
@@ -157,20 +158,20 @@ const NonTransferFile = () => {
   return (
     <div className="p-6 min-h-screen">
       <h2 className="text-2xl font-bold text-[#E68332] mb-4">
-        Non-Transferred Files
+        स्थानान्तरण नगरिएको फाइल
       </h2>
       <div className="overflow-x-auto">
         <table className="w-full shadow-md rounded-lg border-none border-separate border-spacing-y-4">
           <thead className="text-gray-800">
             <tr className="border-none">
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">ID</th>
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">File Name</th>
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">File Number</th>
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Subject</th>
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Presented By</th>
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Presented Date</th>
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">File</th>
-              <th className="p-3 text-center font-normal text-lg text-pretty border-none">Actions</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">आईडी</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">फाइलको नाम </th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">फाइलको नम्बर</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">विषय</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">पेश गर्ने</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">पेश गरेको मिति</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">फाइल</th>
+              <th className="p-3 text-center font-normal text-lg text-pretty border-none">कार्य</th>
             </tr>
           </thead>
           <tbody className="space-y-4">

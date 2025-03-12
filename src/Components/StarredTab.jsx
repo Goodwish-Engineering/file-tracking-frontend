@@ -45,7 +45,7 @@ const StarredTab = ({ onToggleStarred }) => {
 
   return (
     <div className="">
-      <h2 className="text-lg font-semibold mt-3 mb-1 mx-5">Starred notification</h2>
+      <h2 className="text-lg font-normal mt-3 mb-1 mx-5">तारांकित सूचना</h2>
       {starredNotifications.length > 0 ? (
         <ul className="list-none">
           {starredNotifications.map((notification) => {
