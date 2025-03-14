@@ -18,6 +18,7 @@ const UserDetails = () => {
     const token = localStorage.getItem("token");
     const userid = localStorage.getItem("userId");
     // console.log(username);
+    console.log(userid);
 
     if (!token) {
       setIsLoggedin(false);

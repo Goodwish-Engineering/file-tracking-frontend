@@ -254,7 +254,7 @@ const Registration = () => {
       if (response.ok) {
         const result = await response.json();
         alert("Form submitted successfully!");
-        // window.location.reload();
+        window.location.reload();
         console.log(result);
       } else {
         alert("Failed to submit the form.");
@@ -307,20 +307,16 @@ const Registration = () => {
       className="md:w-[90%] w-full mx-auto p-6 space-y-6"
       onSubmit={handleSubmit}
     >
-      <h1 className="text-2xl font-bold text-[#E68332]">
-        Employee Registration Form
-      </h1>
+      <h1 className="text-2xl font-bold text-[#E68332]">कर्मचारी दर्ता फारम</h1>
 
       {/* Account Information */}
       <fieldset className="border border-orange-400 p-4 rounded">
         <legend className="text-lg font-semibold text-[#E68332]">
-          Personal Information
+          व्यक्तिगत जानकारी
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">
-              first name
-            </span>
+            <span className="text-sm font-medium text-gray-900">पहिलो नाम</span>
             <input
               type="text"
               name="first_name"
@@ -331,7 +327,9 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">last name</span>
+            <span className="text-sm font-medium text-gray-900">
+              अन्तिम नाम
+            </span>
             <input
               type="text"
               name="last_name"
@@ -343,7 +341,7 @@ const Registration = () => {
           </label>
           <label className="flex flex-col">
             <span className="text-sm font-medium text-gray-900">
-              Father name
+              बुबाको नाम
             </span>
             <input
               type="text"
@@ -355,9 +353,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">
-              Mother name
-            </span>
+            <span className="text-sm font-medium text-gray-900">आमाको नाम</span>
             <input
               type="text"
               name="mother_name"
@@ -369,7 +365,7 @@ const Registration = () => {
           </label>
           <label className="flex flex-col">
             <span className="text-sm font-medium text-gray-900">
-              Grand father name
+              हजुरबुबाको नाम
             </span>
             <input
               type="text"
@@ -384,11 +380,11 @@ const Registration = () => {
       </fieldset>
       <fieldset className="border border-orange-400 p-4 rounded">
         <legend className="text-lg font-semibold text-[#E68332]">
-          Account Information
+          खाता जानकारी
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">Username</span>
+            <span className="text-sm font-medium text-gray-900">युसरनेम</span>
             <input
               type="text"
               name="username"
@@ -399,7 +395,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">Password</span>
+            <span className="text-sm font-medium text-gray-900">पासवर्ड</span>
             <input
               type="password"
               name="password"
@@ -410,7 +406,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">Email</span>
+            <span className="text-sm font-medium text-gray-900">इमेल</span>
             <input
               type="email"
               name="email"
@@ -426,11 +422,11 @@ const Registration = () => {
       {/* Permanent Address */}
       <fieldset className="border border-orange-400 p-4 rounded">
         <legend className="text-lg font-semibold text-[#E68332]">
-          Permanent Address
+          स्थायी ठेगाना (Permanent Address)
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">State</span>
+            <span className="text-sm font-medium text-gray-900">प्रोविंस</span>
 
             <select
               name="perm_state"
@@ -447,7 +443,7 @@ const Registration = () => {
             </select>
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">District</span>
+            <span className="text-sm font-medium text-gray-900">जिल्ला</span>
 
             <select
               name="perm_district"
@@ -464,9 +460,7 @@ const Registration = () => {
             </select>
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">
-              Municipality
-            </span>
+            <span className="text-sm font-medium text-gray-900">नगरपालिका</span>
 
             <select
               name="perm_municipality"
@@ -483,7 +477,7 @@ const Registration = () => {
             </select>
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">Ward No.</span>
+            <span className="text-sm font-medium text-gray-900">वार्ड नं.</span>
             <input
               type="text"
               name="perm_ward_no"
@@ -498,11 +492,11 @@ const Registration = () => {
 
       <fieldset className="border border-orange-400 p-4 rounded">
         <legend className="text-lg font-semibold text-[#E68332]">
-          Temporary Address
+          अस्थायी ठेगाना (Temporary Address)
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">State</span>
+            <span className="text-sm font-medium text-gray-900">प्रोविंस</span>
 
             <select
               name="temp_state"
@@ -519,7 +513,7 @@ const Registration = () => {
             </select>
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">District</span>
+            <span className="text-sm font-medium text-gray-900">जिल्ला</span>
 
             <select
               name="temp_district"
@@ -536,9 +530,7 @@ const Registration = () => {
             </select>
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">
-              Municipality
-            </span>
+            <span className="text-sm font-medium text-gray-900">नगरपालिका</span>
 
             <select
               name="temp_municipality"
@@ -555,7 +547,7 @@ const Registration = () => {
             </select>
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">Ward No.</span>
+            <span className="text-sm font-medium text-gray-900">वार्ड नं.</span>
             <input
               type="text"
               name="temp_ward_no"
@@ -568,11 +560,11 @@ const Registration = () => {
       </fieldset>
       <fieldset className="border border-orange-400 p-4 rounded">
         <legend className="text-lg font-semibold text-[#E68332]">
-          Citizenship Information
+          नागरिकता जानकारी (Citizenship Information)
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            Citizenship ID:
+            नागरिकता आईडी
             <input
               type="text"
               name="citizenship_id"
@@ -582,7 +574,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Date of Issue:
+            जारी मिति
             <input
               type="date"
               name="citizenship_date_of_issue"
@@ -592,7 +584,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            District of Issue:
+            जारी गरेको जिल्ला
             <input
               type="text"
               name="citizenship_district"
@@ -606,11 +598,11 @@ const Registration = () => {
 
       <fieldset className="border border-orange-400 p-4 rounded">
         <legend className="text-lg font-semibold text-[#E68332]">
-          Contact Information
+          सम्पर्क जानकारी
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            Home Number:
+            घर नम्बर
             <input
               type="text"
               name="home_number"
@@ -620,7 +612,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Phone Number:
+            फोन नम्बर
             <input
               type="text"
               name="phone_number"
@@ -630,7 +622,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Mobile Number:
+            मोबाइल नम्बर
             <input
               type="text"
               name="mobile_number"
@@ -644,11 +636,11 @@ const Registration = () => {
 
       <fieldset className="border border-orange-400 p-4 rounded">
         <legend className="text-lg font-semibold text-[#E68332]">
-          Job Details
+          काम विवरण
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            Date Joined:
+            सामेल भएको मिति
             <input
               type="date"
               name="date_joined"
@@ -658,7 +650,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Recess Date:
+            अवकाश मिति(Recess Date)
             <input
               type="date"
               name="recess_date"
@@ -668,7 +660,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Position:
+            पोसिशन
             <input
               type="text"
               name="position"
@@ -678,21 +670,21 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Position Category:
+            पोसिशन श्रेणी:
             <select
               onChange={handleChange}
               name="position_category"
               value={formData.position_category}
               className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
-              <option>select position category </option>
+              <option>सेलेक्ट पोसिशन श्रेणी</option>
 
               <option value={"Darbandi"}>Darbandi</option>
               <option value={"Kaaj"}>Kaaj</option>
             </select>
           </label>
           <label className="flex flex-col">
-            Employee ID:
+            कर्मचारी आईडी
             <input
               type="text"
               name="employee_id"
@@ -702,7 +694,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Employee Type:
+            कर्मचारी प्रकार
             <select
               onChange={handleChange}
               name="employee_type"
@@ -718,7 +710,7 @@ const Registration = () => {
             </select>
           </label>
           <label className="flex flex-col">
-            Duration:
+            अवधि
             <input
               type="date"
               name="duration"
@@ -729,7 +721,7 @@ const Registration = () => {
           </label>
 
           <label className="flex flex-col">
-            Office:
+            कार्यालय
             <select
               name="office"
               value={formData.office}
@@ -746,7 +738,7 @@ const Registration = () => {
           </label>
 
           <label className="flex flex-col">
-            Department:
+            विभाग
             <select
               name="department"
               value={formData.department}
@@ -768,7 +760,7 @@ const Registration = () => {
           </label>
 
           <label className="flex flex-col">
-            User level :
+            युसर लेवल
             <select
               onChange={handleChange}
               name="user_type"
@@ -789,7 +781,7 @@ const Registration = () => {
 
       <fieldset className="border border-orange-400 p-4 rounded">
         <legend className="text-lg font-semibold text-[#E68332]">
-          Bank Details
+          बैंक विवरण
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
@@ -803,7 +795,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Accumulation Fund No:
+            संचय कोष नं.
             <input
               type="text"
               name="accumulation_fund_no"
@@ -813,7 +805,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Bank Account No:
+            बैंक खाता नं.
             <input
               type="text"
               name="bank_account_no"
@@ -823,7 +815,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Bank Name:
+            बैंक नाम
             <select
               onChange={handleChange}
               name="bank_name"
@@ -843,11 +835,11 @@ const Registration = () => {
 
       <fieldset className="border border-orange-400 p-4 rounded">
         <legend className="text-lg font-semibold text-[#E68332]">
-          Loan Information
+          ऋण जानकारी
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            Loan Type:
+            ऋण प्रकार
             <select
               onChange={handleChange}
               name="loan_type"
@@ -863,7 +855,7 @@ const Registration = () => {
             </select>
           </label>
           <label className="flex flex-col">
-            Loan Name:
+            ऋण नाम
             <input
               type="text"
               name="loan_name"
@@ -873,7 +865,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Interest Rate:
+            ब्याज दर
             <input
               type="number"
               name="interest_rate"
@@ -883,7 +875,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Max Amount:
+            अधिकतम रकम
             <input
               type="number"
               name="max_amount"
@@ -893,7 +885,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Min Amount:
+            न्यूनतम रकम
             <input
               type="number"
               name="min_amount"
@@ -903,7 +895,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Max Tenure:
+            अधिकतम कार्यकाल
             <input
               type="number"
               name="max_tenure"
@@ -913,7 +905,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Min Tenure:
+            न्यूनतम कार्यकाल
             <input
               type="number"
               name="min_tenure"
@@ -926,12 +918,10 @@ const Registration = () => {
       </fieldset>
 
       <fieldset className="border border-orange-400 p-4 rounded">
-        <legend className="text-lg font-semibold text-[#E68332]">
-          Education
-        </legend>
+        <legend className="text-lg font-semibold text-[#E68332]">शिक्षा</legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            Education Level:
+            शिक्षा स्तर
             <select
               onChange={handleChange}
               name="education_level"
@@ -947,7 +937,7 @@ const Registration = () => {
             </select>
           </label>
           <label className="flex flex-col">
-            Institution:
+            संस्था
             <input
               type="text"
               name="institution"
@@ -957,7 +947,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Board:
+            बोर्ड
             <input
               type="text"
               name="board"
@@ -967,7 +957,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Percentage:
+            प्रतिशत
             <input
               type="number"
               name="percentage"
@@ -977,7 +967,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Year:
+            वर्ष
             <input
               type="number"
               name="year"
@@ -990,10 +980,12 @@ const Registration = () => {
       </fieldset>
 
       <fieldset className="border border-orange-400 p-4 rounded">
-        <legend className="text-lg font-semibold text-[#E68332]">Awards</legend>
+        <legend className="text-lg font-semibold text-[#E68332]">
+          पुरस्कार
+        </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            Award Name:
+            पुरस्कार नाम
             <input
               type="text"
               name="award_name"
@@ -1003,7 +995,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Description:
+            विवरण
             <input
               type="text"
               name="award_description"
@@ -1016,12 +1008,10 @@ const Registration = () => {
       </fieldset>
 
       <fieldset className="border border-orange-400 p-4 rounded">
-        <legend className="text-lg font-semibold text-[#E68332]">
-          Punishments
-        </legend>
+        <legend className="text-lg font-semibold text-[#E68332]">सजाय</legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            Punishment Name:
+            सजायको नाम
             <input
               type="text"
               name="punishment_name"
@@ -1031,7 +1021,7 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            Description:
+            विवरण
             <input
               type="text"
               name="punishment_description"
@@ -1047,7 +1037,7 @@ const Registration = () => {
         type="submit"
         className="w-full bg-[#E68332] text-white font-semibold py-2 rounded hover:bg-[#c27434] transition"
       >
-        Submit
+        पेश गर्नुहोस्
       </button>
     </form>
   );

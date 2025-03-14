@@ -70,6 +70,7 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("isLogin", true);
       localStorage.setItem("empId", data.user.id);
+      localStorage.setItem("userId", data.user.id);
       localStorage.setItem("officeid", data.user.office);
       localStorage.setItem("depart_id",data.user.department);
       localStorage.setItem("username", data.user.username);

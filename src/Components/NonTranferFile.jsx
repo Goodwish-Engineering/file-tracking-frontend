@@ -157,7 +157,7 @@ const NonTransferFile = () => {
 
   return (
     <div className="p-6 min-h-screen">
-      <h2 className="text-2xl font-bold text-[#E68332] mb-4">
+      <h2 className="text-xl font-bold text-[#E68332] mb-4">
         स्थानान्तरण नगरिएको फाइल
       </h2>
       <div className="overflow-x-auto">

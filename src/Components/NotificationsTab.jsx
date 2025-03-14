@@ -33,12 +33,18 @@ const NotificationsTab = () => {
   };
 
   const handleNotificationClick = async (notification) => {
+    console.log("Notification clicked:", notification);
+
     if (!notification.related_file || !notification.related_file.id) {
       console.error("Related file ID not found");
       return;
     }
 
+    const fileId = notification.related_file.id;
+    console.log("Related file ID:", fileId);
+
     try {
+      // First, mark the notification as read
       const response = await fetch(
         `${baseUrl}/notification/${notification.id}/`,
         {
@@ -51,52 +57,29 @@ const NotificationsTab = () => {
         }
       );
 
-      if (!response.ok) throw new Error("Failed to update notification status");
+      if (!response.ok) {
+        console.error("Failed to update notification status:", response.status);
+        throw new Error("Failed to update notification status");
+      }
 
+      // Update the UI to show the notification as read
       setNotifications((prevNotifications) =>
         prevNotifications.map((n) =>
           n.id === notification.id ? { ...n, is_read: true } : n
         )
       );
 
-      navigate(`/file-details/${notification.related_file.id}/`);
+      // Navigate to file details page
+      console.log(`Navigating to: /file-details/${fileId}/`);
+      navigate(`/file-details/${fileId}/`);
     } catch (error) {
-      console.error("Error updating notification status:", error);
+      console.error("Error in handleNotificationClick:", error);
     }
   };
 
-  // const postStarred = async (notification) => {
-  //   try {
-  //     // const updatedStarredStatus = !notification.is_starred;
+  const toggleStarred = async (notification, e) => {
+    e.stopPropagation(); // Prevent triggering the parent click event
 
-  //     const response = await fetch(
-  //       `${baseUrl}/notification/${notification.id}/`,
-  //       {
-  //         method: "PATCH",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `token ${token}`,
-  //         },
-  //         body: JSON.stringify({ is_starred: true }),
-  //       }
-  //     );
-
-  //     if (!response.ok)
-  //       throw new Error("Failed to update starred notification");
-
-  //     setNotifications((prevNotifications) =>
-  //       prevNotifications.map((n) =>
-  //         n.id === notification.id
-  //           ? { ...n, is_starred: true }
-  //           : n
-  //       )
-  //     );
-  //   } catch (error) {
-  //     console.error("Error updating notification status:", error);
-  //   }
-  // };
-
-  const toggleStarred = async (notification) => {
     try {
       const updatedStarredStatus = !notification.is_starred;
 
@@ -127,9 +110,9 @@ const NotificationsTab = () => {
     }
   };
 
-  const getUserColor = (firstName, lastName) => {
+  const getUserColor = (username) => {
     // Create a simple hash from the user's name
-    const name = `${firstName || ""}${lastName || ""}`;
+    const name = `${username || ""}`;
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -154,10 +137,11 @@ const NotificationsTab = () => {
     return colors[index];
   };
 
-  const getInitials = (firstName, lastName) => {
-    const firstInitial = firstName ? firstName.charAt(0) : "";
-    const lastInitial = lastName ? lastName.charAt(0) : "";
-    return (firstInitial + lastInitial).toUpperCase();
+  const getInitials = (username) => {
+    if (username && username.length > 0) {
+      return username[0].toUpperCase(); // Return the first character of the username as the initials
+    }
+    return "";
   };
 
   // Sort notifications by date (newest first)
@@ -173,10 +157,10 @@ const NotificationsTab = () => {
       {sortedNotifications.length > 0 ? (
         <ul className="list-none">
           {sortedNotifications.map((notification) => {
-            const firstName = notification?.related_file?.present_by?.first_name || "N/A";
-            const lastName = notification?.related_file?.present_by?.last_name || "N/A";
-            const userColor = getUserColor(firstName, lastName);
-            const initials = getInitials(firstName, lastName);
+            const username =
+              notification?.related_file?.present_by?.username || "N/A";
+            const userColor = getUserColor(username);
+            const initials = getInitials(username);
 
             return (
               <li
@@ -187,7 +171,6 @@ const NotificationsTab = () => {
                       ? "bg-white"
                       : "bg-[#F8F8F8] font-semibold"
                   }`}
-                // onClick={() => navigate(`/file-details/${file.id}`)}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex justify-between items-center border-gray-300 text-nowrap">
@@ -195,10 +178,7 @@ const NotificationsTab = () => {
                     <div>
                       <span className="relative">
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent triggering the parent click event
-                            toggleStarred(notification);
-                          }}
+                          onClick={(e) => toggleStarred(notification, e)}
                         >
                           <MdOutlineStar
                             className={`text-xl ${
@@ -218,11 +198,11 @@ const NotificationsTab = () => {
                           {initials}
                         </div>
                         <h3>
-                          {firstName} {lastName}
+                          {notification?.related_file?.present_by?.first_name}{" "}
+                          {notification?.related_file?.present_by?.last_name}
                         </h3>
                       </div>
                       <div className="flex gap-20 items-center justify-around">
-                        {/* <h3>{notification.related_file.file_number}</h3> */}
                         <h3>{notification?.related_file?.file_number ?? "N/A"}</h3>
                         <h3>{notification?.related_file?.subject ?? "N/A"}</h3>
                       </div>
@@ -231,6 +211,9 @@ const NotificationsTab = () => {
                   <div>
                     {new Date(notification.created_at).toLocaleString()}
                   </div>
+                </div>
+                <div className="mt-2 text-gray-600 text-sm">
+                  {notification.message}
                 </div>
               </li>
             );

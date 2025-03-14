@@ -36,21 +36,33 @@ const TransferedFile = () => {
   };
 
   const fetchData = async () => {
+    const token = localStorage.getItem("token");
     try {
       const response = await fetch(`${baseUrl}/file/`, {
+        method: "GET",
         headers: {
           Authorization: `token ${token}`,
         },
       });
+  
+      if (!response.ok) {
+        throw new Error("Failed to fetch files");
+      }
+  
       const data = await response.json();
+  
+      // Filtering only files where at least one approval has is_transferred: true
       const filteredData = data.filter(
-        (file) => !(file.is_transferred || file.is_approved)
+        (file) =>
+          file.approvals && file.approvals.some((approval) => approval.is_transferred)
       );
+  
       setTransferedFiles(filteredData);
     } catch (error) {
       console.error("Error fetching files:", error);
     }
   };
+  
 
   // const fetchData = async () => {
   //   try {

@@ -56,11 +56,30 @@ const EmployeeDetails = () => {
     }
   };
 
+  // const updateRole = async () => {
+  //   if (!roleModal || !newRole) return;
+    
+  //   try {
+  //     await fetch(`${baseUrl}/user/${roleModal.id}/update/`, {
+  //       method: "PATCH",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `token ${token}`,
+  //       },
+  //       body: JSON.stringify({ user_type: newRole }),
+  //     });
+  //     setRoleModal(null);
+  //     fetchdata();
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
   const updateRole = async () => {
     if (!roleModal || !newRole) return;
     
     try {
-      await fetch(`${baseUrl}/user/${roleModal.id}/update/`, {
+      const response = await fetch(`${baseUrl}/user/${roleModal.id}/update/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -68,10 +87,23 @@ const EmployeeDetails = () => {
         },
         body: JSON.stringify({ user_type: newRole }),
       });
+      
+      if (!response.ok) {
+        throw new Error("Failed to update user role");
+      }
+      
+      setEmpData(prevEmpData => 
+        prevEmpData.map(user => 
+          user.id === roleModal.id 
+            ? { ...user, user_type: newRole } 
+            : user
+        )
+      );
+      
       setRoleModal(null);
-      fetchdata();
+      setNewRole("");
     } catch (error) {
-      console.log(error);
+      console.error("Error updating role:", error);
     }
   };
 

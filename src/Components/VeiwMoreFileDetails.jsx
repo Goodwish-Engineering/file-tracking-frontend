@@ -70,11 +70,11 @@ const ViewMoreFileDetails = () => {
 
   const handleChange = (e, field, index, type) => {
     const value = e.target.value;
-    if (type === "tippani") {
+    if (type === "tippani" && fileDetails?.tippani) {
       const updatedTippani = [...fileDetails.tippani];
       updatedTippani[index][field] = value;
       setFileDetails({ ...fileDetails, tippani: updatedTippani });
-    } else if (type === "document") {
+    } else if (type === "document" && fileDetails?.letters_and_documents) {
       const updatedDocs = [...fileDetails.letters_and_documents];
       updatedDocs[index][field] = value;
       setFileDetails({ ...fileDetails, letters_and_documents: updatedDocs });
@@ -85,7 +85,7 @@ const ViewMoreFileDetails = () => {
     setTippani(true);
     setFileDetails((prevState) => ({
       ...prevState,
-      tippani: [...prevState.tippani, newTippani],
+      tippani: [...(prevState.tippani || []), newTippani],
     }));
     setNewTippani({
       subject: "",
@@ -103,7 +103,7 @@ const ViewMoreFileDetails = () => {
     setLetter(true);
     setFileDetails((prevState) => ({
       ...prevState,
-      letters_and_documents: [...prevState.letters_and_documents, newDoc],
+      letters_and_documents: [...(prevState.letters_and_documents || []), newDoc],
     }));
     setNewDoc({
       registration_no: "",
@@ -125,8 +125,8 @@ const ViewMoreFileDetails = () => {
           Authorization: `token ${token}`,
         },
         body: JSON.stringify({
-          tippani: fileDetails.tippani,
-          letters_and_documents: fileDetails.letters_and_documents,
+          tippani: fileDetails?.tippani || [],
+          letters_and_documents: fileDetails?.letters_and_documents || [],
         }),
       });
       
@@ -142,11 +142,17 @@ const ViewMoreFileDetails = () => {
     } catch (error) {
       console.error("Error updating file:", error);
       alert(`Failed to save changes: ${error.message}`);
-    } finally {
-      
     }
   };
 
+  const level = localStorage.getItem("level");
+  const handleNavigate = () => {
+    if (level === "5") {
+      navigate("/admindashboard");
+    } else {
+      navigate("/employeeheader");
+    }
+  };
   if (loading) {
     return (
       <div className="text-center mt-10 text-[#E68332] text-lg">
@@ -163,41 +169,30 @@ const ViewMoreFileDetails = () => {
     );
   }
 
-  // Extracting properties safely from nested objects
+  // Extracting properties safely from nested objects with default values
   const {
-    file_name,
-    subject,
-    file,
-    file_number,
-    present_date,
-    days_submitted,
-    total_tippani_pages,
-    total_documents_pages,
-    total_page_count,
-    letters_and_documents,
-    tippani,
-    province,
-    district,
-    municipality,
-    ward_no,
-    tole,
-  } = fileDetails;
+    file_name = "",
+    subject = "",
+    file = "",
+    file_number = "",
+    present_date = "",
+    days_submitted = "",
+    total_tippani_pages = "",
+    total_documents_pages = "",
+    total_page_count = "",
+    letters_and_documents = [],
+    tippani = [], 
+    province = "",
+    district = "",
+    municipality = "",
+    ward_no = "",
+    tole = "",
+  } = fileDetails || {};
 
   // Safely extract nested object properties
-  const related_guthi_name = fileDetails.related_guthi ? fileDetails.related_guthi.name : "N/A";
-  const related_department_name = fileDetails.related_department ? fileDetails.related_department.name : "N/A";
-  const submitted_by_name = fileDetails.submitted_by || "N/A";
-  
-  const level = localStorage.getItem("level");
-  const handleNavigate = () => {
-    if (level === "5") {
-      navigate("/admindashboard");
-    } else {
-      navigate("/employeeheader");
-    // } else {
-    //   navigate("/login");
-    }
-  };
+  const related_guthi_name = fileDetails?.related_guthi?.name || "N/A";
+  const related_department_name = fileDetails?.related_department?.name || "N/A";
+  const submitted_by_name = fileDetails?.submitted_by || "N/A";
 
   return (
     <div className="w-full mx-auto p-6">
@@ -235,9 +230,6 @@ const ViewMoreFileDetails = () => {
                 </p>
                 <p className="text-lg font-normal text-gray-800">
                   Subject: <span className="font-mono">{subject}</span>
-                </p>
-                <p className="text-lg font-normal text-gray-800">
-                  File Name: <span className="font-mono">{file_name}</span>
                 </p>
                 <p className="text-lg font-normal text-gray-800">
                   Related Guthi: <span className="font-mono">{related_guthi_name}</span>
@@ -291,6 +283,7 @@ const ViewMoreFileDetails = () => {
             </div>
           </div>
         </div>
+
 
         {/* Tippani Table */}
         <div className="md:w-1/2 w-[98%] mx-auto">

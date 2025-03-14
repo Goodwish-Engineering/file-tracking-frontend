@@ -19,6 +19,8 @@ import logo from "/logo192.png";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { removeLogin, removeUser } from "../app/loginSlice"; // Import the actions
+import NonTransferFile3 from "../Components/NonTransfer3";
+import TransferedFile from "../Components/TransferedFiles";
 
 const AdminDashboard = () => {
   const [tab, setTab] = useState("empdetails");
@@ -127,56 +129,72 @@ const AdminDashboard = () => {
     <div className="flex h-screen w-full">
       {/* Large Screen Sidebar - Fixed and 17% width */}
       <div className="hidden md:flex flex-col justify-between fixed left-0 top-0 w-[17%] h-screen bg-[#e7e6e4] p-2 shadow-md z-10">
-        <div className="w-[90%] h-[92%] my-auto mx-auto"> 
-        <div className="flex justify-center mt-8 items-center">
-          <img
-            src={logo}
-            className="w-16 h-16 object-cover rounded-full cursor-pointer"
-            alt="Logo"
-          />
-        </div>
-        <div className="flex flex-col gap-3 mt-14">
-          <h3
-            onClick={() => handleTabChange("empdetails")}
-            className={`cursor-pointer ${
-              tab === "empdetails" ? "bg-[#E68332] text-white" : ""
-            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
-          >
-            कर्मचारी विवरण
-          </h3>
-          <h3
-            onClick={() => handleTabChange("filedetails")}
-            className={`cursor-pointer ${
-              tab === "filedetails" ? "bg-[#E68332] text-white" : ""
-            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
-          >
-            फाइल विवरण
-          </h3>
-          <h3
-            onClick={() => handleTabChange("register")}
-            className={`cursor-pointer ${
-              tab === "register" ? "bg-[#E68332] text-white" : ""
-            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
-          >
-            कर्मचारी दर्ता
-          </h3>
-          <h3
-            onClick={() => handleTabChange("add-office")}
-            className={`cursor-pointer ${
-              tab === "add-office" ? "bg-[#E68332] text-white" : ""
-            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
-          >
-            शाखा थप्नुहोस्
-          </h3>
-          <button
-            onClick={() => handleTabChange("notification")}
-            className={`cursor-pointer ${
-              tab === "notification" ? "bg-[#E68332] text-white" : ""
-            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2 relative`}
-          >
-            <span>सूचना</span>
-          </button>
-        </div>
+        <div className="w-[90%] h-[92%] my-auto mx-auto">
+          <div className="flex justify-center mt-8 items-center">
+            <img
+              src={logo}
+              className="w-16 h-16 object-cover rounded-full cursor-pointer"
+              alt="Logo"
+            />
+          </div>
+          <div className="flex flex-col gap-3 mt-14">
+            <h3
+              onClick={() => handleTabChange("empdetails")}
+              className={`cursor-pointer ${
+                tab === "empdetails" ? "bg-[#E68332] text-white" : ""
+              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
+            >
+              कर्मचारी विवरण
+            </h3>
+            <h3
+              onClick={() => handleTabChange("filedetails")}
+              className={`cursor-pointer ${
+                tab === "filedetails" ? "bg-[#E68332] text-white" : ""
+              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
+            >
+              फाइल विवरण
+            </h3>
+            <h3
+              onClick={() => handleTabChange("register")}
+              className={`cursor-pointer ${
+                tab === "register" ? "bg-[#E68332] text-white" : ""
+              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
+            >
+              कर्मचारी दर्ता
+            </h3>
+            <h3
+              onClick={() => handleTabChange("add-office")}
+              className={`cursor-pointer ${
+                tab === "add-office" ? "bg-[#E68332] text-white" : ""
+              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
+            >
+              शाखा थप्नुहोस्
+            </h3>
+            <h3
+              onClick={() => handleTabChange("nontransfer3")}
+              className={`cursor-pointer ${
+                tab === "nontransfer3" ? "bg-[#E68332] text-white" : ""
+              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
+            >
+              स्थानान्तरण नगरिएको फाइल
+            </h3>
+            <h3
+              onClick={() => handleTabChange("transfered")}
+              className={`cursor-pointer ${
+                tab === "transfered" ? "bg-[#E68332] text-white" : ""
+              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
+            >
+              स्थानान्तरण गरिएको फाइल
+            </h3>
+            <button
+              onClick={() => handleTabChange("notification")}
+              className={`cursor-pointer ${
+                tab === "notification" ? "bg-[#E68332] text-white" : ""
+              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2 relative`}
+            >
+              <span>सूचना</span>
+            </button>
+          </div>
         </div>
         <div className="flex items-center justify-center mb-8">
           <UserDetails />
@@ -258,6 +276,22 @@ const AdminDashboard = () => {
           >
             शाखा थप्नुहोस्
           </h3>
+          <h3
+            onClick={() => handleTabChange("nontransfer3")}
+            className={`cursor-pointer ${
+              tab === "nontransfer3" ? "bg-[#E68332] text-white" : ""
+            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
+          >
+            स्थानान्तरण नगरिएको फाइल
+          </h3>
+          <h3
+            onClick={() => handleTabChange("transfered")}
+            className={`cursor-pointer ${
+              tab === "transfered" ? "bg-[#E68332] text-white" : ""
+            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
+          >
+            स्थानान्तरण गरिएको फाइल
+          </h3>
 
           <button
             onClick={() => handleTabChange("notification")}
@@ -291,6 +325,8 @@ const AdminDashboard = () => {
         {tab === "register" && <Registration />}
         {tab === "notification" && <Notification />}
         {tab === "add-office" && <AddOffice />}
+        {tab === "nontransfer3" && <NonTransferFile3 />}
+        {tab === "transfered" && <TransferedFile />}
       </div>
     </div>
   );

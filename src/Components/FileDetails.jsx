@@ -6,6 +6,9 @@ const FileDetails = ({ setShowButton, clearData }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
   const empId = localStorage.getItem("userId");
+  const userid = localStorage.getItem("userId");
+  console.log(empId);
+  console.log("user is is:"+userid);
   const [show, setShow] = useState(true);
   
   // This state will be used to track the current values

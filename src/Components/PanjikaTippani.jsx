@@ -60,18 +60,18 @@ const PanjikaTippani = () => {
   return (
     <div className="p-4 w-[90%] md:w-[80%] mx-auto my-4 bg-white shadow-gray-200 rounded-lg shadow-inner border-2">
       <h1 className="text-center font-bold text-2xl mb-6 text-[#E68332]">
-        Panjika Details Tippani
+        पञ्जिका विवरण टिप्नी
       </h1>
       <form className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
         {[
-          { label: "Subject", name: "subject", type: "text" },
-          { label: "Submitted By", name: "submitted_by", type: "text" },
-          { label: "Submitted Date", name: "submitted_date", type: "date" },
-          { label: "Remarks", name: "remarks", type: "text" },
-          { label: "Approved By", name: "approved_by", type: "text" },
-          { label: "Approval Date", name: "approved_date", type: "date" },
-          { label: "Tippani Date", name: "tippani_date", type: "date" },
-          { label: "Page No", name: "page_no", type: "text" },
+          { label: "विषय", name: "subject", type: "text" },
+          { label: "पेश गर्ने व्यक्ति", name: "submitted_by", type: "text" },
+          { label: "पेश मिति", name: "submitted_date", type: "date" },
+          { label: "रिमार्क्स", name: "remarks", type: "text" },
+          { label: "स्वीकृत गरिएको द्वारा", name: "approved_by", type: "text" },
+          { label: "स्वीकृति मिति", name: "approved_date", type: "date" },
+          { label: "टिप्पणी मिति", name: "tippani_date", type: "date" },
+          { label: "पृष्ठ नं", name: "page_no", type: "text" },
         ].map(({ label, name, type }) => (
           <div key={name}>
             <label className="block text-gray-800 font-medium">{label}</label>
@@ -92,7 +92,7 @@ const PanjikaTippani = () => {
           type="submit"
           className="bg-[#E68332] text-white px-6 py-2 rounded-lg hover:bg-[#c36f2a]"
         >
-          Save Tippani
+          पेश गर्नुहोस्
         </button>
 
         {showAddButton && (
@@ -100,7 +100,7 @@ const PanjikaTippani = () => {
             onClick={addNewForm}
             className="mt-1 bg-[#B3F8CC] text-white px-4 py-2 rounded-lg hover:bg-[#89c29e]"
           >
-            Add Another Tippani
+            अर्को पेश गर्नुहोस्
           </button>
         )}
       </div>

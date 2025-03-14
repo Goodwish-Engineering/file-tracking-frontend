@@ -57,13 +57,11 @@ const PanjikaDocumentsForm = () => {
   return (
     <div className="p-6 mb-6 w-[90%] md:w-[80%] mx-auto bg-white rounded-lg shadow-inner shadow-gray-200">
       <h1 className="text-center text-xl font-bold text-[#E68332] mb-6">
-        PANJIKA DOCUMENTS
+        पञ्जिका डकुमेन्ट्स
       </h1>
-      <form
-        className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 font-semibold"
-      >
+      <form className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-gray-800">Subject</label>
+          <label className="block text-gray-800">विषय</label>
           <input
             type="text"
             name="subject"
@@ -74,7 +72,7 @@ const PanjikaDocumentsForm = () => {
           />
         </div>
         <div>
-          <label className="block text-gray-800">Darta No.</label>
+          <label className="block text-gray-800">दर्ता नं.</label>
           <input
             type="text"
             name="registration_no"
@@ -85,7 +83,7 @@ const PanjikaDocumentsForm = () => {
           />
         </div>
         <div>
-          <label className="block text-gray-800">Office</label>
+          <label className="block text-gray-800">कार्यालय</label>
           <input
             type="text"
             name="office"
@@ -96,7 +94,7 @@ const PanjikaDocumentsForm = () => {
           />
         </div>
         <div>
-          <label className="block text-gray-800">Chalani No.</label>
+          <label className="block text-gray-800">चलनी नं</label>
           <input
             type="text"
             name="invoice_no"
@@ -107,7 +105,7 @@ const PanjikaDocumentsForm = () => {
           />
         </div>
         <div>
-          <label className="block text-gray-800">Date</label>
+          <label className="block text-gray-800">मिति</label>
           <input
             type="date"
             name="date"
@@ -118,7 +116,7 @@ const PanjikaDocumentsForm = () => {
           />
         </div>
         <div>
-          <label className="block text-gray-800">Letter Date</label>
+          <label className="block text-gray-800">पत्र मिति</label>
           <input
             type="date"
             name="letter_date"
@@ -129,7 +127,7 @@ const PanjikaDocumentsForm = () => {
           />
         </div>
         <div>
-          <label className="block text-gray-800">Total Pages</label>
+          <label className="block text-gray-800">कुल पृष्ठहरू</label>
           <input
             type="number"
             name="page_no"
@@ -146,14 +144,14 @@ const PanjikaDocumentsForm = () => {
           type="submit"
           className="mt-4 bg-[#E68332] text-white px-4 rounded-lg py-2 hover:bg-[#c36F2a]"
         >
-          Submit
+          पेश गर्नुहोस्
         </button>
         {showNewForm && (
           <button
             onClick={() => setShowNewForm(false)}
             className="mt-4 bg-[#B3F8CC] text-white px-4 rounded-lg py-2 hover:bg-[#89c29e]"
           >
-            Submit Another
+            अर्को पेश गर्नुहोस्
           </button>
         )}
       </div>

@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
-    // console.log(fileId);
-  const navigate = useNavigate('');
+  const navigate = useNavigate();
   const [tippanis, setTippanis] = useState([]);
   const [currentTippani, setCurrentTippani] = useState({
     subject: "",
@@ -17,28 +16,49 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
     tippani_date: "",
     page_no: "",
     related_file: fileId,
+    file: null, // Change from empty string to null
   });
   const [showAddButton, setShowAddButton] = useState(false);
 
+  // Handle input changes, including file selection
   const handleChange = (e) => {
-    setCurrentTippani({
-      ...currentTippani,
-      [e.target.name]: e.target.value,
-    });
+    if (e.target.name === "file") {
+      setCurrentTippani({
+        ...currentTippani,
+        file: e.target.files[0], // Correctly store the file
+      });
+    } else {
+      setCurrentTippani({
+        ...currentTippani,
+        [e.target.name]: e.target.value,
+      });
+    }
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const formData = new FormData();
+
+      // Append all form fields to FormData
+      Object.entries(currentTippani).forEach(([key, value]) => {
+        if (value !== null) {
+          formData.append(key, value);
+        }
+      });
+
       const response = await fetch(`${baseUrl}/tippani/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(currentTippani),
+        body: formData, // Do NOT set Content-Type; FormData handles it
       });
+
       if (!response.ok) throw new Error("Failed to save Tippani");
+
       const newTippani = await response.json();
       setTippanis([...tippanis, newTippani]);
       setShowAddButton(true);
+
       setCurrentTippani({
         subject: "",
         submitted_by: "",
@@ -49,24 +69,20 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
         tippani_date: "",
         page_no: "",
         related_file: fileId,
+        file: null,
       });
-      if (response) {
-        alert("Tippani added successfully");
-        window.location.reload();
-      }
+
+      alert("Tippani added successfully");
+      window.location.reload();
     } catch (error) {
       console.error("Error saving Tippani:", error);
     }
   };
 
-//   const addNewForm = () => {
-//     setShowAddButton(false);
-//   };
-
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex shadow-inner justify-center items-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
       <div className="bg-white border-[#E68332] p-6 rounded-lg w-full max-w-2xl relative">
         <button
           onClick={onClose}
@@ -76,24 +92,30 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
         </button>
 
         <h2 className="text-2xl font-semibold text-[#E68332] mb-4 text-center">
-          Add New Tippani
+          नयाँ टिप्पणी थप्नुहोस्
         </h2>
 
-        <form className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form
+          className="w-full grid grid-cols-1 md:grid-cols-2 gap-4"
+          onSubmit={handleSubmit}
+          encType="multipart/form-data"
+        >
           {[
-            { label: "Subject", name: "subject", type: "text" },
-            { label: "Submitted By", name: "submitted_by", type: "text" },
-            { label: "Submitted Date", name: "submitted_date", type: "date" },
-            { label: "Remarks", name: "remarks", type: "text" },
-            { label: "Approved By", name: "approved_by", type: "text" },
-            { label: "Approval Date", name: "approved_date", type: "date" },
-            { label: "Tippani Date", name: "tippani_date", type: "date" },
-            { label: "Page No", name: "page_no", type: "text" },
+            { label: "विषय", name: "subject", type: "text" },
+            { label: "पेश गर्ने व्यक्ति", name: "submitted_by", type: "text" },
+            { label: "पेश मिति", name: "submitted_date", type: "date" },
+            { label: "टिप्पणी", name: "remarks", type: "text" },
+            {
+              label: "स्वीकृत गरिएको द्वारा",
+              name: "approved_by",
+              type: "text",
+            },
+            { label: "स्वीकृति मिति", name: "approved_date", type: "date" },
+            { label: "टिप्पणी मिति", name: "tippani_date", type: "date" },
+            { label: "पृष्ठ नं", name: "page_no", type: "text" },
           ].map(({ label, name, type }) => (
             <div key={name}>
-              <label className="block text-gray-800">
-                {label}
-              </label>
+              <label className="block text-gray-800">{label}</label>
               <input
                 type={type}
                 name={name}
@@ -104,6 +126,18 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
               />
             </div>
           ))}
+
+          {/* File input */}
+          <div>
+            <label className="block text-gray-800">File</label>
+            <input
+              type="file"
+              name="file"
+              onChange={handleChange}
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
+              required
+            />
+          </div>
         </form>
 
         <div className="flex items-center gap-5 justify-center my-3">
@@ -112,17 +146,8 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
             type="submit"
             className="bg-[#E68332] text-white px-6 py-2 rounded-lg hover:bg-[#c36f2a]"
           >
-            Save Tippani
+            टिप्पणी पेश गर्नुहोस्
           </button>
-
-          {/* {showAddButton && (
-            <button
-              onClick={addNewForm}
-              className="mt-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-[#E68332]"
-            >
-              Add Another Tippani
-            </button>
-          )} */}
         </div>
       </div>
     </div>

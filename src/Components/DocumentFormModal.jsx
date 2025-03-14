@@ -16,27 +16,39 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
     page_no: "",
     tippani: "",
     related_file: fileId,
+    file: null,
   });
 
   const [showNewForm, setShowNewForm] = useState(false);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, files } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value, // Handle file input
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const formDataToSend = new FormData();
+      Object.keys(formData).forEach((key) => {
+        if (formData[key] !== null) {
+          formDataToSend.append(key, formData[key]);
+        }
+      });
+
       const response = await fetch(apiBaseUrl, {
         method: "POST",
         headers: {
           Authorization: token ? `token ${token.trim()}` : "",
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: formDataToSend, // Use FormData
       });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
 
       setFormData({
         registration_no: "",
@@ -48,14 +60,13 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
         page_no: "",
         tippani: "",
         related_file: fileId,
+        file: null,
       });
 
       setShowNewForm(true);
 
-      if(response){
-        alert("Letters and document added successfully");
-        window.location.reload();
-      }
+      alert("Letters and document added successfully");
+      window.location.reload();
     } catch (error) {
       console.error("Error submitting form:", error);
     }
@@ -70,31 +81,41 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
         >
-          <span className="text-2xl font-bold text-[#E86332] hover:text-[#c36f2a]">×</span>
+          <span className="text-2xl font-bold text-[#E86332] hover:text-[#c36f2a]">
+            ×
+          </span>
         </button>
 
         <h2 className="text-2xl font-semibold text-[#E86332] mb-2 text-center">
-          Add New Document
+          नयाँ कागजात थप्नुहोस्
         </h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
-              { label: "Registration No", name: "registration_no", type: "text" },
-              { label: "Chalani No", name: "invoice_no", type: "text" },
-              { label: "Date", name: "date", type: "date" },
-              { label: "Subject", name: "subject", type: "text" },
-              { label: "Letter Date", name: "letter_date", type: "date" },
-              { label: "Office", name: "office", type: "text" },
-              { label: "Page No", name: "page_no", type: "number" },
+              {
+                label: "दर्ता नम्बर",
+                name: "registration_no",
+                type: "text",
+              },
+              { label: "चलनी नं", name: "invoice_no", type: "text" },
+              { label: "चलनी नम्बर", name: "date", type: "date" },
+              { label: "विषय", name: "subject", type: "text" },
+              { label: "पत्र मिति", name: "letter_date", type: "date" },
+              { label: "कार्यालय", name: "office", type: "text" },
+              { label: "पृष्ठ नं", name: "page_no", type: "number" },
+              { label: "फाइल", name: "file", type: "file" },
             ].map(({ label, name, type }) => (
               <div key={name} className="mb-2">
                 <label className="block text-gray-800 mb-2">{label}</label>
                 <input
                   type={type}
                   name={name}
-                  value={formData[name]}
+                  value={type !== "file" ? formData[name] : undefined} // Ensure file input does not have a value
                   onChange={handleInputChange}
                   className="w-full p-2 border border-gray-300 rounded"
+                  {...(type === "file"
+                    ? { accept: "application/pdf, image/*" }
+                    : {})} // Accept PDFs and images
                 />
               </div>
             ))}
@@ -105,7 +126,7 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
               type="submit"
               className="px-4 py-2 bg-[#E86332] text-white rounded hover:bg-[#c36f2a]"
             >
-              Add Document
+              कागजात थप्नुहोस्
             </button>
           </div>
         </form>
