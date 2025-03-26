@@ -133,8 +133,8 @@ const NonTransferFile = () => {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`${baseUrl}/file/${fileId}/`, {
-        method: "DELETE",
+      const response = await fetch(`${baseUrl}/files/${fileId}/disable/`, {
+        method: "POST",
         headers: {
           Authorization: `token ${token}`,
         },
@@ -145,7 +145,6 @@ const NonTransferFile = () => {
         setNonTransferredFiles(prevFiles => 
           prevFiles.filter(file => file.id !== fileId)
         );
-        alert("File deleted successfully");
       } else {
         alert("Failed to delete file");
       }

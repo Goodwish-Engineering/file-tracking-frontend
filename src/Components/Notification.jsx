@@ -82,7 +82,7 @@ const Notification = () => {
         <ul className="flex flex-row items-center w-full">
           <li
             className={`px-6 py-3 flex items-center text-gray-900 font-semibold text-lg rounded-t-lg hover:text-[#E68332] mr-2 cursor-pointer ${
-              activeTab === "notifications" ? "text-[#E68332]" : ""
+              activeTab === "notifications" ? "text-[#E68332]" : "text-[#E68332]"
             }`}
             onClick={() => setActiveTab("notifications")}
           >

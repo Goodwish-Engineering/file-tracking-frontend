@@ -85,25 +85,26 @@ const TransferedFile = () => {
   // };
 
   const handleDelete = async (fileId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this file?"
-    );
+    const confirmDelete = window.confirm("Are you sure you want to delete this file?");
     if (!confirmDelete) return;
-
+  
     try {
-      await fetch(`${baseUrl}/file/${fileId}/`, {
-        method: "DELETE",
+      const response = await fetch(`${baseUrl}/files/${fileId}/disable/`, {
+        method: "POST",
         headers: {
           Authorization: `token ${token}`,
         },
       });
-      setFileStatuses((prevStatuses) =>
-        prevStatuses.filter((file) => file.id !== fileId)
-      );
+  
+      if (!response.ok) {
+        throw new Error("Failed to delete file");
+      }
+  
+      setTransferedFiles((prevFiles) => prevFiles.filter((file) => file.id !== fileId));
     } catch (error) {
       console.error("Error deleting file:", error);
     }
-  };
+  };  
 
   return (
     <div className="p-6 min-h-screen">
@@ -193,7 +194,7 @@ const TransferedFile = () => {
               </button>
               <button
                 onClick={handleTransfer}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg"
               >
                 Transfer
               </button>

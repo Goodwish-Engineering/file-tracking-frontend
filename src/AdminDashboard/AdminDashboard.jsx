@@ -5,6 +5,7 @@ import FileStatus from "../Components/FileStatus";
 import Notification from "../Components/Notification";
 import UserDetails from "../EmployeeDashboard/UserDetails";
 import AddOffice from "./AddOffice";
+import DeletedFile from "../Components/DeletedFile";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
@@ -182,9 +183,17 @@ const AdminDashboard = () => {
               onClick={() => handleTabChange("transfered")}
               className={`cursor-pointer ${
                 tab === "transfered" ? "bg-[#E68332] text-white" : ""
-              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
+              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2`}
             >
               स्थानान्तरण गरिएको फाइल
+            </h3>
+            <h3
+              onClick={() => handleTabChange("deleted-files")}
+              className={`cursor-pointer ${
+                tab === "deleted-files" ? "bg-[#E68332] text-white" : ""
+              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-left flex items-center gap-2`}
+            >
+              देलितेत फाइल
             </h3>
             <button
               onClick={() => handleTabChange("notification")}
@@ -292,6 +301,14 @@ const AdminDashboard = () => {
           >
             स्थानान्तरण गरिएको फाइल
           </h3>
+          <h3
+            onClick={() => handleTabChange("deleted-files")}
+            className={`cursor-pointer ${
+              tab === "deleted-files" ? "bg-[#E68332] text-white" : ""
+            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
+          >
+            देलितेत फाइल
+          </h3>
 
           <button
             onClick={() => handleTabChange("notification")}
@@ -327,6 +344,7 @@ const AdminDashboard = () => {
         {tab === "add-office" && <AddOffice />}
         {tab === "nontransfer3" && <NonTransferFile3 />}
         {tab === "transfered" && <TransferedFile />}
+        {tab === "deleted-files" && <DeletedFile/>}
       </div>
     </div>
   );

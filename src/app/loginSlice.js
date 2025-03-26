@@ -7,7 +7,7 @@ const storedLoginStatus = JSON.parse(localStorage.getItem("isLogin") || "false")
 const initialState = {
   isLogin: storedLoginStatus, 
   user: storedUser, 
-  baseUrl: "https://file-tracking.goodwish.com.np/api",
+  baseUrl: "https://fts.guthisansthan.org.np/api",
 };
 
 export const loginSlice = createSlice({

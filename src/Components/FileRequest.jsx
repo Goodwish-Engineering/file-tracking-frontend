@@ -20,22 +20,30 @@ const FileRequest = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const level = localStorage.getItem("level");
+  const officeId = localStorage.getItem("officeid");
 
   useEffect(() => {
     fetchData();
     fetchAdmins();
     fetchOffices();
-  }, []);
-
-  // Reset department when office changes
-  useEffect(() => {
-    setSelectedDepartment("");
-    if (selectedOffice) {
-      fetchDepartments(selectedOffice);
-    } else {
-      setDepartments([]);
+    
+    // For level 2 users, fetch departments for their office immediately
+    if (level === "2" && officeId) {
+      fetchDepartments(officeId);
     }
-  }, [selectedOffice]);
+  }, [level, officeId]);
+
+  // Reset department when office changes (for non-level 2 users)
+  useEffect(() => {
+    if (level !== "2") {
+      setSelectedDepartment("");
+      if (selectedOffice) {
+        fetchDepartments(selectedOffice);
+      } else {
+        setDepartments([]);
+      }
+    }
+  }, [selectedOffice, level]);
 
   const fetchAdmins = async () => {
     try {
@@ -50,6 +58,7 @@ const FileRequest = () => {
       console.error("Error fetching admins:", error);
     }
   };
+  
   const fetchData = async () => {
     try {
       const response = await fetch(`${baseUrl}/file/`, {
@@ -101,7 +110,16 @@ const FileRequest = () => {
         throw new Error("Network response was not ok");
       }
       const data = await response.json();
-      setDepartments(data.departments || []);
+      
+      // For level 2 users, filter out office departments
+      let departmentsToSet = data.departments || [];
+      if (level === "2") {
+        departmentsToSet = departmentsToSet.filter(
+          department => department.type !== "office"
+        );
+      }
+      
+      setDepartments(departmentsToSet);
     } catch (error) {
       console.error("Error fetching departments:", error);
       setDepartments([]);
@@ -113,25 +131,51 @@ const FileRequest = () => {
   const handleOpenTransferModal = (fileId) => {
     setFileToTransfer(fileId);
     setIsModalOpen(true);
-    setSelectedOffice("");
-    setSelectedDepartment("");
-    setDepartments([]);
+    
+    if (level !== "2") {
+      // Reset selections for non-level-2 users
+      setSelectedOffice("");
+      setSelectedDepartment("");
+      setDepartments([]);
+    } else {
+      // For level 2 users, keep department selections but reset the selected department
+      setSelectedDepartment("");
+    }
   };
 
   const handleTransfer = async () => {
-    if (!selectedOffice) {
-      alert("Please select an office");
-      return;
+    // For level 2 users, validate department is selected
+    if (level === "2") {
+      if (!selectedDepartment) {
+        alert("Please select a department");
+        return;
+      }
+    } else {
+      // For other users, validate office is selected
+      if (!selectedOffice) {
+        alert("Please select an office");
+        return;
+      }
     }
 
     setIsLoading(true);
     try {
-      const payload = {
-        related_office: selectedOffice,
-      };
-
-      if (selectedDepartment) {
-        payload.related_department = selectedDepartment;
+      let payload = {};
+      
+      if (level === "2") {
+        // For level 2 users, only send department
+        payload = {
+          related_department: selectedDepartment
+        };
+      } else {
+        // For other users, send office and optionally department
+        payload = {
+          related_office: selectedOffice
+        };
+        
+        if (selectedDepartment) {
+          payload.related_department = selectedDepartment;
+        }
       }
 
       const response = await fetch(
@@ -192,8 +236,6 @@ const FileRequest = () => {
     }
   };
 
-  console.log("user type:" +level);
-
   return (
     <div className="p-6 min-h-screen">
       <h2 className="text-xl font-bold text-orange-600 mb-4">फाइल अनुरोध</h2>
@@ -252,23 +294,11 @@ const FileRequest = () => {
                   </td>
                   <td className="px-4 py-4 gap-2 border-none bg-gray-50 flex justify-center items-center rounded-r-xl">
                     <button
-                      onClick={() => {
-                        setFileToTransfer(file.id);
-                        setIsModalOpen(true);
-                      }}
+                      onClick={() => handleOpenTransferModal(file.id)}
                       className="bg-[#B3F8CC] hover:bg-[#84be99] text-black px-3 py-1 rounded-lg transition-all"
                     >
                       Transfer
                     </button>
-                    {/* <button
-                      onClick={() => {
-                        setFileToAccept(file.id);
-                        setIsAcceptModalOpen(true);
-                      }}
-                      className="bg-[#b3c9f8] hover:bg-[#8a9fcb] text-black px-3 py-1 rounded-lg transition-all"
-                    >
-                      Approve
-                    </button> */}
                     {level !== "2" && (
                       <button
                         onClick={() => {
@@ -298,66 +328,98 @@ const FileRequest = () => {
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
             <h3 className="text-xl font-bold mb-4">Transfer File</h3>
             <div className="mb-4">
-              <label className="block mb-4">
-                <span className="text-gray-700">Select Office:</span>
-                <select
-                  value={selectedOffice}
-                  onChange={(e) => setSelectedOffice(e.target.value)}
-                  className="mt-1 block w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  disabled={isLoading}
-                >
-                  <option value="">Select an Office</option>
-                  {offices.map((office) => (
-                    <option key={office.id} value={office.id}>
-                      {office.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              {level === "2" ? (
+                <>
+                  <label className="block">
+                    <span className="text-gray-700">Select Department:</span>
+                    <select
+                      onChange={(e) => setSelectedDepartment(e.target.value)}
+                      value={selectedDepartment}
+                      className="mt-1 block w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      disabled={isLoading}
+                    >
+                      <option value="">Select a Department</option>
+                      {departments.length > 0 ? (
+                        departments.map((department) => (
+                          <option key={department.id} value={department.id}>
+                            {department.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>{isLoading ? "Loading departments..." : "No departments available"}</option>
+                      )}
+                    </select>
+                  </label>
+                </>
+              ) : (
+                <>
+                  {/* Other users see both office and department selection */}
+                  <label className="block mb-4">
+                    <span className="text-gray-700">Select Office:</span>
+                    <select
+                      value={selectedOffice}
+                      onChange={(e) => setSelectedOffice(e.target.value)}
+                      className="mt-1 block w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      disabled={isLoading}
+                    >
+                      <option value="">Select an Office</option>
+                      {offices.map((office) => (
+                        <option key={office.id} value={office.id}>
+                          {office.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
 
-              <label className="block">
-                <span className="text-gray-700">Select Department:</span>
-                <select
-                  onChange={(e) => setSelectedDepartment(e.target.value)}
-                  value={selectedDepartment}
-                  className="mt-1 block w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                  disabled={!selectedOffice || isLoading}
-                >
-                  <option value="">Select a Department</option>
-                  {departments.length > 0 ? (
-                    departments.map((department) => (
-                      <option key={department.id} value={department.id}>
-                        {department.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>
-                      {isLoading
-                        ? "Loading departments..."
-                        : selectedOffice
-                        ? "No departments available for this office"
-                        : "Please select an office first"}
-                    </option>
-                  )}
-                </select>
-              </label>
+                  <label className="block">
+                    <span className="text-gray-700">Select Department:</span>
+                    <select
+                      onChange={(e) => setSelectedDepartment(e.target.value)}
+                      value={selectedDepartment}
+                      className="mt-1 block w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                      disabled={!selectedOffice || isLoading}
+                    >
+                      <option value="">Select a Department</option>
+                      {departments.length > 0 ? (
+                        departments.map((department) => (
+                          <option key={department.id} value={department.id}>
+                            {department.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>
+                          {isLoading
+                            ? "Loading departments..."
+                            : selectedOffice
+                            ? "No departments available for this office"
+                            : "Please select an office first"}
+                        </option>
+                      )}
+                    </select>
+                  </label>
+                </>
+              )}
             </div>
             <div className="flex justify-end space-x-4">
               <button
                 onClick={() => {
                   setIsModalOpen(false);
-                  setSelectedOffice("");
+                  if (level !== "2") {
+                    setSelectedOffice("");
+                  }
                   setSelectedDepartment("");
                 }}
                 className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-lg"
+                disabled={isLoading}
               >
                 Cancel
               </button>
               <button
                 onClick={handleTransfer}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                disabled={isLoading || (level === "2" ? !selectedDepartment : !selectedOffice)}
               >
-                Transfer
+                {isLoading ? "Transferring..." : "Transfer"}
               </button>
             </div>
           </div>

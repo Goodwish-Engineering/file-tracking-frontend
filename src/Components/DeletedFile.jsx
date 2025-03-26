@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-const FileStatus = () => {
+const DeletedFile = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
   const [fileStatuses, setFileStatuses] = useState([]);
@@ -21,7 +21,7 @@ const FileStatus = () => {
         },
       });
       const data = await response.json();
-      const filteredData = data.filter(file => file.is_disabled === false);
+      const filteredData = data.filter(file => file.is_disabled === true);
       setFileStatuses(filteredData);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -122,4 +122,4 @@ const FileStatus = () => {
   );
 };
 
-export default FileStatus;
+export default DeletedFile;

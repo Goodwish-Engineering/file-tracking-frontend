@@ -90,7 +90,7 @@ const StarredTab = ({ onToggleStarred }) => {
         </ul>
       ) : (
         <p className="text-md p-4 border-b border-gray-200 text-gray-900">
-          No new notifications
+          No starred notifications
         </p>
       )}
     </div>

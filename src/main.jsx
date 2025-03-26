@@ -14,6 +14,7 @@ import VeiwMoreFileDetails from "./Components/VeiwMoreFileDetails.jsx";
 import EmployeHeader from "./EmployeeDashboard/EmployeeHeader.jsx";
 import UserDetails from "./EmployeeDashboard/UserDetails.jsx";
 import AddDepartOfOffice from "./AdminDashboard/AddDepartOfOffice.jsx";
+import FileHistory from "./Components/FileHistory.jsx";
 const router = createBrowserRouter([
   {
     element: <App />,
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
       { element: <EmployeHeader/>, path:"/employeeheader"},
       { element: <UserDetails/>, path:'/userDetails'},
       { element: <AddDepartOfOffice/>, path:'/addDepartment/:officeId'},
+      { element: <FileHistory/>, path: "/file-history/:id"},
     ],
   },
 ]);

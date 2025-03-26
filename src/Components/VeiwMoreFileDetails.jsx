@@ -13,7 +13,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 
 const ViewMoreFileDetails = () => {
   const { id } = useParams();
-  console.log(id);
+  // console.log(id);
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const [fileDetails, setFileDetails] = useState(null);
   const [isTippaniModalOpen, setIsTippaniModalOpen] = useState(false);
@@ -437,7 +437,7 @@ const ViewMoreFileDetails = () => {
             </div>
             {editable && (
               <button
-                className="mt-4 px-4 py-2 bg-green-500 text-white rounded"
+                className="mt-4 px-4 py-2 bg-[#E68332] text-white rounded"
                 onClick={() => setIsTippaniModalOpen(true)}
               >
                 Add Tippani
@@ -578,7 +578,7 @@ const ViewMoreFileDetails = () => {
             </div>
             {editable && (
               <button
-                className="mt-4 px-4 py-2 bg-green-500 text-white rounded"
+                className="mt-4 px-4 py-2 bg-[#E68332] text-white rounded"
                 onClick={() => setIsDocumentModalOpen(true)}
               >
                 Add Document
