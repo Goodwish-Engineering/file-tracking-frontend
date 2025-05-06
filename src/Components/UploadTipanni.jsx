@@ -24,7 +24,7 @@ const UploadTipanni = () => {
           }}
           className="flex items-end justify-end "
         >
-          <button className="cursor-pointer px-3 py-1 right-1 bg-[#E68332] rounded-lg text-white fixed top-3 ">Add New file</button>
+          <button className="cursor-pointer px-3 py-1 md:mt-2 mt-8 right-2 top-12 bg-[#E68332] rounded-lg text-white fixed md:top-3 ">Add New file</button>
           {/* <FontAwesomeIcon icon={faFile} /> */}
         </div>
       )}

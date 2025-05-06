@@ -37,6 +37,9 @@ const PanjikaDocumentsForm = () => {
       });
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
+      if(response.status === 201) {
+        alert("Panjika documents added successfully");
+      }
       setFormData({
         registration_no: "",
         invoice_no: "",
@@ -44,7 +47,7 @@ const PanjikaDocumentsForm = () => {
         letter_date: "",
         subject: "",
         office: "",
-        page_no: 0,
+        page_no: "",
         tippani: "",
         related_file: fileId,
       });
@@ -146,14 +149,14 @@ const PanjikaDocumentsForm = () => {
         >
           पेश गर्नुहोस्
         </button>
-        {showNewForm && (
+        {/* {showNewForm && (
           <button
             onClick={() => setShowNewForm(false)}
             className="mt-4 bg-[#B3F8CC] text-white px-4 rounded-lg py-2 hover:bg-[#89c29e]"
           >
             अर्को पेश गर्नुहोस्
           </button>
-        )}
+        )} */}
       </div>
     </div>
   );

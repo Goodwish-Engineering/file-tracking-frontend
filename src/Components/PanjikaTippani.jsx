@@ -48,6 +48,7 @@ const PanjikaTippani = () => {
         page_no: "",
         related_file: fileId,
       });
+      alert("Panjika Tippani added successfully");
     } catch (error) {
       console.error("Error saving Tippani:", error);
     }
@@ -95,14 +96,14 @@ const PanjikaTippani = () => {
           पेश गर्नुहोस्
         </button>
 
-        {showAddButton && (
+        {/* {showAddButton && (
           <button
             onClick={addNewForm}
             className="mt-1 bg-[#B3F8CC] text-white px-4 py-2 rounded-lg hover:bg-[#89c29e]"
           >
             अर्को पेश गर्नुहोस्
           </button>
-        )}
+        )} */}
       </div>
     </div>
   );
