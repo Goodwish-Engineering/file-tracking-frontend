@@ -47,7 +47,7 @@ const FileStatus = () => {
       <div className="flex justify-between items-center mb-4">
         <input
           type="text"
-          placeholder="Search by ID, File No, Name, or Subject..."
+          placeholder="आईडी, फाइल नम्बर, नाम, वा विषयद्वारा खोज्नुहोस्..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="p-2 border rounded-lg focus:border-blue-600 w-1/3"
@@ -67,7 +67,7 @@ const FileStatus = () => {
                 फाइलको नाम 
               </th>
               <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
-                बिषय 
+                विषय 
               </th>
               <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
                 फाइल आएको समय
@@ -94,13 +94,13 @@ const FileStatus = () => {
                       onClick={() => navigate(`/file-details/${file.id}`)}
                       className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg transition-all"
                     >
-                      View More
+                      थप हेर्नुहोस्
                     </button>
                     <button
                       onClick={()=> navigate(`/file-history/${file.id}`)}
                       className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg transition-all"
                       >
-                      View History
+                      इतिहास हेर्नुहोस्
                     </button>
                   </td>
                 </tr>
@@ -111,7 +111,7 @@ const FileStatus = () => {
                   colSpan="6"
                   className="p-4 text-center text-gray-600 border-none border-b-2"
                 >
-                  No files available.
+                  कुनै फाइलहरू उपलब्ध छैनन्。
                 </td>
               </tr>
             )}
