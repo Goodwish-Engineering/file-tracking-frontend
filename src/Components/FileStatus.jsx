@@ -7,6 +7,7 @@ const FileStatus = () => {
   const token = localStorage.getItem("token");
   const [fileStatuses, setFileStatuses] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("all"); // Track the active tab: "all", "chaalu", "tameli"
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,29 +22,81 @@ const FileStatus = () => {
         },
       });
       const data = await response.json();
-      const filteredData = data.filter(file => file.is_disabled === false);
+      const filteredData = data.filter((file) => file.is_disabled === false);
       setFileStatuses(filteredData);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
-  const filteredFiles = fileStatuses.filter((file) =>
-    searchQuery
-      .toLowerCase()
-      .split(" ")
-      .every((query) =>
-        [
-          file.file_name.toLowerCase(),
-          file.subject.toLowerCase(),
-          String(file.id),
-          String(file.file_number),
-        ].some((field) => field.includes(query))
-      )
-  );
+  // Filter files based on search query and active tab
+  const getFilteredFiles = () => {
+    // First filter by search query
+    const searchFiltered = fileStatuses.filter((file) =>
+      searchQuery
+        .toLowerCase()
+        .split(" ")
+        .every((query) =>
+          [
+            file.file_name?.toLowerCase() || "",
+            file.subject?.toLowerCase() || "",
+            String(file.id),
+            String(file.file_number),
+          ].some((field) => field.includes(query))
+        )
+    );
+
+    // Then filter by file type
+    if (activeTab === "all") {
+      return searchFiltered;
+    } else if (activeTab === "chaalu") {
+      return searchFiltered.filter((file) => file.file_type === "चालु");
+    } else if (activeTab === "tameli") {
+      return searchFiltered.filter((file) => file.file_type === "तामेली");
+    }
+
+    return searchFiltered;
+  };
+
+  const filteredFiles = getFilteredFiles();
 
   return (
     <div className="p-6 min-h-screen">
+      {/* Tab navigation - removed "others" tab */}
+      <div className="flex mb-6 border-b border-gray-200 overflow-x-auto">
+        <button
+          className={`py-2 px-4 font-medium border-b-2 mr-2 ${
+            activeTab === "all"
+              ? "border-[#E68332] text-[#E68332]"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+          onClick={() => setActiveTab("all")}
+        >
+          सबै फाइलहरू
+        </button>
+        <button
+          className={`py-2 px-4 font-medium border-b-2 mr-2 ${
+            activeTab === "chaalu"
+              ? "border-[#E68332] text-[#E68332]"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+          onClick={() => setActiveTab("chaalu")}
+        >
+          चालु फाइलहरू
+        </button>
+        <button
+          className={`py-2 px-4 font-medium border-b-2 ${
+            activeTab === "tameli"
+              ? "border-[#E68332] text-[#E68332]"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+          onClick={() => setActiveTab("tameli")}
+        >
+          तामेली फाइलहरू
+        </button>
+      </div>
+
+      {/* Search bar */}
       <div className="flex justify-between items-center mb-4">
         <input
           type="text"
@@ -52,7 +105,15 @@ const FileStatus = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="p-2 border rounded-lg focus:border-blue-600 w-1/3"
         />
+
+        {/* File count display */}
+        <div className="text-gray-600">
+          कुल फाइलहरू:{" "}
+          <span className="font-medium">{filteredFiles.length}</span>
+        </div>
       </div>
+
+      {/* Files table */}
       <div className="overflow-x-auto">
         <table className="w-full mx-auto shadow-md rounded-lg border-none border-separate border-spacing-y-4">
           <thead className="text-gray-800">
@@ -64,16 +125,19 @@ const FileStatus = () => {
                 फाइल नं
               </th>
               <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
-                फाइलको नाम 
+                फाइलको नाम
               </th>
               <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
-                विषय 
+                विषय
+              </th>
+              <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
+                फाइल प्रकार
               </th>
               <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
                 फाइल आएको समय
               </th>
               <th className="p-3 text-center border-none text-nowrap font-normal text-md text-gray-700">
-                कार्य 
+                कार्य
               </th>
             </tr>
           </thead>
@@ -84,11 +148,40 @@ const FileStatus = () => {
                   key={file.id}
                   className="text-black text-center my-4 gap-5 shadow-gray-100 text-nowrap border-none shadow-[4px_4px_5px_rgba(0,0,0,0.2)] rounded-lg"
                 >
-                  <td className="py-4 px-4 border-none bg-gray-50 rounded-l-xl">{file.id}</td>
-                  <td className="py-4 px-4 border-none bg-gray-50">{file.file_number}</td>
-                  <td className="py-4 px-4 border-none bg-gray-50">{file.file_name}</td>
-                  <td className="py-4 px-4 border-none bg-gray-50">{file.subject}</td>
-                  <td className="py-4 px-4 border-none bg-gray-50">{file.days_submitted}</td>
+                  <td className="py-4 px-4 border-none bg-gray-50 rounded-l-xl">
+                    {file.id}
+                  </td>
+                  <td className="py-4 px-4 border-none bg-gray-50">
+                    {file.file_number}
+                  </td>
+                  <td className="py-4 px-4 border-none bg-gray-50">
+                    {file.file_name}
+                  </td>
+                  <td className="py-4 px-4 border-none bg-gray-50">
+                    {file.subject}
+                  </td>
+                  <td className="py-4 px-4 border-none bg-gray-50">
+                    {file.file_type ? (
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          file.file_type === "चालु"
+                            ? "bg-green-100 text-green-800"
+                            : file.file_type === "तामेली"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {file.file_type}
+                      </span>
+                    ) : (
+                      <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">
+                        अवर्गीकृत
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-4 px-4 border-none bg-gray-50">
+                    {file.days_submitted}
+                  </td>
                   <td className="py-4 px-4 border-none bg-gray-50 flex justify-center items-center gap-4 rounded-r-xl">
                     <button
                       onClick={() => navigate(`/file-details/${file.id}`)}
@@ -97,9 +190,9 @@ const FileStatus = () => {
                       थप हेर्नुहोस्
                     </button>
                     <button
-                      onClick={()=> navigate(`/file-history/${file.id}`)}
+                      onClick={() => navigate(`/file-history/${file.id}`)}
                       className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg transition-all"
-                      >
+                    >
                       इतिहास हेर्नुहोस्
                     </button>
                   </td>
@@ -108,7 +201,7 @@ const FileStatus = () => {
             ) : (
               <tr className="border-none border-t-0 border-b-2 border-white">
                 <td
-                  colSpan="6"
+                  colSpan="7"
                   className="p-4 text-center text-gray-600 border-none border-b-2"
                 >
                   कुनै फाइलहरू उपलब्ध छैनन्。
