@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { NepaliDatePicker } from "nepali-datepicker-reactjs";
+import "nepali-datepicker-reactjs/dist/index.css";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
@@ -20,12 +24,30 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
   });
 
   const [showNewForm, setShowNewForm] = useState(false);
+  const [datePickerKey, setDatePickerKey] = useState(0);
+
+  // Helper to get today's BS date string (manual calculation fallback)
+  const getTodayBS = () => {
+    // Use today's AD date and format as YYYY-MM-DD for fallback
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
 
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: files ? files[0] : value, // Handle file input
+    }));
+  };
+
+  const handleNepaliDateChange = (field, value, bsDate) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: bsDate || value,
     }));
   };
 
@@ -65,10 +87,11 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
 
       setShowNewForm(true);
 
-      alert("Letters and document added successfully");
+      toast.success("Letters and document added successfully");
       window.location.reload();
     } catch (error) {
       console.error("Error submitting form:", error);
+      toast.error(`Error: ${error.message}`);
     }
   };
 
@@ -102,21 +125,34 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
               { label: "विषय", name: "subject", type: "text" },
               { label: "पत्र मिति", name: "letter_date", type: "date" },
               { label: "कार्यालय", name: "office", type: "text" },
-              { label: "पृष्ठ नं", name: "page_no", type: "number" },
+              { label: "पाना संख्या", name: "page_no", type: "number" },
               { label: "फाइल", name: "file", type: "file" },
             ].map(({ label, name, type }) => (
               <div key={name} className="mb-2">
                 <label className="block text-gray-800 mb-2">{label}</label>
-                <input
-                  type={type}
-                  name={name}
-                  value={type !== "file" ? formData[name] : undefined} // Ensure file input does not have a value
-                  onChange={handleInputChange}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  {...(type === "file"
-                    ? { accept: "application/pdf, image/*" }
-                    : {})} // Accept PDFs and images
-                />
+                {type === "date" ? (
+                  <NepaliDatePicker
+                    key={datePickerKey + name}
+                    inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    value={formData[name] || getTodayBS()}
+                    onChange={(value, { bsDate }) =>
+                      handleNepaliDateChange(name, value, bsDate)
+                    }
+                    options={{ calenderLocale: "ne", valueLocale: "bs" }}
+                    name={name}
+                  />
+                ) : (
+                  <input
+                    type={type}
+                    name={name}
+                    value={type !== "file" ? formData[name] : undefined}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded"
+                    {...(type === "file"
+                      ? { accept: "application/pdf, image/*" }
+                      : {})} // Accept PDFs and images
+                  />
+                )}
               </div>
             ))}
           </div>

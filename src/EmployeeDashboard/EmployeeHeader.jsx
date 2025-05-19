@@ -23,6 +23,8 @@ const EmployeHeader = () => {
   const [tab, setTab] = useState("notification");
   const [menue, setMenu] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [fileType, setFileType] = useState(""); // NEW: Track file type for upload
+  const [fileUploadDropdownOpen, setFileUploadDropdownOpen] = useState(false); // Add a state to control the file upload dropdown open/close
   const level = localStorage.getItem("level");
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
@@ -53,7 +55,7 @@ const EmployeHeader = () => {
   };
 
   // Reusable NavItem component for both mobile and desktop
-  const NavItem = ({ onClick, isActive, icon, label }) => {
+  const NavItem = ({ onClick, isActive, icon, label, children }) => {
     return (
       <div
         onClick={onClick}
@@ -61,10 +63,11 @@ const EmployeHeader = () => {
           isActive
             ? "bg-[#E68332] text-white"
             : "text-black hover:bg-[#E68332] hover:text-white"
-        } font-normal text-lg px-3 my-3 py-2 rounded-md flex items-center gap-2`}
+        } font-normal text-lg px-3 my-3 py-2 rounded-md flex items-center gap-2 relative`}
       >
         {icon}
         <span>{label}</span>
+        {children}
       </div>
     );
   };
@@ -83,13 +86,49 @@ const EmployeHeader = () => {
               />
             </div>
             {level === "1" && (
-              <NavItem
-                className="text-md font-normal"
-                onClick={() => setTab("uploadTippani")}
-                isActive={tab === "uploadTippani"}
-                icon={<FaFile className="text-lg font-normal" />}
-                label="फाइल अपलोड"
-              />
+              <div>
+                {/* Sidebar Dropdown for फाइल अपलोड */}
+                <div className="relative">
+                  <NavItem
+                    onClick={() => setFileUploadDropdownOpen((prev) => !prev)}
+                    isActive={tab === "uploadTippani"}
+                    icon={<FaFile className="text-lg font-normal" />}
+                    label="फाइल अपलोड"
+                  />
+                  {fileUploadDropdownOpen && (
+                    <div className="ml-8 mt-1 flex flex-col gap-1">
+                      <button
+                        className={`text-left px-4 py-2 rounded hover:bg-orange-100 transition ${
+                          tab === "uploadTippani" && fileType === "चालु"
+                            ? "bg-[#E68332] text-white"
+                            : "text-black"
+                        }`}
+                        onClick={() => {
+                          setTab("uploadTippani");
+                          setFileType("चालु");
+                          setFileUploadDropdownOpen(true);
+                        }}
+                      >
+                        चालु फाइल
+                      </button>
+                      <button
+                        className={`text-left px-4 py-2 rounded hover:bg-orange-100 transition ${
+                          tab === "uploadTippani" && fileType === "तामेली"
+                            ? "bg-[#E68332] text-white"
+                            : "text-black"
+                        }`}
+                        onClick={() => {
+                          setTab("uploadTippani");
+                          setFileType("तामेली");
+                          setFileUploadDropdownOpen(true);
+                        }}
+                      >
+                        तामेली फाइल
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
             <NavItem
               onClick={() => setTab("veiwStatus")}
@@ -196,12 +235,39 @@ const EmployeHeader = () => {
 
         <div className="flex flex-col mt-6 px-4 text-gray-900">
           {level === "1" && (
-            <NavItem
-              onClick={() => handleTabChange("uploadTippani")}
-              isActive={tab === "uploadTippani"}
-              icon={<FaFile className="text-lg" />}
-              label="फाइल अपलोड"
-            />
+            <div>
+              <NavItem
+                isActive={tab === "uploadTippani"}
+                icon={<FaFile className="text-lg" />}
+                label="फाइल अपलोड"
+              >
+                {/* Dropdown for file type */}
+                <div className="absolute left-full top-0 ml-2 bg-white border rounded shadow z-50 min-w-[120px]">
+                  <div
+                    className="px-4 py-2 hover:bg-orange-100 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTab("uploadTippani");
+                      setFileType("चालु");
+                      setMenu(false);
+                    }}
+                  >
+                    चालु फाइल
+                  </div>
+                  <div
+                    className="px-4 py-2 hover:bg-orange-100 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTab("uploadTippani");
+                      setFileType("तामेली");
+                      setMenu(false);
+                    }}
+                  >
+                    तामेली फाइल
+                  </div>
+                </div>
+              </NavItem>
+            </div>
           )}
           <NavItem
             onClick={() => handleTabChange("veiwStatus")}
@@ -254,7 +320,7 @@ const EmployeHeader = () => {
 
       {/* Content Area - takes full width on mobile, partial width on desktop */}
       <div className="w-full md:w-[83%] flex flex-col p-4">
-        {tab === "uploadTippani" && <UploadTipanni />}
+        {tab === "uploadTippani" && <UploadTipanni fileType={fileType} />}
         {tab === "veiwStatus" && <FileStatus />}
         {tab === "nontransfer" && <NonTransferFile />}
         {tab === "filerequest" && <FileRequest />}

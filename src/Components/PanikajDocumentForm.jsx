@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { NepaliDatePicker } from "nepali-datepicker-reactjs";
+import "nepali-datepicker-reactjs/dist/index.css";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PanjikaDocumentsForm = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
@@ -18,10 +22,18 @@ const PanjikaDocumentsForm = () => {
     tippani: "",
     related_file: fileId,
   });
+  const [datePickerKey, setDatePickerKey] = useState(0);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleNepaliDateChange = (field, value, bsDate) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: bsDate || value,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -38,7 +50,7 @@ const PanjikaDocumentsForm = () => {
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
       if(response.status === 201) {
-        alert("Panjika documents added successfully");
+        toast.success("Panjika documents added successfully");
       }
       setFormData({
         registration_no: "",
@@ -54,6 +66,7 @@ const PanjikaDocumentsForm = () => {
       setShowNewForm(true);
     } catch (error) {
       console.error("Error submitting form:", error);
+      toast.error(`Error: ${error.message}`);
     }
   };
 
@@ -109,28 +122,32 @@ const PanjikaDocumentsForm = () => {
         </div>
         <div>
           <label className="block text-gray-800">मिति</label>
-          <input
-            type="date"
+          <NepaliDatePicker
+            key={datePickerKey + "date"}
+            inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+            value={formData.date || ""}
+            onChange={(value, { bsDate }) =>
+              handleNepaliDateChange("date", value, bsDate)
+            }
+            options={{ calenderLocale: "ne", valueLocale: "bs" }}
             name="date"
-            value={formData.date}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
-            required
           />
         </div>
         <div>
           <label className="block text-gray-800">पत्र मिति</label>
-          <input
-            type="date"
+          <NepaliDatePicker
+            key={datePickerKey + "letter_date"}
+            inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+            value={formData.letter_date || ""}
+            onChange={(value, { bsDate }) =>
+              handleNepaliDateChange("letter_date", value, bsDate)
+            }
+            options={{ calenderLocale: "ne", valueLocale: "bs" }}
             name="letter_date"
-            value={formData.letter_date}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
-            required
           />
         </div>
         <div>
-          <label className="block text-gray-800">कुल पृष्ठहरू</label>
+          <label className="block text-gray-800">कुल पाना संख्या</label>
           <input
             type="number"
             name="page_no"

@@ -7,6 +7,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import TippaniFormModal from "./TippaniFormModal";
 import DocumentFormModal from "./DocumentFormModal";
 import { IoMdArrowRoundBack } from "react-icons/io";
@@ -137,11 +139,10 @@ const ViewMoreFileDetails = () => {
       await fetchFileDetails();
       
       setEditable(false);
-      console.log(response);
-      alert("Changes saved successfully!");
+      toast.success("Changes saved successfully!");
     } catch (error) {
       console.error("Error updating file:", error);
-      alert(`Failed to save changes: ${error.message}`);
+      toast.error(`Failed to save changes: ${error.message}`);
     }
   };
 
@@ -418,210 +419,176 @@ const ViewMoreFileDetails = () => {
                         )}
                       </td>
                       <td className="py-2 px-4 border-none">
-                        {editable ? (
-                          <input
-                            type="number"
-                            value={tip.page_no || ""}
-                            onChange={(e) =>
-                              handleChange(e, "page_no", index, "tippani")
-                            }
-                          />
-                        ) : (
-                          tip.page_no || "N/A"
-                        )}
+                        {tip.page_no || "N/A"}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            {editable && (
+            {/* Add Tippani button */}
+            <div className="flex justify-end mt-4">
               <button
-                className="mt-4 px-4 py-2 bg-[#E68332] text-white rounded"
                 onClick={() => setIsTippaniModalOpen(true)}
+                className="px-4 py-2 bg-[#E68332] text-white font-semibold rounded-md shadow-md hover:bg-[#d37524] transition-all duration-200"
               >
                 Add Tippani
               </button>
-            )}
-          </div>
-
-          {/* Letters and Documents Table */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-[#E68332] mb-4">
-              Letters and Documents
-            </h2>
-            <div className="overflow-auto max-h-[400px] rounded-t-lg">
-              <table className="min-w-full table-auto border-none bg-gray-100 overflow-hidden">
-                <thead>
-                  <tr className="bg-[#E68332] text-white border-b-2 border-gray-300 text-nowrap">
-                    <th className="py-2 px-4 text-left border-none">
-                      Registration No
-                    </th>
-                    <th className="py-2 px-4 text-left border-none">
-                      Chalani No
-                    </th>
-                    <th className="py-2 px-4 text-left border-none">Date</th>
-                    <th className="py-2 px-4 text-left border-none">Subject</th>
-                    <th className="py-2 px-4 text-left border-none">
-                      Letter Date
-                    </th>
-                    <th className="py-2 px-4 text-left border-none">Office</th>
-                    <th className="py-2 px-4 text-left border-none">Page No</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {letters_and_documents.map((doc, index) => (
-                    <tr
-                      key={index}
-                      className="border-b-2 border-gray-300 text-center"
-                    >
-                      <td className="py-2 px-4 border-none">
-                        {editable ? (
-                          <input
-                            type="text"
-                            value={doc.registration_no || ""}
-                            onChange={(e) =>
-                              handleChange(
-                                e,
-                                "registration_no",
-                                index,
-                                "document"
-                              )
-                            }
-                          />
-                        ) : (
-                          doc.registration_no || "N/A"
-                        )}
-                      </td>
-                      <td className="py-2 px-4 border-none">
-                        {editable ? (
-                          <input
-                            type="text"
-                            value={doc.invoice_no || ""}
-                            onChange={(e) =>
-                              handleChange(e, "invoice_no", index, "document")
-                            }
-                          />
-                        ) : (
-                          doc.invoice_no || "N/A"
-                        )}
-                      </td>
-                      <td className="py-2 px-4 border-none">
-                        {editable ? (
-                          <input
-                            type="date"
-                            value={doc.date || ""}
-                            onChange={(e) =>
-                              handleChange(e, "date", index, "document")
-                            }
-                          />
-                        ) : (
-                          doc.date || "N/A"
-                        )}
-                      </td>
-                      <td className="py-2 px-4 border-none">
-                        {editable ? (
-                          <input
-                            type="text"
-                            value={doc.subject || ""}
-                            onChange={(e) =>
-                              handleChange(e, "subject", index, "document")
-                            }
-                          />
-                        ) : (
-                          doc.subject || "N/A"
-                        )}
-                      </td>
-                      <td className="py-2 px-4 border-none">
-                        {editable ? (
-                          <input
-                            type="date"
-                            value={doc.letter_date || ""}
-                            onChange={(e) =>
-                              handleChange(e, "letter_date", index, "document")
-                            }
-                          />
-                        ) : (
-                          doc.letter_date || "N/A"
-                        )}
-                      </td>
-                      <td className="py-2 px-4 border-none">
-                        {editable ? (
-                          <input
-                            type="text"
-                            value={doc.office || ""}
-                            onChange={(e) =>
-                              handleChange(e, "office", index, "document")
-                            }
-                          />
-                        ) : (
-                          doc.office || "N/A"
-                        )}
-                      </td>
-                      <td className="py-2 px-4 border-none">
-                        {editable ? (
-                          <input
-                            type="text"
-                            value={doc.page_no || ""}
-                            onChange={(e) =>
-                              handleChange(e, "page_no", index, "document")
-                            }
-                          />
-                        ) : (
-                          doc.page_no || "N/A"
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {editable && (
-              <button
-                className="mt-4 px-4 py-2 bg-[#E68332] text-white rounded"
-                onClick={() => setIsDocumentModalOpen(true)}
-              >
-                Add Document
-              </button>
-            )}
-
-            {/* edit button */}
-            {editable && (
-              <div className="mt-4 flex justify-center">
-                <button
-                  className="px-6 py-2 bg-[#E68332] text-white rounded"
-                  onClick={handleSave}
-                >
-                  Save Changes
-                </button>
-              </div>
-            )}
-
-            <div className="mt-4 text-center">
-              <button
-                className="px-6 py-2 bg-[#E68332] text-white rounded"
-                onClick={handleEditToggle}
-              >
-                {editable ? "Cancel" : "Edit"}
-              </button>
             </div>
           </div>
-
-          <TippaniFormModal
-            isOpen={isTippaniModalOpen}
-            onClose={() => setIsTippaniModalOpen(false)}
-            onSubmit={addTippani}
-            fileId={id}
-          />
-
-          <DocumentFormModal
-            isOpen={isDocumentModalOpen}
-            onClose={() => setIsDocumentModalOpen(false)}
-            onSubmit={addDocument}
-            fileId={id}
-          />
         </div>
       </div>
+
+      {/* Document Table */}
+      <div className="w-[94%] md:w-[98%] mx-auto mb-8">
+        <h2 className="text-2xl font-semibold text-[#E68332] mb-4">
+          Letters and Documents
+        </h2>
+        <div className="overflow-auto max-h-[400px] rounded-t-lg">
+          <table className="min-w-full table-auto border-none bg-gray-100 rounded-sm overflow-hidden">
+            <thead>
+              <tr className="bg-[#E68332] text-white border-t-2 border-b-2 border-white text-nowrap py-3">
+                <th className="py-2 px-4 text-left border-none">Reg. No.</th>
+                <th className="py-2 px-4 text-left border-none">Invoice No.</th>
+                <th className="py-2 px-4 text-left border-none">Date</th>
+                <th className="py-2 px-4 text-left border-none">Subject</th>
+                <th className="py-2 px-4 text-left border-none">Letter Date</th>
+                <th className="py-2 px-4 text-left border-none">Office</th>
+                <th className="py-2 px-4 text-left border-none">Pages</th>
+              </tr>
+            </thead>
+            <tbody>
+              {letters_and_documents.map((doc, index) => (
+                <tr
+                  key={index}
+                  className="border-gray-300 border-b-2 text-center"
+                >
+                  <td className="py-2 px-4 border-none">
+                    {editable ? (
+                      <input
+                        type="text"
+                        value={doc.registration_no || ""}
+                        onChange={(e) =>
+                          handleChange(e, "registration_no", index, "document")
+                        }
+                      />
+                    ) : (
+                      doc.registration_no || "N/A"
+                    )}
+                  </td>
+                  <td className="py-2 px-4 border-none">
+                    {editable ? (
+                      <input
+                        type="text"
+                        value={doc.invoice_no || ""}
+                        onChange={(e) =>
+                          handleChange(e, "invoice_no", index, "document")
+                        }
+                      />
+                    ) : (
+                      doc.invoice_no || "N/A"
+                    )}
+                  </td>
+                  <td className="py-2 px-4 border-none">
+                    {editable ? (
+                      <input
+                        type="date"
+                        value={doc.date || ""}
+                        onChange={(e) =>
+                          handleChange(e, "date", index, "document")
+                        }
+                      />
+                    ) : (
+                      doc.date || "N/A"
+                    )}
+                  </td>
+                  <td className="py-2 px-4 border-none">
+                    {editable ? (
+                      <input
+                        type="text"
+                        value={doc.subject || ""}
+                        onChange={(e) =>
+                          handleChange(e, "subject", index, "document")
+                        }
+                      />
+                    ) : (
+                      doc.subject || "N/A"
+                    )}
+                  </td>
+                  <td className="py-2 px-4 border-none">
+                    {editable ? (
+                      <input
+                        type="date"
+                        value={doc.letter_date || ""}
+                        onChange={(e) =>
+                          handleChange(e, "letter_date", index, "document")
+                        }
+                      />
+                    ) : (
+                      doc.letter_date || "N/A"
+                    )}
+                  </td>
+                  <td className="py-2 px-4 border-none">
+                    {editable ? (
+                      <input
+                        type="text"
+                        value={doc.office || ""}
+                        onChange={(e) =>
+                          handleChange(e, "office", index, "document")
+                        }
+                      />
+                    ) : (
+                      doc.office || "N/A"
+                    )}
+                  </td>
+                  <td className="py-2 px-4 border-none">
+                    {doc.page_no || "N/A"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {/* Add Document button */}
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={() => setIsDocumentModalOpen(true)}
+            className="px-4 py-2 bg-[#E68332] text-white font-semibold rounded-md shadow-md hover:bg-[#d37524] transition-all duration-200"
+          >
+            Add Document
+          </button>
+        </div>
+      </div>
+
+      {/* Tippani Form Modal */}
+      {isTippaniModalOpen && (
+        <TippaniFormModal
+          onClose={() => setIsTippaniModalOpen(false)}
+          onSubmit={(newTippaniData) => {
+            setFileDetails((prevState) => ({
+              ...prevState,
+              tippani: [...(prevState.tippani || []), newTippaniData],
+            }));
+            setIsTippaniModalOpen(false);
+            toast.success("Tippani added successfully!");
+          }}
+        />
+      )}
+
+      {/* Document Form Modal */}
+      {isDocumentModalOpen && (
+        <DocumentFormModal
+          onClose={() => setIsDocumentModalOpen(false)}
+          onSubmit={(newDocData) => {
+            setFileDetails((prevState) => ({
+              ...prevState,
+              letters_and_documents: [...(prevState.letters_and_documents || []), newDocData],
+            }));
+            setIsDocumentModalOpen(false);
+            toast.success("Document added successfully!");
+          }}
+        />
+      )}
     </div>
   );
 };

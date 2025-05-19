@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { addLogin } from "./app/loginSlice"; // Import action
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
   const isLogin = useSelector((state) => state.login?.isLogin);
@@ -31,7 +33,23 @@ const App = () => {
     }
   }, [isLogin, navigate]);
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+    </>
+  );
 };
 
 export default App;

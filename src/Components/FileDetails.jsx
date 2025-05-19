@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import { NepaliDatePicker } from "nepali-datepicker-reactjs";
+import "nepali-datepicker-reactjs/dist/index.css";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const FileDetails = ({ setShowButton, clearData }) => {
+const FileDetails = ({ setShowButton, clearData, fileType }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
   const empId = localStorage.getItem("userId");
@@ -33,8 +37,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
     subject: useRef(null),
     ward_no: useRef(null),
     tole: useRef(null),
-    submitted_by: useRef(null),
-    present_date: useRef(null)
+    submitted_by: useRef(null)
   };
   
   const [provinces, setProvinces] = useState([]);
@@ -67,9 +70,14 @@ const FileDetails = ({ setShowButton, clearData }) => {
     });
   };
 
+  // Fix: Use NepaliDatePicker with a unique key to force re-mount on clear
+  // Add a state to force re-mounting the date picker when clearData changes
+  const [datePickerKey, setDatePickerKey] = useState(0);
+
   useEffect(() => {
     clearFields();
     setShow(true);
+    setDatePickerKey(prev => prev + 1); // force re-mount of date picker
   }, [clearData]);
 
   // Fetch provinces and office data on component mount
@@ -128,19 +136,19 @@ const FileDetails = ({ setShowButton, clearData }) => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      const data = await response.json();
+      const data = await response.json(); 
       setMunicipalities(data);
     } catch (error) {
       console.error("Error fetching municipalities:", error);
     }
   };
 
-  // Function to update text input state when focus leaves the input
+  // Update handleBlur to support both normal and date picker fields
   const handleBlur = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -205,19 +213,32 @@ const FileDetails = ({ setShowButton, clearData }) => {
     }
   };
 
+  // Add file_type to formData if not present
+  useEffect(() => {
+    if (fileType) {
+      setFormData(prev => ({
+        ...prev,
+        file_type: fileType
+      }));
+    }
+  }, [fileType]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Update the formData with current input values before submitting
+
+    // Only sync text input values from refs, not present_date
     const updatedFormData = { ...formData };
-    
-    // Sync text input values with state
     Object.keys(inputRefs).forEach(name => {
       if (inputRefs[name]?.current) {
         updatedFormData[name] = inputRefs[name].current.value;
       }
     });
-    
+
+    // Ensure file_type is set before submit
+    if (fileType) {
+      updatedFormData.file_type = fileType;
+    }
+
     // Now use the updated form data
     const formDataToSend = new FormData();
     
@@ -237,17 +258,17 @@ const FileDetails = ({ setShowButton, clearData }) => {
       const data = await response.json();
       
       if (response.ok) {
-        alert("File details submitted successfully!");
+        toast.success("File details submitted successfully!");
         localStorage.setItem("fileId", data.id);
         setShowButton(true);
         setShow(false);
       } else {
         console.error("Server error:", data);
-        alert("Failed to submit file details.");
+        toast.error("Failed to submit file details.");
       }
     } catch (error) {
       console.error("Error submitting file details:", error);
-      alert(`Error: ${error.message}`);
+      toast.error(`Error: ${error.message}`);
     }
   };
 
@@ -278,6 +299,34 @@ const FileDetails = ({ setShowButton, clearData }) => {
               </option>
             ))}
           </select>
+        </div>
+      );
+    } else if (type === "nepali-date" || type === "date") {
+      return (
+        <div className="mb-4">
+          <label htmlFor={name} className="block font-medium text-gray-800 mb-2">
+            {label} {required && <span className="text-red-500">*</span>}
+          </label>
+          <NepaliDatePicker
+            key={datePickerKey + name}
+            inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+            className=""
+            value={formData[name] || ""}
+            onChange={(value, { bsDate }) => {
+              setFormData((prev) => ({
+                ...prev,
+                [name]: bsDate || value // Use bsDate for BS, fallback to value
+              }));
+            }}
+            options={{
+              calenderLocale: "ne",
+              valueLocale: "bs" // <-- Set to "bs" for Bikram Sambat (BS)
+            }}
+            name={name}
+          />
+          <small className="text-gray-500 mt-1 block">
+            नेपाली मिति (BS) चयन गर्नुहोस्
+          </small>
         </div>
       );
     } else {
@@ -378,7 +427,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
             <FormField 
               label="हालको मिति"
               name="present_date" 
-              type="date"
+              type="nepali-date"
               // required={true}
             />
             
