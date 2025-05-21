@@ -225,7 +225,7 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log(formData)
     // Only sync text input values from refs, not present_date
     const updatedFormData = { ...formData };
     Object.keys(inputRefs).forEach(name => {
@@ -273,12 +273,12 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
   };
 
   // Create form field component with uncontrolled inputs for text fields
-  const FormField = ({ label, name, type, options = [], placeholder, required = false }) => {
+  const FormField = ({ label, name, type, options = [], placeholder }) => {
     if (type === "select") {
       return (
         <div className="mb-4">
           <label htmlFor={name} className="block font-medium text-gray-800 mb-2">
-            {label} {required && <span className="text-red-500">*</span>}
+            {label}
           </label>
           <select
             id={name}
@@ -287,7 +287,6 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
             onChange={handleSelectChange}
             className="w-full border border-gray-300 rounded-md shadow-sm p-2"
             disabled={options.length === 0 && name !== "province"}
-            required={required}
           >
             <option value="">{placeholder || `Select ${label}`}</option>
             {options.map((option) => (
@@ -305,28 +304,23 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
       return (
         <div className="mb-4">
           <label htmlFor={name} className="block font-medium text-gray-800 mb-2">
-            {label} {required && <span className="text-red-500">*</span>}
+            {label} 
           </label>
           <NepaliDatePicker
-            key={datePickerKey + name}
+            // key={datePickerKey + name}
             inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
             className=""
-            value={formData[name] || ""}
-            onChange={(value, { bsDate }) => {
-              setFormData((prev) => ({
-                ...prev,
-                [name]: bsDate || value // Use bsDate for BS, fallback to value
-              }));
-            }}
+            name="present_date"
+            value={formData['present_date']}
+              onSelect={(value) => {
+                setFormData((prev) => ({...prev, [name]: value }))
+              }}
+
             options={{
               calenderLocale: "ne",
               valueLocale: "bs" // <-- Set to "bs" for Bikram Sambat (BS)
             }}
-            name={name}
           />
-          <small className="text-gray-500 mt-1 block">
-            नेपाली मिति (BS) चयन गर्नुहोस्
-          </small>
         </div>
       );
     } else {
@@ -334,7 +328,7 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
       return (
         <div className="mb-4">
           <label htmlFor={name} className="block font-medium text-gray-800 mb-2">
-            {label} {required && <span className="text-red-500">*</span>}
+            {label}
           </label>
           <input
             id={name}
@@ -345,7 +339,6 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
             className="w-full border border-gray-300 rounded-md shadow-sm p-2"
             placeholder={placeholder}
             ref={inputRefs[name]}
-            required={required}
           />
         </div>
       );

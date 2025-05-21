@@ -29,15 +29,24 @@ const PanjikaDocumentsForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleNepaliDateChange = (field, value, bsDate) => {
+  // Modified to match the working implementation from FileDetails.jsx
+  const handleNepaliDateChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
-      [field]: bsDate || value,
+      [field]: value,
     }));
+    console.log(`Date field ${field} updated:`, value);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Create payload, ensuring date fields are properly formatted
+    const payload = { ...formData, related_file: fileId };
+
+    // Log the payload to debug date values
+    console.log("Submitting document data:", payload);
+
     try {
       const response = await fetch(apiBaseUrl, {
         method: "POST",
@@ -45,11 +54,11 @@ const PanjikaDocumentsForm = () => {
           Authorization: token ? `token ${token.trim()}` : "",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
-      if(response.status === 201) {
+      if (response.status === 201) {
         toast.success("Panjika documents added successfully");
       }
       setFormData({
@@ -84,7 +93,6 @@ const PanjikaDocumentsForm = () => {
             value={formData.subject}
             onChange={handleInputChange}
             className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
-            required
           />
         </div>
         <div>
@@ -95,7 +103,6 @@ const PanjikaDocumentsForm = () => {
             value={formData.registration_no}
             onChange={handleInputChange}
             className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
-            required
           />
         </div>
         <div>
@@ -106,7 +113,6 @@ const PanjikaDocumentsForm = () => {
             value={formData.office}
             onChange={handleInputChange}
             className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
-            required
           />
         </div>
         <div>
@@ -117,33 +123,36 @@ const PanjikaDocumentsForm = () => {
             value={formData.invoice_no}
             onChange={handleInputChange}
             className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
-            required
           />
         </div>
         <div>
           <label className="block text-gray-800">मिति</label>
           <NepaliDatePicker
-            key={datePickerKey + "date"}
             inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
-            value={formData.date || ""}
-            onChange={(value, { bsDate }) =>
-              handleNepaliDateChange("date", value, bsDate)
-            }
-            options={{ calenderLocale: "ne", valueLocale: "bs" }}
             name="date"
+            value={formData.date}
+            onSelect={(value) => {
+              handleNepaliDateChange("date", value);
+            }}
+            options={{
+              calenderLocale: "ne",
+              valueLocale: "bs", // BS format for Bikram Sambat
+            }}
           />
         </div>
         <div>
           <label className="block text-gray-800">पत्र मिति</label>
           <NepaliDatePicker
-            key={datePickerKey + "letter_date"}
             inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
-            value={formData.letter_date || ""}
-            onChange={(value, { bsDate }) =>
-              handleNepaliDateChange("letter_date", value, bsDate)
-            }
-            options={{ calenderLocale: "ne", valueLocale: "bs" }}
             name="letter_date"
+            value={formData.letter_date}
+            onSelect={(value) => {
+              handleNepaliDateChange("letter_date", value);
+            }}
+            options={{
+              calenderLocale: "ne",
+              valueLocale: "bs",
+            }}
           />
         </div>
         <div>
@@ -154,7 +163,6 @@ const PanjikaDocumentsForm = () => {
             value={formData.page_no}
             onChange={handleInputChange}
             className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
-            required
           />
         </div>
       </form>

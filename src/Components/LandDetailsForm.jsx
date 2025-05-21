@@ -44,6 +44,14 @@ const LandDetailsForm = ({ onSuccess }) => {
     fetchOfficeData();
   }, [baseUrl, token]);
 
+  // Update related_file whenever fileId changes
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      related_file: fileId,
+    }));
+  }, [fileId]);
+
   // Simple input change handler
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,7 +64,17 @@ const LandDetailsForm = ({ onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const payload = { ...formData, related_file: fileId };
+      // Ensure we're using the latest fileId
+      const currentFileId = localStorage.getItem("fileId");
+
+      // Create the payload with the current fileId
+      const payload = {
+        ...formData,
+        related_file: currentFileId,
+      };
+
+      console.log("Submitting land details:", payload);
+
       const response = await fetch(`${baseUrl}/land-details/`, {
         method: "POST",
         headers: {
@@ -65,8 +83,17 @@ const LandDetailsForm = ({ onSuccess }) => {
         },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error("Failed to submit land details");
-      toast.success("Land details added successfully!");
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error response:", errorData);
+        throw new Error(
+          `Failed to submit land details: ${JSON.stringify(errorData)}`
+        );
+      }
+
+      toast.success("जग्गा विवरण सफलतापूर्वक थपियो!");
+
+      // Reset the form
       setFormData({
         district: "",
         municipality: "",
@@ -74,11 +101,12 @@ const LandDetailsForm = ({ onSuccess }) => {
         kitta_no: "",
         guthi_name: "",
         land_type: "",
-        related_file: fileId,
+        related_file: currentFileId,
       });
       if (onSuccess) onSuccess();
     } catch (error) {
-      toast.error("Failed to add land details");
+      console.error("Error submitting land details:", error);
+      toast.error(`जग्गा विवरण थप्न असफल: ${error.message}`);
     }
   };
 
@@ -112,7 +140,7 @@ const LandDetailsForm = ({ onSuccess }) => {
             className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
           />
         </div>
-        
+
         <div>
           <label className="block text-gray-800">वार्ड नं</label>
           <input
@@ -123,7 +151,7 @@ const LandDetailsForm = ({ onSuccess }) => {
             className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
           />
         </div>
-        
+
         <div>
           <label className="block text-gray-800">कित्ता नं</label>
           <input
@@ -134,7 +162,7 @@ const LandDetailsForm = ({ onSuccess }) => {
             className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
           />
         </div>
-        
+
         <div>
           <label className="block text-gray-800">गुठी नाम</label>
           <select
@@ -151,7 +179,7 @@ const LandDetailsForm = ({ onSuccess }) => {
             ))}
           </select>
         </div>
-        
+
         <div>
           <label className="block text-gray-800">जग्गा प्रकार</label>
           <select
@@ -168,7 +196,7 @@ const LandDetailsForm = ({ onSuccess }) => {
             ))}
           </select>
         </div>
-        
+
         <div className="md:col-span-2 flex justify-center mt-4">
           <button
             type="submit"
