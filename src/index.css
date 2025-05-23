@@ -10,3 +10,56 @@ th,
 td {
     border: 1px solid black;
 }
+
+/* Add these styles to fix Nepali Date Picker */
+.nepali-date-picker {
+  position: relative;
+}
+
+.nepali-date-picker .calender-container {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  z-index: 9999 !important;
+  background: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 0.375rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  width: 100% !important;
+  max-width: 300px !important;
+}
+
+.calender-container table {
+  width: 100% !important;
+}
+
+/* Make sure calendar elements are visible and properly styled */
+.calender-container th,
+.calender-container td {
+  text-align: center !important;
+  padding: 0.25rem !important;
+  font-size: 0.875rem !important;
+}
+
+.calender-container td {
+  cursor: pointer !important;
+}
+
+.calender-container td:hover {
+  background-color: #f3f4f6 !important;
+}
+
+.calender-container td.active {
+  background-color: #ED772F !important;
+  color: white !important;
+}
+
+/* Fix nepali datepicker position */
+.nepali-datepicker-container {
+  position: relative !important;
+  width: 100% !important;
+}
+
+.react-nepali-datepicker {
+  width: 100% !important;
+}

@@ -5,15 +5,20 @@ import { NepaliDatePicker } from "nepali-datepicker-reactjs";
 import "nepali-datepicker-reactjs/dist/index.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { FaFile, FaMapMarkerAlt, FaBuilding, FaCalendarAlt, FaUserCircle } from "react-icons/fa";
+import { BsFileEarmark } from "react-icons/bs";
+import { GrStatusInfo } from "react-icons/gr";
+import { MdSubject } from "react-icons/md";
 
-const FileDetails = ({ setShowButton, clearData, fileType }) => {
+const FileDetails = ({ setShowButton, clearData }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
   const empId = localStorage.getItem("userId");
   const userid = localStorage.getItem("userId");
-  // console.log(empId);
-  // console.log("user is is:"+userid);
   const [show, setShow] = useState(true);
+  
+  // Add missing state variable
+  const [useManualDateInput, setUseManualDateInput] = useState(false);
   
   // This state will be used to track the current values
   const [formData, setFormData] = useState({
@@ -25,10 +30,11 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
     ward_no: "",
     tole: "",
     present_by: empId,
-    submitted_by: "",
+    submitted_by: "", // Already exists in state, ensure it's used in the form
     present_date: "",
     related_guthi: "",
     related_department: "",
+    file_type: "",
   });
   
   // Form input references for direct DOM access
@@ -37,7 +43,7 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
     subject: useRef(null),
     ward_no: useRef(null),
     tole: useRef(null),
-    submitted_by: useRef(null)
+    submitted_by: useRef(null) // Reference already exists, ensure it's used properly
   };
   
   const [provinces, setProvinces] = useState([]);
@@ -56,10 +62,11 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
       ward_no: "",
       tole: "",
       present_by: empId,
-      submitted_by: "",
+      submitted_by: "", // Make sure this is cleared
       present_date: "",
       related_guthi: "",
       related_department: "",
+      file_type: "",
     });
     
     // Clear all input fields manually
@@ -213,19 +220,15 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
     }
   };
 
-  // Add file_type to formData if not present
-  useEffect(() => {
-    if (fileType) {
-      setFormData(prev => ({
-        ...prev,
-        file_type: fileType
-      }));
-    }
-  }, [fileType]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData)
+    
+    // Validate required fields, especially file_type
+    if (!formData.file_type) {
+      toast.error("कृपया फाइल प्रकार चयन गर्नुहोस्");
+      return;
+    }
+    
     // Only sync text input values from refs, not present_date
     const updatedFormData = { ...formData };
     Object.keys(inputRefs).forEach(name => {
@@ -233,11 +236,6 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
         updatedFormData[name] = inputRefs[name].current.value;
       }
     });
-
-    // Ensure file_type is set before submit
-    if (fileType) {
-      updatedFormData.file_type = fileType;
-    }
 
     // Now use the updated form data
     const formDataToSend = new FormData();
@@ -273,20 +271,25 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
   };
 
   // Create form field component with uncontrolled inputs for text fields
-  const FormField = ({ label, name, type, options = [], placeholder }) => {
+  const FormField = ({ label, name, type, options = [], placeholder, required = false, icon }) => {
     if (type === "select") {
       return (
-        <div className="mb-4">
-          <label htmlFor={name} className="block font-medium text-gray-800 mb-2">
+        <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md">
+          <label htmlFor={name} className="block font-medium text-gray-700 mb-2 items-center">
+            {icon && <span className="mr-2 text-[#ED772F]">{icon}</span>}
             {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
           </label>
           <select
             id={name}
             name={name}
             value={formData[name]}
             onChange={handleSelectChange}
-            className="w-full border border-gray-300 rounded-md shadow-sm p-2"
+            className={`w-full border ${
+              required && !formData[name] ? "border-red-300" : "border-gray-300"
+            } rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#ED772F] focus:border-[#ED772F] transition-all duration-200 outline-none text-gray-700`}
             disabled={options.length === 0 && name !== "province"}
+            required={required}
           >
             <option value="">{placeholder || `Select ${label}`}</option>
             {options.map((option) => (
@@ -298,37 +301,73 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
               </option>
             ))}
           </select>
+          {required && !formData[name] && (
+            <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
+          )}
         </div>
       );
     } else if (type === "nepali-date" || type === "date") {
       return (
-        <div className="mb-4">
-          <label htmlFor={name} className="block font-medium text-gray-800 mb-2">
-            {label} 
-          </label>
-          <NepaliDatePicker
-            // key={datePickerKey + name}
-            inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
-            className=""
-            name="present_date"
-            value={formData['present_date']}
+        <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md p-2">
+          <div className="flex justify-between items-center mb-2">
+            <label htmlFor={name} className="block font-medium text-gray-700 items-center">
+              <FaCalendarAlt className="mr-2 text-[#ED772F]" />
+              {label} 
+              {required && <span className="text-red-500 ml-1">*</span>}
+            </label>
+            
+            {/* Toggle between date picker and manual input */}
+            <button 
+              type="button"
+              onClick={() => setUseManualDateInput(!useManualDateInput)} 
+              className="text-xs text-blue-600 hover:underline"
+            >
+              {useManualDateInput ? "प्रयोग गर्नुहोस् पिकर" : "म्यानुअल इनपुट प्रयोग गर्नुहोस्"}
+            </button>
+          </div>
+          
+          {useManualDateInput ? (
+            // Manual date input option
+            <input
+              type="text"
+              name={name}
+              value={formData[name] || ""}
+              onChange={(e) => setFormData(prev => ({...prev, [name]: e.target.value}))}
+              placeholder="YYYY-MM-DD वा YYYY/MM/DD"
+              className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#ED772F] text-gray-700"
+              required={required}
+            />
+          ) : (
+            // Nepali Date Picker option
+            <NepaliDatePicker
+              key={datePickerKey + name}
+              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#ED772F] text-gray-700"
+              className="w-full"
+              name={name}
+              value={formData[name]}
               onSelect={(value) => {
-                setFormData((prev) => ({...prev, [name]: value }))
+                setFormData((prev) => ({...prev, [name]: value }));
               }}
-
-            options={{
-              calenderLocale: "ne",
-              valueLocale: "bs" // <-- Set to "bs" for Bikram Sambat (BS)
-            }}
-          />
+              options={{
+                calenderLocale: "ne",
+                valueLocale: "bs"
+              }}
+            />
+          )}
+          
+          {required && !formData[name] && (
+            <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
+          )}
         </div>
       );
     } else {
       // Use uncontrolled components for text inputs
       return (
-        <div className="mb-4">
-          <label htmlFor={name} className="block font-medium text-gray-800 mb-2">
+        <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md">
+          <label htmlFor={name} className="block font-medium text-gray-700 mb-2  items-center">
+            {icon && <span className="mr-2 text-[#ED772F]">{icon}</span>}
             {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
           </label>
           <input
             id={name}
@@ -336,9 +375,10 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
             name={name}
             defaultValue={formData[name]} 
             onBlur={handleBlur}
-            className="w-full border border-gray-300 rounded-md shadow-sm p-2"
+            className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#ED772F] focus:border-[#ED772F] transition-all duration-200 outline-none text-gray-700"
             placeholder={placeholder}
             ref={inputRefs[name]}
+            required={required}
           />
         </div>
       );
@@ -347,108 +387,169 @@ const FileDetails = ({ setShowButton, clearData, fileType }) => {
 
   return (
     <>
-      <div className="w-[90%] md:w-[80%] mt-4 md:mt-5 md:my-10 mx-auto p-6">
-        <h1 className="text-center text-2xl font-bold mb-6 text-[#ED772F]">
-          फारामको विवरण
-        </h1>
-        <div className="flex md:flex-row flex-col gap-2 mb-4">
-          <p className="text-red-500 text-lg font-normal text-center">सम्भव भएसम्म सबैलाई नेपालीमा फारम भर्न अनुरोध छ।</p>
-          <p className="text-red-500 text-lg font-normal text-center">(Everyone is requested to fill out the form in Nepali if possible.)</p>
+      <div className="w-[95%] md:w-[85%] mt-4 md:mt-5 md:my-10 mx-auto p-6 bg-white rounded-xl shadow-lg">
+        <div className="bg-gradient-to-r from-[#f9f1ea] to-[#fcf8f5] p-4 rounded-lg mb-8 border-l-4 border-[#ED772F]">
+          <h1 className="text-center text-2xl md:text-3xl font-bold mb-3 text-[#ED772F]">
+            फारामको विवरण
+          </h1>
+          <div className="flex md:flex-row flex-col gap-2">
+            <p className="text-red-500 text-lg font-normal text-center">सम्भव भएसम्म सबैलाई नेपालीमा फारम भर्न अनुरोध छ।</p>
+            <p className="text-gray-600 text-lg font-normal text-center">(Everyone is requested to fill out the form in Nepali if possible.)</p>
+          </div>
         </div>
         
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField 
-              label="फाइल नाम"
-              name="file_name" 
-              // placeholder="Enter file name"
-            />
-            
-            <FormField 
-              label="विषय"
-              name="subject" 
-              // required={true}
-            />
-            
-            <FormField 
-              label="प्रदेश"
-              name="province" 
-              type="select" 
-              options={provinces}
-              placeholder="प्रदेश छान्नुहोस्"
-              // required={true}
-            />
-            
-            <FormField 
-              label="जिल्ला"
-              name="district" 
-              type="select" 
-              options={districts}
-              placeholder="जिल्ला छान्नुहोस्"
-              // required={true}
-            />
-            
-            <FormField 
-              label="नगरपालिका"
-              name="municipality" 
-              type="select" 
-              options={municipalities}
-              placeholder="नगरपालिका छान्नुहोस्"
-              // required={true}
-            />
-            
-            <FormField 
-              label="वार्ड नं"
-              name="ward_no" 
-              // placeholder="Enter ward number"
-              // required={true}
-            />
-            
-            <FormField 
-              label="टोल"
-              name="tole" 
-              // placeholder="Enter tole"
-            />
-            
-            <FormField 
-              label="कर्मचारी नाम"
-              name="submitted_by" 
-              // placeholder="Enter submitter name"
-              // required={true}
-            />
-            
-            <FormField 
-              label="हालको मिति"
-              name="present_date" 
-              type="nepali-date"
-              // required={true}
-            />
-            
-            <FormField 
-              label="कार्यालय"
-              name="related_guthi" 
-              type="select" 
-              options={officeData}
-              placeholder="कार्यालय छान्नुहोस्"
-              // required={true}
-            />
-            
-            <FormField 
-              label="विभाग"
-              name="related_department" 
-              type="select" 
-              options={departments}
-              placeholder="विभाग छान्नुहोस्"
-              // required={true}
-            />
+        <form onSubmit={handleSubmit} className="animate-fadeIn">
+          <div className="mb-6 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+            <p className="text-sm text-gray-600 flex items-center gap-2">
+              <span className="text-red-500 font-bold">*</span> 
+              चिन्ह भएका फिल्ड अनिवार्य छन्
+            </p>
+          </div>
+          
+          {/* File Information Section */}
+          <div className="border-b pb-6 mb-8">
+            <h2 className="text-xl font-semibold mb-6 text-gray-700 flex items-center">
+              <BsFileEarmark className="mr-2 text-[#ED772F]" />
+              फाइल जानकारी
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <FormField 
+                label="फाइल प्रकार"
+                name="file_type" 
+                type="select" 
+                options={[
+                  { id: "चालु", name: "चालु फाइल" },
+                  { id: "तामेली", name: "तामेली फाइल" }
+                ]}
+                placeholder="फाइल प्रकार छान्नुहोस्"
+                required={true}
+                icon={<FaFile />}
+              />
+              
+              <FormField 
+                label="फाइल नाम"
+                name="file_name"
+                icon={<FaFile />}
+                required={true}
+                placeholder="फाइलको नाम लेख्नुहोस्"
+              />
+              
+              <FormField 
+                label="विषय"
+                name="subject" 
+                required={true}
+                icon={<MdSubject />}
+                placeholder="फाइलको विषय लेख्नुहोस्"
+              />
+              
+              {/* Add the responsible person field here */}
+              <FormField 
+                label="फाइलको जिम्मेवार व्यक्ति"
+                name="submitted_by"
+                icon={<FaUserCircle />}
+                required={true}
+                placeholder="जिम्मेवार व्यक्तिको नाम लेख्नुहोस्"
+              />
+              
+              <FormField 
+                label="हालको मिति"
+                name="present_date" 
+                type="nepali-date"
+                required={true}
+              />
+            </div>
+          </div>
+          
+          {/* Location Information Section */}
+          <div className="border-b pb-6 mb-8">
+            <h2 className="text-xl font-semibold mb-6 text-gray-700 flex items-center">
+              <FaMapMarkerAlt className="mr-2 text-[#ED772F]" />
+              स्थान जानकारी
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <FormField 
+                label="प्रदेश"
+                name="province" 
+                type="select" 
+                options={provinces}
+                placeholder="प्रदेश छान्नुहोस्"
+                required={true}
+                icon={<FaMapMarkerAlt />}
+              />
+              
+              <FormField 
+                label="जिल्ला"
+                name="district" 
+                type="select" 
+                options={districts}
+                placeholder="जिल्ला छान्नुहोस्"
+                required={true}
+                icon={<FaMapMarkerAlt />}
+              />
+              
+              <FormField 
+                label="नगरपालिका"
+                name="municipality" 
+                type="select" 
+                options={municipalities}
+                placeholder="नगरपालिका छान्नुहोस्"
+                required={true}
+                icon={<FaMapMarkerAlt />}
+              />
+              
+              <FormField 
+                label="वार्ड नं"
+                name="ward_no" 
+                placeholder="वार्ड नम्बर राख्नुहोस्"
+                required={true}
+                icon={<FaMapMarkerAlt />}
+              />
+              
+              <FormField 
+                label="टोल"
+                name="tole" 
+                placeholder="टोलको नाम राख्नुहोस्"
+                icon={<FaMapMarkerAlt />}
+              />
+            </div>
+          </div>
+          
+          {/* Office Information Section */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-6 text-gray-700 flex items-center">
+              <FaBuilding className="mr-2 text-[#ED772F]" />
+              कार्यालय जानकारी
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <FormField 
+                label="कार्यालय"
+                name="related_guthi" 
+                type="select" 
+                options={officeData}
+                placeholder="कार्यालय छान्नुहोस्"
+                required={true}
+                icon={<FaBuilding />}
+              />
+              
+              <FormField 
+                label="विभाग"
+                name="related_department" 
+                type="select" 
+                options={departments}
+                placeholder="विभाग छान्नुहोस्"
+                required={true}
+                icon={<FaBuilding />}
+              />
+            </div>
           </div>
           
           <div className="mt-8 flex justify-center">
             {show && (
               <button
                 type="submit"
-                className="px-6 py-2 bg-[#ED772F] text-white rounded-lg hover:bg-[#d9773b] transition-all"
+                className="px-8 py-3 bg-[#ED772F] text-white rounded-lg hover:bg-[#d9773b] transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 flex items-center gap-2 text-lg font-medium"
               >
+                <BsFileEarmark />
                 रेकर्ड थप्नुहोस्
               </button>
             )}
