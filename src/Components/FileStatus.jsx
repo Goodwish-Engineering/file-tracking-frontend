@@ -340,11 +340,11 @@ const FileStatus = () => {
           {filteredFiles.length > 0 ? (
             <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
               <table className="w-full table-fixed border-collapse">
-                {/* Improved table header */}
+                {/* Improved table header with bold text */}
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 sticky top-0">
                   <tr>
                     <th 
-                      className="p-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[8%]" 
+                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[8%]" 
                       onClick={() => requestSort('id')}
                     >
                       <div className="flex items-center">
@@ -353,7 +353,7 @@ const FileStatus = () => {
                       </div>
                     </th>
                     <th 
-                      className="p-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[10%]" 
+                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[10%]" 
                       onClick={() => requestSort('file_number')}
                     >
                       <div className="flex items-center">
@@ -362,7 +362,7 @@ const FileStatus = () => {
                       </div>
                     </th>
                     <th 
-                      className="p-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[25%]" 
+                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[25%]" 
                       onClick={() => requestSort('file_name')}
                     >
                       <div className="flex items-center">
@@ -371,7 +371,7 @@ const FileStatus = () => {
                       </div>
                     </th>
                     <th 
-                      className="p-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[26%]" 
+                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[26%]" 
                       onClick={() => requestSort('subject')}
                     >
                       <div className="flex items-center">
@@ -379,13 +379,13 @@ const FileStatus = () => {
                         {getSortDirectionIndicator('subject')}
                       </div>
                     </th>
-                    <th className="p-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-[15%]">
+                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[15%]">
                       <div className="flex items-center">
                         <span>फाइल प्रकार</span>
                       </div>
                     </th>
                     <th 
-                      className="p-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[16%]" 
+                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[16%]" 
                       onClick={() => requestSort('days_submitted')}
                     >
                       <div className="flex items-center">
