@@ -126,25 +126,28 @@ const EmployeeHome = () => {
   }, [baseUrl, token]);
 
   const handleAction = (action) => {
-    // Navigate to different tabs based on the action
+    // Store the selected tab in localStorage so EmployeeHeader can pick it up
     if (action === "upload" && level === "1") {
-      setTab("uploadTippani");
+      localStorage.setItem("activeTab", "uploadTippani");
     } else if (action === "status") {
-      setTab("veiwStatus");
-    } else if (action === "nontransfer" && level !== "1") {
-      setTab(level === "2" ? "nontransfer" : "nontransfer3");
-    } else if (action === "transferred" && level !== "1") {
-      setTab("transfered");
-    } else if (action === "request" && level !== "1") {
-      setTab("filerequest");
+      localStorage.setItem("activeTab", "veiwStatus");
+    } else if (action === "nontransfer") {
+      if (level === "2") {
+        localStorage.setItem("activeTab", "nontransfer");
+      } else if (level === "3" || level === "4") {
+        localStorage.setItem("activeTab", "nontransfer3");
+      }
+    } else if (action === "transferred") {
+      localStorage.setItem("activeTab", "transfered");
+    } else if (action === "request") {
+      localStorage.setItem("activeTab", "filerequest");
+    } else if (action === "notification") {
+      localStorage.setItem("activeTab", "notification");
     }
-  };
-
-  // Function to set tab and navigate to employee dashboard
-  const setTab = (tabName) => {
-    // Store the active tab in localStorage so EmployeeHeader can read it
-    localStorage.setItem("activeTab", tabName);
-    navigate("/employeeheader");
+    
+    // Force a refresh of the current page which will trigger EmployeeHeader 
+    // to read the new activeTab from localStorage
+    window.location.reload();
   };
 
   // Reusable card component
@@ -237,7 +240,7 @@ const EmployeeHome = () => {
         <StatCard 
           title="जम्मा फाइलहरू"
           value={stats.totalFiles}
-          icon={<FaFile size={24} />}
+          icon={<FaFile size={24} className="p-3 rounded-full bg-blue-100 text-blue-500" />}
           color="border-blue-500"
           onClick={() => handleAction("status")}
         />
@@ -247,16 +250,19 @@ const EmployeeHome = () => {
           value={stats.pendingFiles}
           icon={<MdPending size={24} className="p-3 rounded-full bg-amber-100 text-amber-500" />}
           color="border-amber-500"
-          onClick={() => handleAction("nontransfer")}
+          onClick={() => level !== "1" ? handleAction("nontransfer") : handleAction("status")}
         />
         
-        <StatCard 
-          title="स्थानान्तरण गरिएका फाइलहरू" 
-          value={stats.transferredFiles} 
-          icon={<RiFileTransferFill size={24} className="p-3 rounded-full bg-green-100 text-green-500" />}
-          color="border-green-500"
-          onClick={() => handleAction("transferred")}
-        />
+        {/* Only show transferred files card for level 2 and above */}
+        {level !== "1" && (
+          <StatCard 
+            title="स्थानान्तरण गरिएका फाइलहरू" 
+            value={stats.transferredFiles} 
+            icon={<RiFileTransferFill size={24} className="p-3 rounded-full bg-green-100 text-green-500" />}
+            color="border-green-500"
+            onClick={() => handleAction("transferred")}
+          />
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -290,6 +296,14 @@ const EmployeeHome = () => {
                   icon={<FaFileAlt />} 
                   onClick={() => handleAction("nontransfer")} 
                   color="bg-yellow-50 text-yellow-600" 
+                />
+                
+                {/* Only show transferred files action button for level 2 and above */}
+                <ActionButton 
+                  label="स्थानान्तरण गरिएको फाइल" 
+                  icon={<RiFileTransferFill />} 
+                  onClick={() => handleAction("transferred")} 
+                  color="bg-green-50 text-green-600" 
                 />
                 
                 <ActionButton 
@@ -360,9 +374,17 @@ const EmployeeHome = () => {
 
       {/* Recent Notifications */}
       <div className="bg-white p-6 rounded-xl shadow-md mt-6">
-        <h2 className="text-lg font-semibold mb-4 text-gray-700 flex items-center gap-2">
-          <FaBell className="text-[#ED772F]" /> हालैका सूचनाहरू
-        </h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+            <FaBell className="text-[#ED772F]" /> हालैका सूचनाहरू
+          </h2>
+          <button 
+            onClick={() => handleAction("notification")}
+            className="text-sm text-[#ED772F] hover:underline"
+          >
+            सबै हेर्नुहोस्
+          </button>
+        </div>
 
         {recentNotifications && recentNotifications.length > 0 ? (
           <div className="space-y-4">

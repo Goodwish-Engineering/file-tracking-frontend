@@ -5,7 +5,10 @@ import "nepali-datepicker-reactjs/dist/index.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const PanjikaTippani = () => {
+const PanjikaTippani = ({ isOpen, onClose }) => {
+  // Add modal functionality
+  if (!isOpen) return null;
+
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const fileId = localStorage.getItem("fileId");
   const token = localStorage.getItem("token");
@@ -21,7 +24,6 @@ const PanjikaTippani = () => {
     page_no: "",
     related_file: fileId,
   });
-  const [showAddButton, setShowAddButton] = useState(false);
 
   const handleChange = (e) => {
     setCurrentTippani({
@@ -30,7 +32,6 @@ const PanjikaTippani = () => {
     });
   };
 
-  // Modified to match the working implementation from FileDetails.jsx
   const handleNepaliDateChange = (field, value) => {
     setCurrentTippani((prev) => ({
       ...prev,
@@ -69,7 +70,6 @@ const PanjikaTippani = () => {
       // Process successful response
       const newTippani = await response.json();
       setTippanis([...tippanis, newTippani]);
-      setShowAddButton(true);
 
       // Reset form fields after successful submission
       setCurrentTippani({
@@ -85,6 +85,9 @@ const PanjikaTippani = () => {
       });
 
       toast.success("पञ्जिका टिप्पणी सफलतापूर्वक थपियो");
+
+      // Close modal after successful submission
+      onClose();
     } catch (error) {
       console.error("Error saving Tippani:", error);
       toast.error(`त्रुटि: ${error.message}`);
@@ -92,128 +95,129 @@ const PanjikaTippani = () => {
   };
 
   return (
-    <div className="p-4 w-[90%] md:w-[80%] mx-auto my-4 bg-white shadow-gray-200 rounded-lg shadow-inner border-2">
-      <h1 className="text-center font-bold text-2xl mb-6 text-[#E68332]">
-        पञ्जिका विवरण टिप्नी
-      </h1>
-      <form
-        className="w-full grid grid-cols-1 md:grid-cols-2 gap-4"
-        onSubmit={handleSubmit}
-      >
-        <div>
-          <label className="block text-gray-800 font-medium">विषय</label>
-          <input
-            type="text"
-            name="subject"
-            value={currentTippani.subject}
-            onChange={handleChange}
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-800 font-medium">पेश गर्ने व्यक्ति</label>
-          <input
-            type="text"
-            name="submitted_by"
-            value={currentTippani.submitted_by}
-            onChange={handleChange}
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-800 font-medium">पेश मिति</label>
-          <NepaliDatePicker
-            inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
-            name="submitted_date"
-            value={currentTippani.submitted_date}
-            onSelect={(value) => {
-              handleNepaliDateChange("submitted_date", value);
-            }}
-            options={{
-              calenderLocale: "ne",
-              valueLocale: "bs",
-            }}
-          />
-        </div>
-        <div>
-          <label className="block text-gray-800 font-medium">कैफियत</label>
-          <input
-            type="text"
-            name="remarks"
-            value={currentTippani.remarks}
-            onChange={handleChange}
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-800 font-medium">स्वीकृत गरिएको द्वारा</label>
-          <input
-            type="text"
-            name="approved_by"
-            value={currentTippani.approved_by}
-            onChange={handleChange}
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-800 font-medium">स्वीकृति मिति</label>
-          <NepaliDatePicker
-            inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
-            name="approved_date"
-            value={currentTippani.approved_date}
-            onSelect={(value) => {
-              handleNepaliDateChange("approved_date", value);
-            }}
-            options={{
-              calenderLocale: "ne",
-              valueLocale: "bs",
-            }}
-          />
-        </div>
-        <div>
-          <label className="block text-gray-800 font-medium">टिप्पणी मिति</label>
-          <NepaliDatePicker
-            inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
-            name="tippani_date"
-            value={currentTippani.tippani_date}
-            onSelect={(value) => {
-              handleNepaliDateChange("tippani_date", value);
-            }}
-            options={{
-              calenderLocale: "ne",
-              valueLocale: "bs",
-            }}
-          />
-        </div>
-        <div>
-          <label className="block text-gray-800 font-medium">पाना संख्या</label>
-          <input
-            type="text"
-            name="page_no"
-            value={currentTippani.page_no}
-            onChange={handleChange}
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
-          />
-        </div>
-        <div className="md:col-span-2 flex items-center gap-5 justify-center my-3">
-          <button
-            type="submit"
-            className="bg-[#E68332] text-white px-6 py-2 rounded-lg hover:bg-[#c36f2a]"
-          >
-            पेश गर्नुहोस्
-          </button>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white p-6 rounded-lg w-full max-w-2xl relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+        >
+          <span className="text-2xl font-bold text-[#E86332] hover:text-[#c36f2a]">
+            ×
+          </span>
+        </button>
 
-          {showAddButton && (
+        <h1 className="text-center font-bold text-2xl mb-6 text-[#E68332]">
+          पञ्जिका विवरण टिप्नी
+        </h1>
+        <form
+          className="w-full grid grid-cols-1 md:grid-cols-2 gap-4"
+          onSubmit={handleSubmit}
+        >
+          <div>
+            <label className="block text-gray-800 font-medium">विषय</label>
+            <input
+              type="text"
+              name="subject"
+              value={currentTippani.subject}
+              onChange={handleChange}
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-800 font-medium">पेश गर्ने व्यक्ति</label>
+            <input
+              type="text"
+              name="submitted_by"
+              value={currentTippani.submitted_by}
+              onChange={handleChange}
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-800 font-medium">पेश मिति</label>
+            <NepaliDatePicker
+              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+              name="submitted_date"
+              value={currentTippani.submitted_date}
+              onSelect={(value) => {
+                handleNepaliDateChange("submitted_date", value);
+              }}
+              options={{
+                calenderLocale: "ne",
+                valueLocale: "bs",
+              }}
+            />
+          </div>
+          <div>
+            <label className="block text-gray-800 font-medium">कैफियत</label>
+            <input
+              type="text"
+              name="remarks"
+              value={currentTippani.remarks}
+              onChange={handleChange}
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-800 font-medium">स्वीकृत गरिएको द्वारा</label>
+            <input
+              type="text"
+              name="approved_by"
+              value={currentTippani.approved_by}
+              onChange={handleChange}
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-800 font-medium">स्वीकृति मिति</label>
+            <NepaliDatePicker
+              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+              name="approved_date"
+              value={currentTippani.approved_date}
+              onSelect={(value) => {
+                handleNepaliDateChange("approved_date", value);
+              }}
+              options={{
+                calenderLocale: "ne",
+                valueLocale: "bs",
+              }}
+            />
+          </div>
+          <div>
+            <label className="block text-gray-800 font-medium">टिप्पणी मिति</label>
+            <NepaliDatePicker
+              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+              name="tippani_date"
+              value={currentTippani.tippani_date}
+              onSelect={(value) => {
+                handleNepaliDateChange("tippani_date", value);
+              }}
+              options={{
+                calenderLocale: "ne",
+                valueLocale: "bs",
+              }}
+            />
+          </div>
+          <div>
+            <label className="block text-gray-800 font-medium">पाना संख्या</label>
+            <input
+              type="text"
+              name="page_no"
+              value={currentTippani.page_no}
+              onChange={handleChange}
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
+            />
+          </div>
+          <div className="md:col-span-2 flex items-center gap-5 justify-center my-3">
             <button
-              type="button"
-              onClick={() => setShowAddButton(false)}
-              className="bg-[#B3F8CC] text-green-800 px-4 py-2 rounded-lg hover:bg-[#89c29e]"
+              type="submit"
+              className="bg-[#E68332] text-white px-6 py-2 rounded-lg hover:bg-[#c36f2a]"
             >
-              अर्को पेश गर्नुहोस्
+              पेश गर्नुहोस्
             </button>
-          )}
-        </div>
-      </form>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

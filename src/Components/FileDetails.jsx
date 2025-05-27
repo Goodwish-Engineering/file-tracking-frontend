@@ -223,12 +223,6 @@ const FileDetails = ({ setShowButton, clearData }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate required fields, especially file_type
-    if (!formData.file_type) {
-      toast.error("कृपया फाइल प्रकार चयन गर्नुहोस्");
-      return;
-    }
-    
     // Only sync text input values from refs, not present_date
     const updatedFormData = { ...formData };
     Object.keys(inputRefs).forEach(name => {
@@ -258,8 +252,8 @@ const FileDetails = ({ setShowButton, clearData }) => {
       if (response.ok) {
         toast.success("File details submitted successfully!");
         localStorage.setItem("fileId", data.id);
-        setShowButton(true);
         setShow(false);
+        // Remove the redirection toast
       } else {
         console.error("Server error:", data);
         toast.error("Failed to submit file details.");
@@ -422,7 +416,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
                   { id: "तामेली", name: "तामेली फाइल" }
                 ]}
                 placeholder="फाइल प्रकार छान्नुहोस्"
-                required={true}
+                // required={true}
                 icon={<FaFile />}
               />
               

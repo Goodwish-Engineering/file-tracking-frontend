@@ -85,10 +85,11 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
         file: null,
       });
 
-      setShowNewForm(true);
+      // Remove this line as we don't want to show new form automatically
+      // setShowNewForm(true);
 
       toast.success("Letters and document added successfully");
-      window.location.reload();
+      onClose(); // Close the modal after submission
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error(`Error: ${error.message}`);
