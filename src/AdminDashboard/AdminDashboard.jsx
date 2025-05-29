@@ -6,49 +6,69 @@ import Notification from "../Components/Notification";
 import UserDetails from "../EmployeeDashboard/UserDetails";
 import AddOffice from "./AddOffice";
 import DeletedFile from "../Components/DeletedFile";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBars,
-  faBell,
-  faClose,
-  faSignOut,
-  faUser,
-  faFileAlt,
-  faUserPlus,
-} from "@fortawesome/free-solid-svg-icons";
+import { 
+  FaBuilding, 
+  FaUserCog, 
+  FaFileAlt, 
+  FaUserPlus, 
+  FaExchangeAlt,
+  FaTrashAlt,
+  FaBell,
+  FaChartBar,
+  FaSignOutAlt,
+  FaBars,
+  FaTimes
+} from "react-icons/fa";
+import { MdDashboard } from "react-icons/md";
 import logo from "/logo192.png";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { removeLogin, removeUser } from "../app/loginSlice"; // Import the actions
+import { removeLogin, removeUser } from "../app/loginSlice";
 import NonTransferFile3 from "../Components/NonTransfer3";
 import TransferedFile from "../Components/TransferedFiles";
+import AdminDashboardHome from "./AdminDashboardHome"; // We'll create this component later
 
 const AdminDashboard = () => {
-  const [tab, setTab] = useState("empdetails");
+  const [tab, setTab] = useState(localStorage.getItem("adminTab") || "dashboard");
   const [menue, setMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const [readNotifications, setReadNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // Add dispatch
+  const dispatch = useDispatch();
 
-  // Calculate unread notifications count
-  const unreadCount = notifications.filter(
-    (notification) => !readNotifications.includes(notification.id)
-  ).length;
+  // Save selected tab to localStorage
+  useEffect(() => {
+    localStorage.setItem("adminTab", tab);
+  }, [tab]);
+  
+  // Listen for tab change events from AdminDashboardHome
+  useEffect(() => {
+    const handleAdminTabChange = () => {
+      const newTab = localStorage.getItem("adminTab");
+      setTab(newTab);
+    };
+    
+    window.addEventListener('adminTabChange', handleAdminTabChange);
+    
+    return () => {
+      window.removeEventListener('adminTabChange', handleAdminTabChange);
+    };
+  }, []);
 
-  // Fetch notifications when component mounts
   useEffect(() => {
     fetchNotifications();
-
-    // Load read notifications from localStorage
-    const savedReadNotifications = localStorage.getItem("readNotifications");
-    if (savedReadNotifications) {
-      setReadNotifications(JSON.parse(savedReadNotifications));
-    }
+    
+    // Set up polling for notifications every 30 seconds
+    const intervalId = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
+    
+    return () => clearInterval(intervalId);
   }, []);
 
   const fetchNotifications = async () => {
@@ -61,54 +81,23 @@ const AdminDashboard = () => {
       if (!response.ok) throw new Error("Failed to fetch notifications");
       const data = await response.json();
       setNotifications(data);
+      
+      // Count unread notifications
+      const unreadCount = data.filter(n => !n.is_read).length;
+      setUnreadCount(unreadCount);
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
   };
 
-  const markAsRead = (notificationId) => {
-    if (!readNotifications.includes(notificationId)) {
-      const updatedReadNotifications = [...readNotifications, notificationId];
-      setReadNotifications(updatedReadNotifications);
-
-      localStorage.setItem(
-        "readNotifications",
-        JSON.stringify(updatedReadNotifications)
-      );
-      updateNotificationOnServer(notificationId);
-    }
-  };
-
-  const updateNotificationOnServer = async (notificationId) => {
-    try {
-      await fetch(`${baseUrl}/notification/${notificationId}/read/`, {
-        method: "PUT",
-        headers: {
-          Authorization: `token ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-    } catch (error) {
-      console.error("Error updating notification status:", error);
-    }
-  };
-
-  const handleNotificationClick = (notification) => {
-    markAsRead(notification.id);
-
-    if (notification.related_file_id) {
-      navigate(`/file-details/${notification.related_file_id}/`);
-    }
-
-    setShowNotifications(false);
-  };
-
   const handleTabChange = (newTab) => {
     setTab(newTab);
-    setMenu(false); // Close the menu when a tab is selected
+    setMenu(false);
   };
 
   const handleLogout = () => {
+    setIsLoading(true);
+    
     // Clear localStorage items
     localStorage.removeItem("token");
     localStorage.removeItem("readNotifications");
@@ -117,6 +106,7 @@ const AdminDashboard = () => {
     localStorage.removeItem("token_expiry");
     localStorage.removeItem("level");
     localStorage.removeItem("userId");
+    localStorage.removeItem("adminTab");
 
     // Update Redux state
     dispatch(removeUser());
@@ -126,225 +116,196 @@ const AdminDashboard = () => {
     navigate("/login");
   };
 
+  // Sidebar navigation items
+  const navItems = [
+    { id: "dashboard", label: "डास्हबोर्ड", icon: <MdDashboard /> },
+    { id: "empdetails", label: "कर्मचारी विवरण", icon: <FaUserCog /> },
+    { id: "filedetails", label: "फाइल विवरण", icon: <FaFileAlt /> },
+    { id: "register", label: "कर्मचारी दर्ता", icon: <FaUserPlus /> },
+    { id: "add-office", label: "शाखा व्यवस्थापन", icon: <FaBuilding /> },
+    { id: "nontransfer3", label: "स्थानान्तरण नगरिएको", icon: <FaExchangeAlt /> },
+    { id: "transfered", label: "स्थानान्तरण गरिएको", icon: <FaExchangeAlt /> },
+    { id: "deleted-files", label: "मेटिएका फाइलहरू", icon: <FaTrashAlt /> },
+    { id: "notification", label: "सूचनाहरू", icon: <FaBell />, badge: unreadCount }
+  ];
+
+  const renderContent = () => {
+    switch (tab) {
+      case "dashboard": 
+        return <AdminDashboardHome />;
+      case "empdetails":
+        return <EmployeeDetails />;
+      case "filedetails":
+        return <FileStatus />;
+      case "register":
+        return <Registration />;
+      case "notification":
+        return <Notification onNotificationRead={fetchNotifications} />;
+      case "add-office":
+        return <AddOffice />;
+      case "nontransfer3":
+        return <NonTransferFile3 />;
+      case "transfered":
+        return <TransferedFile />;
+      case "deleted-files":
+        return <DeletedFile />;
+      default:
+        return <AdminDashboardHome />;
+    }
+  };
+
+  // NavItem Component for sidebar
+  const NavItem = ({ item, onClick }) => (
+    <div
+      onClick={() => onClick(item.id)}
+      className={`cursor-pointer transition-all duration-200 mb-1 ${
+        tab === item.id
+          ? "bg-gradient-to-r from-[#E68332] to-[#FF9F4A] text-white shadow-md"
+          : "text-gray-700 hover:bg-[#f0ebe7]"
+      } font-medium px-4 py-3 rounded-md flex items-center justify-between`}
+    >
+      <div className="flex items-center gap-3">
+        <span className={`text-xl ${tab === item.id ? "text-white" : "text-[#E68332]"}`}>
+          {item.icon}
+        </span>
+        <span>{item.label}</span>
+      </div>
+      
+      {item.badge > 0 && (
+        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+          {item.badge}
+        </span>
+      )}
+    </div>
+  );
+
   return (
-    <div className="flex h-screen w-full">
-      {/* Large Screen Sidebar - Fixed and 17% width */}
-      <div className="hidden md:flex flex-col justify-between fixed left-0 top-0 w-[17%] h-screen bg-[#e7e6e4] p-2 shadow-md z-10">
-        <div className="w-[90%] h-[92%] my-auto mx-auto">
-          <div className="flex justify-center mt-8 items-center">
+    <div className="flex h-screen bg-gray-100">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block w-64 h-screen bg-white shadow-lg overflow-y-auto fixed left-0">
+        <div className="flex flex-col h-full">
+          {/* Logo and header */}
+          <div className="flex items-center justify-center space-x-2 py-5 px-4 border-b border-gray-200">
             <img
               src={logo}
-              className="w-16 h-16 object-cover rounded-full cursor-pointer"
+              className="w-12 h-12 object-cover rounded-full border-2 border-[#E68332]"
               alt="Logo"
             />
+            <div>
+              <h2 className="text-lg font-bold text-[#E68332]">फाइल ट्र्याकिंग</h2>
+              <p className="text-xs text-gray-500">प्रशासक पोर्टल</p>
+            </div>
           </div>
-          <div className="flex flex-col gap-3 mt-14">
-            <h3
-              onClick={() => handleTabChange("empdetails")}
-              className={`cursor-pointer ${
-                tab === "empdetails" ? "bg-[#E68332] text-white" : ""
-              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
-            >
-              कर्मचारी विवरण
-            </h3>
-            <h3
-              onClick={() => handleTabChange("filedetails")}
-              className={`cursor-pointer ${
-                tab === "filedetails" ? "bg-[#E68332] text-white" : ""
-              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
-            >
-              फाइल विवरण
-            </h3>
-            <h3
-              onClick={() => handleTabChange("register")}
-              className={`cursor-pointer ${
-                tab === "register" ? "bg-[#E68332] text-white" : ""
-              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
-            >
-              कर्मचारी दर्ता
-            </h3>
-            <h3
-              onClick={() => handleTabChange("add-office")}
-              className={`cursor-pointer ${
-                tab === "add-office" ? "bg-[#E68332] text-white" : ""
-              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
-            >
-              शाखा थप्नुहोस्
-            </h3>
-            <h3
-              onClick={() => handleTabChange("nontransfer3")}
-              className={`cursor-pointer ${
-                tab === "nontransfer3" ? "bg-[#E68332] text-white" : ""
-              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2`}
-            >
-              स्थानान्तरण नगरिएको फाइल
-            </h3>
-            <h3
-              onClick={() => handleTabChange("transfered")}
-              className={`cursor-pointer ${
-                tab === "transfered" ? "bg-[#E68332] text-white" : ""
-              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2`}
-            >
-              स्थानान्तरण गरिएको फाइल
-            </h3>
-            <h3
-              onClick={() => handleTabChange("deleted-files")}
-              className={`cursor-pointer ${
-                tab === "deleted-files" ? "bg-[#E68332] text-white" : ""
-              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-left flex items-center gap-2`}
-            >
-              देलितेत फाइल
-            </h3>
+          
+          {/* Navigation links */}
+          <div className="flex-grow py-5 px-2">
+            <div className="space-y-1">
+              {navItems.map(item => (
+                <NavItem key={item.id} item={item} onClick={handleTabChange} />
+              ))}
+            </div>
+          </div>
+
+          {/* User section */}
+          <div className="border-t border-gray-200 p-4">
+            <div className="flex justify-center mb-3">
+              <UserDetails />
+            </div>
             <button
-              onClick={() => handleTabChange("notification")}
-              className={`cursor-pointer ${
-                tab === "notification" ? "bg-[#E68332] text-white" : ""
-              } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md flex items-center gap-2 relative`}
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+              disabled={isLoading}
             >
-              <span>सूचना</span>
+              <FaSignOutAlt />
+              <span>{isLoading ? "निष्कासन गर्दै..." : "लग आउट गर्नुहोस्"}</span>
             </button>
           </div>
         </div>
-        <div className="flex items-center justify-center mb-8">
-          <UserDetails />
+      </div>
+
+      {/* Mobile Header */}
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-white z-30 shadow-md">
+        <div className="flex justify-between items-center p-4">
+          <div className="flex items-center gap-2">
+            <img
+              src={logo}
+              alt="Logo"
+              className="h-10 w-10 rounded-full border-2 border-[#E68332]"
+            />
+            <div>
+              <h1 className="font-bold text-[#E68332]">फाइल ट्र्याकिंग</h1>
+              <p className="text-xs text-gray-500">प्रशासक</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => handleTabChange("notification")}
+              className="relative text-[#E68332]"
+            >
+              <FaBell className="text-xl" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+            <button onClick={() => setMenu(!menue)} className="text-[#E68332]">
+              {menue ? <FaTimes className="text-2xl" /> : <FaBars className="text-2xl" />}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Small Screen Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-20 flex justify-between items-center bg-[#e7e6e4] p-2 w-full shadow-md">
-        <img
-          src={logo}
-          className="w-10 h-10 object-cover rounded-full cursor-pointer"
-          alt="Logo"
-        />
-        <FontAwesomeIcon
-          className="text-2xl text-black cursor-pointer"
-          icon={menue ? faClose : faBars}
-          onClick={() => setMenu(!menue)}
-        />
-      </div>
-
-      {/* Small Screen Sliding Navigation Menu */}
+      {/* Mobile Menu Drawer */}
       <div
-        className={`fixed top-0 right-0 h-screen bg-[#e7e6e4] z-50 shadow-lg transition-all duration-300 ease-in-out ${
-          menue ? "w-64" : "w-0 overflow-hidden"
+        className={`fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden transition-opacity duration-300 ${
+          menue ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setMenu(false)}
+      ></div>
+
+      <div
+        className={`fixed top-0 bottom-0 right-0 w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
+          menue ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex justify-end p-4">
-          <FontAwesomeIcon
-            className="text-2xl text-black cursor-pointer"
-            icon={faClose}
-            onClick={() => setMenu(false)}
-          />
-        </div>
-
-        <div className="flex flex-col items-center mt-4">
-          <img
-            src={logo}
-            className="w-20 h-20 object-cover rounded-full"
-            alt="Logo"
-          />
-        </div>
-
-        <div className="flex flex-col mt-8 px-4 gap-4">
-          <div className="flex items-center justify-center">
-            <UserDetails />
+        <div className="flex flex-col h-full">
+          <div className="flex justify-between items-center p-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-[#E68332]">प्रशासक मेनू</h2>
+            <button onClick={() => setMenu(false)} className="text-gray-500">
+              <FaTimes className="text-xl" />
+            </button>
           </div>
-          <h3
-            onClick={() => handleTabChange("empdetails")}
-            className={`cursor-pointer ${
-              tab === "empdetails" ? "bg-[#E68332] text-white" : ""
-            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
-          >
-            कर्मचारी विवरण
-          </h3>
-
-          <h3
-            onClick={() => handleTabChange("filedetails")}
-            className={`cursor-pointer ${
-              tab === "filedetails" ? "bg-[#E68332] text-white" : ""
-            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
-          >
-            फाइल विवरण
-          </h3>
-
-          <h3
-            onClick={() => handleTabChange("register")}
-            className={`cursor-pointer ${
-              tab === "register" ? "bg-[#E68332] text-white" : ""
-            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
-          >
-            कर्मचारी दर्ता
-          </h3>
-
-          <h3
-            onClick={() => handleTabChange("add-office")}
-            className={`cursor-pointer ${
-              tab === "add-office" ? "bg-[#E68332] text-white" : ""
-            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
-          >
-            शाखा थप्नुहोस्
-          </h3>
-          <h3
-            onClick={() => handleTabChange("nontransfer3")}
-            className={`cursor-pointer ${
-              tab === "nontransfer3" ? "bg-[#E68332] text-white" : ""
-            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
-          >
-            स्थानान्तरण नगरिएको फाइल
-          </h3>
-          <h3
-            onClick={() => handleTabChange("transfered")}
-            className={`cursor-pointer ${
-              tab === "transfered" ? "bg-[#E68332] text-white" : ""
-            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
-          >
-            स्थानान्तरण गरिएको फाइल
-          </h3>
-          <h3
-            onClick={() => handleTabChange("deleted-files")}
-            className={`cursor-pointer ${
-              tab === "deleted-files" ? "bg-[#E68332] text-white" : ""
-            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center`}
-          >
-            देलितेत फाइल
-          </h3>
-
-          <button
-            onClick={() => handleTabChange("notification")}
-            className={`cursor-pointer ${
-              tab === "notification" ? "bg-[#E68332] text-white" : ""
-            } hover:bg-[#E68332] text-black hover:text-white font-normal text-lg px-3 py-2 rounded-md text-center flex items-center gap-2 justify-center relative w-full`}
-          >
-            <span>सूचना</span>
-            {/* <FontAwesomeIcon icon={faBell} /> */}
-            {/* {unreadCount > 0 && (
-              <span className="absolute top-0 right-2 bg-red-600 text-black text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                {unreadCount}
-              </span>
-            )} */}
-          </button>
+          
+          {/* Mobile Navigation Links */}
+          <div className="flex-grow overflow-y-auto p-4">
+            <div className="space-y-1">
+              {navItems.map(item => (
+                <NavItem key={item.id} item={item} onClick={handleTabChange} />
+              ))}
+            </div>
+          </div>
+          
+          {/* User section in mobile menu */}
+          <div className="border-t border-gray-200 p-4">
+            <div className="flex justify-center mb-3">
+              <UserDetails />
+            </div>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+              disabled={isLoading}
+            >
+              <FaSignOutAlt />
+              <span>{isLoading ? "निष्कासन गर्दै..." : "लग आउट गर्नुहोस्"}</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Semi-transparent overlay when menu is open */}
-      {menue && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setMenu(false)}
-        ></div>
-      )}
-
-      {/* Content Area - Properly positioned relative to sidebar */}
-      <div className="w-full mt-12 md:mt-2 md:ml-[17%] md:w-[83%] overflow-y-auto p-4 h-full">
-        {tab === "empdetails" && <EmployeeDetails />}
-        {tab === "filedetails" && <FileStatus />}
-        {tab === "register" && <Registration />}
-        {tab === "notification" && <Notification />}
-        {tab === "add-office" && <AddOffice />}
-        {tab === "nontransfer3" && <NonTransferFile3 />}
-        {tab === "transfered" && <TransferedFile />}
-        {tab === "deleted-files" && <DeletedFile/>}
+      {/* Main Content Area */}
+      <div className="w-full md:ml-64 pt-16 md:pt-0 px-4 pb-4 overflow-y-auto">
+        {renderContent()}
       </div>
     </div>
   );
