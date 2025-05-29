@@ -50,19 +50,22 @@ const TransferedFile = () => {
           Authorization: `token ${token}`,
         },
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to fetch files");
       }
-  
+
       const data = await response.json();
-  
+      console.log("All files:", data.length); // Debug logging
+
       // Filtering only files where at least one approval has is_transferred: true
       const filteredData = data.filter(
         (file) =>
           file.approvals && file.approvals.some((approval) => approval.is_transferred)
       );
-  
+      
+      console.log("Transferred files:", filteredData.length); // Debug logging
+
       setTransferedFiles(filteredData);
       setLoading(false);
     } catch (error) {
