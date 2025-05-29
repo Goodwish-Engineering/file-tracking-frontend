@@ -10,11 +10,32 @@ import {
   FaSearch,
   FaInfoCircle,
   FaBell,
-  FaRegClock
+  FaRegClock,
+  FaChartBar
 } from "react-icons/fa";
 import { RiFileTransferFill } from "react-icons/ri";
 import { MdPending } from "react-icons/md";
 import { formatNepaliDate, toNepaliDigits } from "../utils/dateConverter";
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const EmployeeHome = () => {
   const navigate = useNavigate();
@@ -25,12 +46,14 @@ const EmployeeHome = () => {
     totalFiles: 0,
     pendingFiles: 0,
     transferredFiles: 0,
-    recentUploads: []
+    recentUploads: [],
+    departmentFiles: []
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [recentNotifications, setRecentNotifications] = useState([]);
   const [currentNepaliDate, setCurrentNepaliDate] = useState('');
+  const [showChart, setShowChart] = useState(false); // Add this state for toggling between table and chart
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -59,6 +82,8 @@ const EmployeeHome = () => {
         let totalFiles = 0;
         let pendingFiles = 0;
         let recentUploads = [];
+        let departmentFiles = [];
+        let departments = {};
         
         if (fileStatsPromise.status === 'fulfilled' && fileStatsPromise.value.ok) {
           const filesData = await fileStatsPromise.value.json();
@@ -68,6 +93,20 @@ const EmployeeHome = () => {
           pendingFiles = filesData.filter(file => 
             !(file.approvals && file.approvals.some(approval => approval.is_transferred))
           ).length;
+          
+          // Process department-wise file distribution
+          filesData.forEach(file => {
+            if (file.department && file.department.name) {
+              const deptName = file.department.name;
+              departments[deptName] = (departments[deptName] || 0) + 1;
+            }
+          });
+          
+          // Convert to array for chart
+          departmentFiles = Object.keys(departments).map(dept => ({
+            department: dept,
+            count: departments[dept]
+          }));
           
           // Get 5 most recent uploads
           recentUploads = filesData
@@ -96,9 +135,8 @@ const EmployeeHome = () => {
         let transferredFiles = 0;
         if (transferredFilesPromise.status === 'fulfilled' && transferredFilesPromise.value.ok) {
           const transferredData = await transferredFilesPromise.value.json();
-          transferredFiles = transferredData.filter(
-            file => file.approvals && file.approvals.some(approval => approval.is_transferred)
-          ).length;
+          // Fix: correctly count transferred files
+          transferredFiles = transferredData.length;
         }
         
         // Update state with all collected data
@@ -106,7 +144,8 @@ const EmployeeHome = () => {
           totalFiles,
           pendingFiles,
           transferredFiles,
-          recentUploads
+          recentUploads,
+          departmentFiles
         });
         
         setRecentNotifications(notifications);
@@ -188,6 +227,61 @@ const EmployeeHome = () => {
   const formatDate = (dateString) => {
     if (!dateString) return 'मिति उपलब्ध छैन';
     return formatNepaliDate(dateString);
+  };
+
+  // Department File Chart configuration
+  const chartData = {
+    labels: stats.departmentFiles.map(item => item.department),
+    datasets: [
+      {
+        label: 'फाइलहरूको संख्या',
+        data: stats.departmentFiles.map(item => item.count),
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.6)',
+          'rgba(54, 162, 235, 0.6)',
+          'rgba(255, 206, 86, 0.6)',
+          'rgba(75, 192, 192, 0.6)',
+          'rgba(153, 102, 255, 0.6)',
+          'rgba(255, 159, 64, 0.6)',
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      title: {
+        display: true,
+        text: 'विभाग अनुसार फाइल वितरण',
+        font: {
+          size: 16,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+          callback: function(value) {
+            return toNepaliDigits(value);
+          }
+        }
+      }
+    },
   };
 
   if (loading) {
@@ -326,48 +420,77 @@ const EmployeeHome = () => {
           </div>
         </div>
 
-        {/* Recent File Activity */}
+        {/* Recent File Activity with Graph */}
         <div className="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
-          <h2 className="text-lg font-semibold mb-4 text-gray-700 flex items-center gap-2">
-            <FaChartLine className="text-[#ED772F]" /> हालैका फाइल गतिविधिहरू
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+              <FaChartLine className="text-[#ED772F]" /> हालैका फाइल गतिविधिहरू
+            </h2>
+            {/* Only show chart toggle for level 4 (admin) users */}
+            {(level === "4" || level === "admin") && (
+              <div className="flex items-center">
+                <button 
+                  onClick={() => setShowChart(!showChart)}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center gap-1"
+                >
+                  <FaChartBar /> {showChart ? 'तालिका देखाउनुहोस्' : 'चार्ट देखाउनुहोस्'}
+                </button>
+              </div>
+            )}
+          </div>
 
-          {stats.recentUploads && stats.recentUploads.length > 0 ? (
-            <div className="overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">फाइल नाम</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">प्रकार</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">मिति</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">स्थिति</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {stats.recentUploads.map((file, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{file.file_name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{file.file_type}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(file.created_at)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          file.status === 'transferred' ? 'bg-green-100 text-green-800' : 
-                          file.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {file.status === 'transferred' ? 'स्वीकृत' : 
-                           file.status === 'pending' ? 'प्रक्रियामा' : file.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {/* Show chart only for level 4 (admin) users AND when showChart is true */}
+          {(level === "4" || level === "admin") && showChart ? (
+            <div className="mt-2">
+              {stats.departmentFiles && stats.departmentFiles.length > 0 ? (
+                <div className="h-80 w-full">
+                  <Bar data={chartData} options={chartOptions} />
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  विभाग अनुसार फाइलहरूको डाटा उपलब्ध छैन
+                </div>
+              )}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500">
-              कुनै हालैको फाइल गतिविधि फेला परेन
-            </div>
+            // Show table for everyone
+            stats.recentUploads && stats.recentUploads.length > 0 ? (
+              <div className="overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">फाइल नाम</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">प्रकार</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">मिति</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">स्थिति</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {stats.recentUploads.map((file, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{file.file_name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{file.file_type}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(file.created_at)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            file.status === 'transferred' ? 'bg-green-100 text-green-800' : 
+                            file.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {file.status === 'transferred' ? 'स्वीकृत' : 
+                            file.status === 'pending' ? 'प्रक्रियामा' : file.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                कुनै हालैको फाइल गतिविधि फेला परेन
+              </div>
+            )
           )}
         </div>
       </div>
