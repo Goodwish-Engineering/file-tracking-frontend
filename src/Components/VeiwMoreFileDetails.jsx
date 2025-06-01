@@ -802,7 +802,7 @@ const ViewMoreFileDetails = () => {
                               className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} 
                                 hover:bg-yellow-50 transition-all duration-200 cursor-default`}
                             >
-                              <td className="px-4 py-3 text-sm border-l-2 border-transparent hover:border-[#E68332] group">
+                              <td className="px-4 py-3 text-sm">
                                 {editable ? (
                                   <input
                                     type="text"
