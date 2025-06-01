@@ -4,7 +4,15 @@ import { FaRegFileAlt, FaCalendarAlt, FaCheck, FaTimes } from "react-icons/fa";
 import { MdAdd, MdClose } from "react-icons/md";
 import { toast } from "react-toastify";
 
-const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, id, fetchFileDetails }) => {
+const DocumentsTab = ({
+  editable,
+  fileDetails,
+  setFileDetails,
+  baseUrl,
+  token,
+  id,
+  fetchFileDetails,
+}) => {
   // Local state
   const [addingNewDocuments, setAddingNewDocuments] = useState(false);
   const [newDocumentRows, setNewDocumentRows] = useState([]);
@@ -33,16 +41,18 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
       return;
     }
 
-    const newRows = Array(pageCount).fill().map(() => ({
-      registration_no: "",
-      invoice_no: "",
-      date: "",
-      subject: "",
-      letter_date: "",
-      office: "",
-      page_no: "",
-    }));
-    
+    const newRows = Array(pageCount)
+      .fill()
+      .map((_, index) => ({
+        number_type: "",
+        number: "",
+        date: "",
+        subject: "",
+        letter_date: "",
+        office: "",
+        page_no: index + 1,
+      }));
+
     setNewDocumentRows(newRows);
     setAddingNewDocuments(true);
     setIsPageCountModalOpen(false);
@@ -59,7 +69,7 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
   // Handle changes to new document rows
   const handleNewDocumentChange = (e, field, index) => {
     const value = e.target.value;
-    setNewDocumentRows(prev => {
+    setNewDocumentRows((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
@@ -82,15 +92,18 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
           return;
         }
       }
-      
-      const updatedDocuments = [...(fileDetails.letters_and_documents || []), ...newDocumentRows];
+
+      const updatedDocuments = [
+        ...(fileDetails.letters_and_documents || []),
+        ...newDocumentRows,
+      ];
       const response = await fetch(`${baseUrl}/file/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `token ${token}`,
         },
-        body: JSON.stringify({ letters_and_documents: updatedDocuments }),
+        body: JSON.stringify({ updatedDocuments }),
       });
 
       if (!response.ok) {
@@ -135,45 +148,84 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
         <table className="min-w-full divide-y divide-gray-200 table-fixed">
           <thead className="bg-gradient-to-r from-[#E68332] to-[#f0996a] text-white sticky top-0 z-10">
             <tr>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">दर्ता नं</th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">चलानी नं</th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">मिति</th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">विषय</th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">पत्र मिति</th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">कार्यालय</th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">पृष्ठ संख्या</th>
+              <th
+                scope="col"
+                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider"
+              >
+                दर्ता नं/चलानी नं
+              </th>
+              <th
+                scope="col"
+                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider"
+              >
+                नं
+              </th>
+              <th
+                scope="col"
+                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider"
+              >
+                मिति
+              </th>
+              <th
+                scope="col"
+                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider"
+              >
+                विषय
+              </th>
+              <th
+                scope="col"
+                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider"
+              >
+                पत्र मिति
+              </th>
+              <th
+                scope="col"
+                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider"
+              >
+                कार्यालय
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {/* Existing Document Rows */}
-            {Array.isArray(fileDetails.letters_and_documents) && fileDetails.letters_and_documents.length > 0 ? (
+            {Array.isArray(fileDetails.letters_and_documents) &&
+            fileDetails.letters_and_documents.length > 0 ? (
               fileDetails.letters_and_documents.map((doc, index) => (
                 <tr
                   key={`existing-doc-${index}`}
-                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-yellow-50 transition-all duration-200 cursor-default`}
+                  className={`${
+                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  } hover:bg-yellow-50 transition-all duration-200 cursor-default`}
                 >
                   <td className="px-4 py-3 text-sm">
                     {editable ? (
-                      <input
-                        type="text"
-                        value={doc.registration_no || ""}
-                        onChange={(e) => handleChange(e, "registration_no", index)}
+                      <select
+                        value={doc.number_type || ""}
+                        onChange={(e) => handleChange(e, "number_type", index)}
                         className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      />
+                      >
+                        <option value="">-- चयन गर्नुहोस् --</option>
+                        <option value="दर्ता नं">दर्ता नं</option>
+                        <option value="चलानी नं">चलानी नं</option>
+                      </select>
                     ) : (
-                      doc.registration_no || <span className="text-gray-400 italic">N/A</span>
+                      doc.registration_no || (
+                        <span className="text-gray-400 italic">N/A</span>
+                      )
                     )}
                   </td>
                   <td className="px-4 py-3 text-sm">
                     {editable ? (
                       <input
                         type="text"
-                        value={doc.invoice_no || ""}
-                        onChange={(e) => handleChange(e, "invoice_no", index)}
+                        value={doc.number || ""}
+                        onChange={(e) => handleChange(e, "number", index)}
                         className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                       />
                     ) : (
-                      doc.invoice_no || <span className="text-gray-400 italic">N/A</span>
+                      doc.invoice_no || (
+                        <span className="text-gray-400 italic">N/A</span>
+                      )
                     )}
                   </td>
                   <td className="px-4 py-3 text-sm">
@@ -187,7 +239,9 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
                     ) : (
                       <span className="flex items-center text-gray-800">
                         <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
-                        {doc.date || <span className="text-gray-400 italic">N/A</span>}
+                        {doc.date || (
+                          <span className="text-gray-400 italic">N/A</span>
+                        )}
                       </span>
                     )}
                   </td>
@@ -201,7 +255,9 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
                       />
                     ) : (
                       <div className="line-clamp-2 hover:line-clamp-none">
-                        {doc.subject || <span className="text-gray-400 italic">N/A</span>}
+                        {doc.subject || (
+                          <span className="text-gray-400 italic">N/A</span>
+                        )}
                       </div>
                     )}
                   </td>
@@ -216,7 +272,9 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
                     ) : (
                       <span className="flex items-center text-gray-800">
                         <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
-                        {doc.letter_date || <span className="text-gray-400 italic">N/A</span>}
+                        {doc.letter_date || (
+                          <span className="text-gray-400 italic">N/A</span>
+                        )}
                       </span>
                     )}
                   </td>
@@ -229,19 +287,9 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
                         className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                       />
                     ) : (
-                      doc.office || <span className="text-gray-400 italic">N/A</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <input
-                        type="text"
-                        value={doc.page_no || ""}
-                        onChange={(e) => handleChange(e, "page_no", index)}
-                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      />
-                    ) : (
-                      doc.page_no || <span className="text-gray-400 italic">N/A</span>
+                      doc.office || (
+                        <span className="text-gray-400 italic">N/A</span>
+                      )
                     )}
                   </td>
                 </tr>
@@ -257,22 +305,31 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
             {/* New Document Rows */}
             {addingNewDocuments &&
               newDocumentRows.map((row, index) => (
-                <tr key={`new-doc-${index}`} className="bg-green-50 hover:bg-green-100 border-b border-gray-200">
+                <tr
+                  key={`new-doc-${index}`}
+                  className="bg-green-50 hover:bg-green-100 border-b border-gray-200"
+                >
                   <td className="px-4 py-3 text-sm">
-                    <input
-                      type="text"
-                      value={row.registration_no || ""}
-                      onChange={(e) => handleNewDocumentChange(e, "registration_no", index)}
-                      placeholder="दर्ता नं"
+                    <select
+                      value={row.number_type || ""}
+                      onChange={(e) =>
+                        handleNewDocumentChange(e, "number_type", index)
+                      }
                       className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                    />
+                    >
+                      <option value="">-- चयन गर्नुहोस् --</option>
+                      <option value="दर्ता नं">दर्ता नं</option>
+                      <option value="चलानी नं">चलानी नं</option>
+                    </select>
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <input
-                      type="text"
-                      value={row.invoice_no || ""}
-                      onChange={(e) => handleNewDocumentChange(e, "invoice_no", index)}
-                      placeholder="चलानी नं"
+                      type="number"
+                      value={row.number || ""}
+                      onChange={(e) =>
+                        handleNewDocumentChange(e, "number", index)
+                      }
+                      placeholder="दर्ता नं/चलानी नं"
                       className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
                   </td>
@@ -280,7 +337,9 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
                     <input
                       type="date"
                       value={row.date || ""}
-                      onChange={(e) => handleNewDocumentChange(e, "date", index)}
+                      onChange={(e) =>
+                        handleNewDocumentChange(e, "date", index)
+                      }
                       className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
                   </td>
@@ -288,7 +347,9 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
                     <input
                       type="text"
                       value={row.subject || ""}
-                      onChange={(e) => handleNewDocumentChange(e, "subject", index)}
+                      onChange={(e) =>
+                        handleNewDocumentChange(e, "subject", index)
+                      }
                       placeholder="विषय"
                       className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                       required
@@ -298,7 +359,9 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
                     <input
                       type="date"
                       value={row.letter_date || ""}
-                      onChange={(e) => handleNewDocumentChange(e, "letter_date", index)}
+                      onChange={(e) =>
+                        handleNewDocumentChange(e, "letter_date", index)
+                      }
                       className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
                   </td>
@@ -306,17 +369,10 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
                     <input
                       type="text"
                       value={row.office || ""}
-                      onChange={(e) => handleNewDocumentChange(e, "office", index)}
+                      onChange={(e) =>
+                        handleNewDocumentChange(e, "office", index)
+                      }
                       placeholder="कार्यालय"
-                      className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                    />
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <input
-                      type="number"
-                      value={row.page_no || ""}
-                      onChange={(e) => handleNewDocumentChange(e, "page_no", index)}
-                      placeholder="पृष्ठ संख्या"
                       className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
                   </td>
@@ -365,7 +421,10 @@ const DocumentsTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, i
                 <h3 className="text-xl font-bold text-[#E68332]">
                   कागजात पृष्ठ संख्या
                 </h3>
-                <button onClick={() => setIsPageCountModalOpen(false)} className="text-gray-500 hover:text-gray-700">
+                <button
+                  onClick={() => setIsPageCountModalOpen(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
                   <MdClose className="w-6 h-6" />
                 </button>
               </div>
