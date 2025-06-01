@@ -1,9 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { 
-  FaFileAlt, 
-  FaMapMarkerAlt, 
-  FaRegClock, 
+import {
+  FaFileAlt,
+  FaMapMarkerAlt,
+  FaRegClock,
   FaRegFilePdf
 } from "react-icons/fa";
 
