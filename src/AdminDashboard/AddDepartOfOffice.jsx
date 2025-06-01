@@ -134,7 +134,7 @@ const AddDepartOfOffice = () => {
               
               <form onSubmit={handleSubmit} className="p-6">
                 <div className="mb-6">
-                  <label htmlFor="name" className="block text-gray-800 font-medium mb-2 flex items-center">
+                  <label htmlFor="name" className="text-gray-800 font-medium mb-2 flex items-center">
                     <FaBuilding className="mr-2 text-[#E68332]" />
                     विभागको नाम
                     <span className="text-red-500 ml-1">*</span>
