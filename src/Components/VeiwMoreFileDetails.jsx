@@ -14,7 +14,6 @@ import TippaniTab from "./Tabs/TippaniTab";
 import DocumentsTab from "./Tabs/DocumentsTab";
 import LandDetailsTab from "./Tabs/LandDetailsTab";
 import FileHistoryTab from "./Tabs/FileHistoryTab";
-import PageCountModal from "./Modals/PageCountModal";
 
 const ViewMoreFileDetails = () => {
   const { id } = useParams();
@@ -27,17 +26,13 @@ const ViewMoreFileDetails = () => {
   const [fileHistory, setFileHistory] = useState([]);
   const navigate = useNavigate();
 
-  // Modal and new row state
+  // Modal state
   const [isPageCountModalOpen, setIsPageCountModalOpen] = useState(false);
   const [pageCountModalType, setPageCountModalType] = useState("");
   const [pageCount, setPageCount] = useState(1);
-  const [addingNewTippani, setAddingNewTippani] = useState(false);
-  const [addingNewDocuments, setAddingNewDocuments] = useState(false);
-  const [newTippaniRows, setNewTippaniRows] = useState([]);
-  const [newDocumentRows, setNewDocumentRows] = useState([]);
   const token = localStorage.getItem("token");
 
-  // Fetch initial data
+  // Fetch data on component mount
   useEffect(() => {
     fetchFileDetails();
     fetchLandDetails();
@@ -57,7 +52,7 @@ const ViewMoreFileDetails = () => {
       const data = await response.json();
       if (!data) throw new Error("No data received from server");
 
-      // Normalize tippani data
+      // Normalize tippani data if it exists
       if (data.tippani) {
         data.tippani = normalizeAndSanitizeTippani(data.tippani);
       }
@@ -67,11 +62,7 @@ const ViewMoreFileDetails = () => {
     } catch (error) {
       console.error("Error fetching file details:", error);
       setLoading(false);
-      if (error.message.includes("Failed to fetch") || error.message.includes("Network")) {
-        toast.error("नेटवर्क त्रुटि: सर्भरसँग जडान गर्न असमर्थ");
-      } else {
-        toast.error(`फाइल विवरण प्राप्त गर्न असफल: ${error.message}`);
-      }
+      handleFetchError(error);
     }
   };
 
@@ -100,7 +91,7 @@ const ViewMoreFileDetails = () => {
 
       if (!response.ok) throw new Error(`Server responded with status: ${response.status}`);
       const data = await response.json();
-
+      
       // Process the data format
       let processedData = Array.isArray(data) ? data : 
                          (data && typeof data === "object") ? (data.history || []) : [];
@@ -162,65 +153,17 @@ const ViewMoreFileDetails = () => {
     });
   };
 
+  // Handle fetch errors
+  const handleFetchError = (error) => {
+    if (error.message.includes("Failed to fetch") || error.message.includes("Network")) {
+      toast.error("नेटवर्क त्रुटि: सर्भरसँग जडान गर्न असमर्थ");
+    } else {
+      toast.error(`फाइल विवरण प्राप्त गर्न असफल: ${error.message}`);
+    }
+  };
+
   // Toggle edit mode
   const handleEditToggle = () => setEditable(!editable);
-
-  // Handle page count modal
-  const openPageCountModal = (type) => {
-    setPageCountModalType(type);
-    setPageCount(1);
-    setIsPageCountModalOpen(true);
-  };
-
-  // Handle page count submit
-  const handlePageCountSubmit = () => {
-    if (pageCount < 1) {
-      toast.error("पृष्ठ संख्या १ भन्दा बढी हुनुपर्छ।");
-      return;
-    } else if (pageCount > 100) {
-      toast.error("पृष्ठ संख्या १00 भन्दा कम हुनुपर्छ।");
-      return;
-    }
-
-    if (pageCountModalType === "tippani") {
-      const newRows = Array(pageCount).fill().map(() => ({
-        subject: "", submitted_by: "", submitted_date: "", approved_by: "",
-        approved_date: "", remarks: "", tippani_date: "", page_no: "",
-      }));
-      setNewTippaniRows(newRows);
-      setAddingNewTippani(true);
-    } else if (pageCountModalType === "document") {
-      const newRows = Array(pageCount).fill().map(() => ({
-        registration_no: "", invoice_no: "", date: "", subject: "",
-        letter_date: "", office: "", page_no: "",
-      }));
-      setNewDocumentRows(newRows);
-      setAddingNewDocuments(true);
-    }
-
-    setIsPageCountModalOpen(false);
-  };
-
-  // Update Tippani
-  const updateTippani = (updatedTippani) => {
-    setFileDetails({ ...fileDetails, tippani: updatedTippani });
-  };
-
-  // Update Documents
-  const updateDocuments = (updatedDocuments) => {
-    setFileDetails({ ...fileDetails, letters_and_documents: updatedDocuments });
-  };
-
-  // Cancel adding new rows
-  const cancelAddingNewRows = (type) => {
-    if (type === "tippani") {
-      setNewTippaniRows([]);
-      setAddingNewTippani(false);
-    } else if (type === "document") {
-      setNewDocumentRows([]);
-      setAddingNewDocuments(false);
-    }
-  };
 
   // Save changes
   const handleSave = async () => {
@@ -251,14 +194,19 @@ const ViewMoreFileDetails = () => {
   // Navigation handler
   const level = localStorage.getItem("level");
   const handleNavigate = () => {
-    if (level === "5") {
-      navigate("/admindashboard");
-    } else {
-      navigate("/employeeheader");
-    }
+    navigate(level === "5" ? "/admindashboard" : "/employeeheader");
   };
 
-  // Loading state
+  // Tab data
+  const tabs = [
+    { id: 0, name: "फाइल जानकारी", icon: <FaFileAlt className="mr-2" /> },
+    { id: 1, name: "टिप्पणी", icon: <FaRegClipboard className="mr-2" /> },
+    { id: 2, name: "पत्रहरू र कागजातहरू", icon: <FaRegFileAlt className="mr-2" /> },
+    { id: 3, name: "जग्गा विवरण", icon: <FaMapMarkerAlt className="mr-2" /> },
+    { id: 4, name: "फाइल इतिहास", icon: <FaHistory className="mr-2" /> },
+  ];
+
+  // Loading view
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
@@ -268,7 +216,7 @@ const ViewMoreFileDetails = () => {
     );
   }
 
-  // Not found state
+  // File not found view
   if (!fileDetails) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
@@ -285,15 +233,6 @@ const ViewMoreFileDetails = () => {
       </div>
     );
   }
-
-  // Tab data
-  const tabs = [
-    { id: 0, name: "फाइल जानकारी", icon: <FaFileAlt className="mr-2" /> },
-    { id: 1, name: "टिप्पणी", icon: <FaRegClipboard className="mr-2" /> },
-    { id: 2, name: "पत्रहरू र कागजातहरू", icon: <FaRegFileAlt className="mr-2" /> },
-    { id: 3, name: "जग्गा विवरण", icon: <FaMapMarkerAlt className="mr-2" /> },
-    { id: 4, name: "फाइल इतिहास", icon: <FaHistory className="mr-2" /> },
-  ];
 
   return (
     <div className="w-full min-h-screen p-4 md:p-6 bg-gray-50">
@@ -407,53 +346,12 @@ const ViewMoreFileDetails = () => {
             {activeTab === 1 && (
               <TippaniTab
                 editable={editable}
-                addingNewTippani={addingNewTippani}
-                tippani={fileDetails?.tippani || []}
-                newTippaniRows={newTippaniRows}
-                openPageCountModal={openPageCountModal}
-                updateTippani={updateTippani}
-                handleNewTippaniChange={(e, field, index) => {
-                  const value = e.target.value;
-                  setNewTippaniRows((prev) => {
-                    const updated = [...prev];
-                    updated[index] = { ...updated[index], [field]: value };
-                    return updated;
-                  });
-                }}
-                cancelAddingNewRows={cancelAddingNewRows}
-                saveNewTippani={async () => {
-                  try {
-                    for (const row of newTippaniRows) {
-                      if (!row.subject) {
-                        toast.error("विषय फील्ड आवश्यक छ।");
-                        return;
-                      }
-                    }
-                    
-                    const updatedTippani = [...(fileDetails.tippani || []), ...newTippaniRows];
-                    const response = await fetch(`${baseUrl}/file/${id}/`, {
-                      method: "PATCH",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `token ${token}`,
-                      },
-                      body: JSON.stringify({ tippani: updatedTippani }),
-                    });
-
-                    if (!response.ok) throw new Error(`Server responded with status: ${response.status}`);
-
-                    await fetchFileDetails();
-                    setNewTippaniRows([]);
-                    setAddingNewTippani(false);
-                    toast.success("टिप्पणी सफलतापूर्वक थपियो!");
-                  } catch (error) {
-                    console.error("Error adding new tippani:", error);
-                    toast.error(`टिप्पणी थप्न असफल: ${error.message}`);
-                  }
-                }}
+                fileDetails={fileDetails}
+                setFileDetails={setFileDetails}
                 baseUrl={baseUrl}
                 token={token}
                 id={id}
+                fetchFileDetails={fetchFileDetails}
               />
             )}
 
@@ -461,53 +359,12 @@ const ViewMoreFileDetails = () => {
             {activeTab === 2 && (
               <DocumentsTab
                 editable={editable}
-                addingNewDocuments={addingNewDocuments}
-                letters_and_documents={fileDetails?.letters_and_documents || []}
-                newDocumentRows={newDocumentRows}
-                openPageCountModal={openPageCountModal}
-                updateDocuments={updateDocuments}
-                handleNewDocumentChange={(e, field, index) => {
-                  const value = e.target.value;
-                  setNewDocumentRows((prev) => {
-                    const updated = [...prev];
-                    updated[index] = { ...updated[index], [field]: value };
-                    return updated;
-                  });
-                }}
-                cancelAddingNewRows={cancelAddingNewRows}
-                saveNewDocuments={async () => {
-                  try {
-                    for (const row of newDocumentRows) {
-                      if (!row.subject) {
-                        toast.error("विषय फील्ड आवश्यक छ।");
-                        return;
-                      }
-                    }
-                    
-                    const updatedDocuments = [...(fileDetails.letters_and_documents || []), ...newDocumentRows];
-                    const response = await fetch(`${baseUrl}/file/${id}/`, {
-                      method: "PATCH",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `token ${token}`,
-                      },
-                      body: JSON.stringify({ letters_and_documents: updatedDocuments }),
-                    });
-
-                    if (!response.ok) throw new Error(`Server responded with status: ${response.status}`);
-
-                    await fetchFileDetails();
-                    setNewDocumentRows([]);
-                    setAddingNewDocuments(false);
-                    toast.success("कागजात सफलतापूर्वक थपियो!");
-                  } catch (error) {
-                    console.error("Error adding new documents:", error);
-                    toast.error(`कागजात थप्न असफल: ${error.message}`);
-                  }
-                }}
+                fileDetails={fileDetails}
+                setFileDetails={setFileDetails}
                 baseUrl={baseUrl}
                 token={token}
                 id={id}
+                fetchFileDetails={fetchFileDetails}
               />
             )}
 
@@ -516,56 +373,11 @@ const ViewMoreFileDetails = () => {
               <LandDetailsTab
                 editable={editable}
                 landDetails={landDetails}
-                id={id}
-                handleLandDetailChange={(e, field, index) => {
-                  const value = e.target.value;
-                  const updatedLandDetails = [...landDetails];
-                  updatedLandDetails[index][field] = value;
-                  setLandDetails(updatedLandDetails);
-                }}
-                addLandDetail={() => {
-                  setLandDetails((prevState) => [...prevState, {
-                    district: "",
-                    municipality: "",
-                    ward_no: "",
-                    kitta_no: "",
-                    guthi_name: "",
-                    land_type: "",
-                    related_file: id,
-                  }]);
-                }}
-                handleSaveLandDetails={async () => {
-                  try {
-                    for (const detail of landDetails) {
-                      if (detail.id) {
-                        await fetch(`${baseUrl}/land-details/${detail.id}/`, {
-                          method: "PATCH",
-                          headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `token ${token}`,
-                          },
-                          body: JSON.stringify(detail),
-                        });
-                      } else {
-                        await fetch(`${baseUrl}/land-details/`, {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `token ${token}`,
-                          },
-                          body: JSON.stringify({ ...detail, related_file: id }),
-                        });
-                      }
-                    }
-                    toast.success("जग्गा विवरण सफलतापूर्वक अद्यावधिक गरियो");
-                    fetchLandDetails();
-                  } catch (error) {
-                    console.error("Error updating land details:", error);
-                    toast.error("जग्गा विवरण अद्यावधिक गर्न असफल");
-                  }
-                }}
+                setLandDetails={setLandDetails}
                 baseUrl={baseUrl}
                 token={token}
+                id={id}
+                fetchLandDetails={fetchLandDetails}
               />
             )}
 
@@ -574,66 +386,6 @@ const ViewMoreFileDetails = () => {
           </AnimatePresence>
         </div>
       </motion.div>
-
-      {/* Page Count Modal */}
-      <AnimatePresence>
-        {isPageCountModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md transform transition-all"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-[#E68332]">
-                  {pageCountModalType === "tippani" ? "टिप्पणी पृष्ठ संख्या" : "कागजात पृष्ठ संख्या"}
-                </h3>
-                <button onClick={() => setIsPageCountModalOpen(false)} className="text-gray-500 hover:text-gray-700">
-                  <MdClose className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-gray-700 mb-2">पृष्ठ संख्या प्रविष्ट गर्नुहोस्:</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={pageCount}
-                  onChange={(e) => setPageCount(parseInt(e.target.value))}
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                />
-                <p className="text-sm text-gray-500 mt-2">
-                  {pageCountModalType === "tippani"
-                    ? "कृपया थप्न चाहनुभएको टिप्पणी पृष्ठ संख्या प्रविष्ट गर्नुहोस्।"
-                    : "कृपया थप्न चाहनुभएको कागजात पृष्ठ संख्या प्रविष्ट गर्नुहोस्।"}
-                </p>
-              </div>
-
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => setIsPageCountModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors"
-                >
-                  रद्द गर्नुहोस्
-                </button>
-                <button
-                  onClick={handlePageCountSubmit}
-                  className="px-4 py-2 bg-[#E68332] text-white rounded-md hover:bg-[#d9773b] transition-colors"
-                >
-                  सुनिश्चित गर्नुहोस्
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
