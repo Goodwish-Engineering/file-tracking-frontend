@@ -2,12 +2,14 @@ import { createSlice } from "@reduxjs/toolkit";
 
 // Load stored login state from localStorage
 const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-const storedLoginStatus = JSON.parse(localStorage.getItem("isLogin") || "false");
+const storedLoginStatus = JSON.parse(
+  localStorage.getItem("isLogin") || "false"
+);
 
 const initialState = {
-  isLogin: storedLoginStatus, 
-  user: storedUser, 
-  baseUrl: "https://fts.guthisansthan.org.np/api",
+  isLogin: storedLoginStatus,
+  user: storedUser,
+  baseUrl: import.meta.env.VITE_API_BASE_URL,
 };
 
 export const loginSlice = createSlice({
@@ -33,5 +35,6 @@ export const loginSlice = createSlice({
   },
 });
 
-export const { addLogin, removeLogin, addUser, removeUser } = loginSlice.actions;
+export const { addLogin, removeLogin, addUser, removeUser } =
+  loginSlice.actions;
 export default loginSlice.reducer;

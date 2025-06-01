@@ -118,7 +118,7 @@ const EmployeHeader = () => {
   return (
     <div className="flex flex-col md:flex-row w-full relative">
       {/* Large Screen Sidebar - hidden on mobile */}
-      <div className="h-screen rounded-lg left-0 sticky w-[18%] top-0 z-10 hidden md:flex flex-col bg-white p-2 shadow-lg border-r">
+      <div className="min-h-screen rounded-lg left-0 sticky w-[18%] top-0 z-10 hidden md:flex flex-col bg-white p-2 shadow-lg border-r">
         <div className="h-full flex flex-col justify-between">
           {/* Logo and app name */}
           <div>
