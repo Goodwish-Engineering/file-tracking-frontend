@@ -53,46 +53,25 @@ const LandDetailsTab = ({
         <table className="min-w-full divide-y divide-gray-200 table-fixed">
           <thead className="bg-gradient-to-r from-[#E68332] to-[#f0996a] text-white sticky top-0 z-10">
             <tr>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-32"
-              >
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-32">
                 जिल्ला
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28"
-              >
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">
                 नगरपालिका
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28"
-              >
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">
                 वार्ड नं
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28"
-              >
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">
                 किट्टा नं
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-32"
-              >
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-32">
                 गुठी नाम
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28"
-              >
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">
                 जग्गा प्रकार
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28"
-              >
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">
                 सम्बन्धित फाइल
               </th>
             </tr>
@@ -102,20 +81,90 @@ const LandDetailsTab = ({
               landDetails.map((detail, index) => (
                 <tr
                   key={index}
-                  className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  } hover:bg-yellow-50 transition-all duration-200 cursor-default`}
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-yellow-50 transition-all duration-200 cursor-default`}
                 >
-                  {/* Land details cells */}
-                  {/* Keep the same structure as in the original code */}
+                  <td className="px-4 py-3 text-sm border-l-2 border-transparent hover:border-[#E68332] group">
+                    {editable ? (
+                      <input
+                        type="text"
+                        value={detail.district || ""}
+                        onChange={(e) => handleLandDetailChange(e, "district", index)}
+                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                      />
+                    ) : (
+                      <div className="line-clamp-2 group-hover:line-clamp-none">
+                        {detail.district || "N/A"}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {editable ? (
+                      <input
+                        type="text"
+                        value={detail.municipality || ""}
+                        onChange={(e) => handleLandDetailChange(e, "municipality", index)}
+                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                      />
+                    ) : (
+                      <span className="text-gray-900">{detail.municipality || "N/A"}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {editable ? (
+                      <input
+                        type="text"
+                        value={detail.ward_no || ""}
+                        onChange={(e) => handleLandDetailChange(e, "ward_no", index)}
+                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                      />
+                    ) : (
+                      <span className="text-gray-900">{detail.ward_no || "N/A"}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {editable ? (
+                      <input
+                        type="text"
+                        value={detail.kitta_no || ""}
+                        onChange={(e) => handleLandDetailChange(e, "kitta_no", index)}
+                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                      />
+                    ) : (
+                      <span className="text-gray-900">{detail.kitta_no || "N/A"}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {editable ? (
+                      <input
+                        type="text"
+                        value={detail.guthi_name || ""}
+                        onChange={(e) => handleLandDetailChange(e, "guthi_name", index)}
+                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                      />
+                    ) : (
+                      <span className="text-gray-900">{detail.guthi_name || "N/A"}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {editable ? (
+                      <input
+                        type="text"
+                        value={detail.land_type || ""}
+                        onChange={(e) => handleLandDetailChange(e, "land_type", index)}
+                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                      />
+                    ) : (
+                      <span className="text-gray-900">{detail.land_type || "N/A"}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <span className="text-gray-900">{id}</span>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr className="bg-white">
-                <td
-                  colSpan="7"
-                  className="px-4 py-3 text-center text-gray-500"
-                >
+                <td colSpan="7" className="px-4 py-3 text-center text-gray-500">
                   कुनै जग्गा विवरण उपलब्ध छैन
                 </td>
               </tr>
