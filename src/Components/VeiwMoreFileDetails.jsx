@@ -7,6 +7,8 @@ import TippaniFormModal from "./TippaniFormModal";
 import DocumentFormModal from "./DocumentFormModal";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { FileHistoryTimeline } from "./FileHistory";
+import { MdSubject } from "react-icons/md";
+import { FaBuilding } from "react-icons/fa";
 import { 
   FaRegFilePdf, 
   FaPencilAlt, 
@@ -16,7 +18,8 @@ import {
   FaRegFileAlt, 
   FaMapMarkerAlt, 
   FaRegClock, 
-  FaHistory 
+  FaHistory,
+  FaCalendarAlt 
 } from "react-icons/fa";
 
 const ViewMoreFileDetails = () => {
@@ -93,6 +96,83 @@ const ViewMoreFileDetails = () => {
     fetchFileHistory();
   }, []);
 
+  // Normalize and sanitize Tippani data
+  const normalizeAndSanitizeTippani = (tippaniData) => {
+    if (!tippaniData) return [];
+    
+    // Handle case where API might return a single item not in an array
+    if (!Array.isArray(tippaniData)) {
+      if (typeof tippaniData === 'object') {
+        // If it's a single object, convert to array
+        tippaniData = [tippaniData];
+      } else {
+        // If it's a string or other primitive, create a dummy object
+        return [{
+          subject: String(tippaniData),
+          submitted_by: "",
+          submitted_date: "",
+          approved_by: "",
+          approved_date: "",
+          remarks: "",
+          tippani_date: "",
+          page_no: ""
+        }];
+      }
+    }
+    
+    // If we got an empty array, return it
+    if (tippaniData.length === 0) return [];
+    
+    // Process each item to ensure it has all required fields
+    return tippaniData.map(tip => {
+      // Create a base object with default values for all expected properties
+      const normalizedTip = {
+        subject: "",
+        submitted_by: "",
+        submitted_date: "",
+        approved_by: "",
+        approved_date: "",
+        remarks: "",
+        tippani_date: "",
+        page_no: ""
+      };
+      
+      // Handle different data structures
+      if (typeof tip === 'string') {
+        // If it's a string, use it as the subject
+        normalizedTip.subject = tip;
+      } else if (typeof tip === 'object' && tip !== null) {
+        // Merge the tip object with our defaults
+        Object.keys(normalizedTip).forEach(key => {
+          if (tip[key] !== undefined) {
+            normalizedTip[key] = tip[key];
+          }
+        });
+        
+        // Add any additional properties from the original object
+        Object.keys(tip).forEach(key => {
+          if (normalizedTip[key] === undefined) {
+            normalizedTip[key] = tip[key];
+          }
+        });
+      }
+      
+      return normalizedTip;
+    });
+  };
+
+  // Add this debugging function right after normalizeAndSanitizeTippani
+  const logTippaniData = (data) => {
+    console.log("Tippani Data Structure:", data);
+    if (Array.isArray(data)) {
+      data.forEach((item, index) => {
+        console.log(`Tippani Item ${index}:`, item);
+      });
+    } else {
+      console.log("Tippani is not an array:", typeof data);
+    }
+  };
+
   // Fetch file details
   const fetchFileDetails = async () => {
     try {
@@ -111,6 +191,16 @@ const ViewMoreFileDetails = () => {
       
       if (!data) {
         throw new Error("No data received from server");
+      }
+      
+      // Log raw data to see structure
+      console.log("Raw file data:", data);
+      
+      // Normalize tippani data if it exists
+      if (data.tippani) {
+        logTippaniData(data.tippani); // Log before normalization
+        data.tippani = normalizeAndSanitizeTippani(data.tippani);
+        logTippaniData(data.tippani); // Log after normalization
       }
       
       setFileDetails(data);
@@ -690,31 +780,29 @@ const ViewMoreFileDetails = () => {
                     )}
                   </div>
                   
-                  <div className="overflow-auto rounded-lg shadow-md border border-gray-200">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gradient-to-r from-[#E68332] to-[#f0996a] text-white sticky top-0">
+                  <div className="overflow-auto rounded-lg shadow-lg border border-gray-200">
+                    <table className="min-w-full divide-y divide-gray-200 table-fixed">
+                      <thead className="bg-gradient-to-r from-[#E68332] to-[#f0996a] text-white sticky top-0 z-10">
                         <tr>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">विषय</th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">पेश गर्ने</th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">पेश गरेको मिति</th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">पेश गरिएको</th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">स्वीकृत मिति</th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">टिप्पणी</th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">टिप्पणी मिति</th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">पाना संख्या</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-32">विषय</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">पेश गर्ने</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">पेश मिति</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">स्वीकृत गर्ने</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">स्वीकृत मिति</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-32">कैफियत</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">टिप्पणी मिति</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-16">पृष्ठ</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {tippani.length > 0 ? (
+                        {Array.isArray(tippani) && tippani.length > 0 ? (
                           tippani.map((tip, index) => (
-                            <AnimatedDiv 
+                            <tr
                               key={index}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.3, delay: index * 0.05 }}
-                              className={index % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100'}
+                              className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} 
+                                hover:bg-yellow-50 transition-all duration-200 cursor-default`}
                             >
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <td className="px-4 py-3 text-sm border-l-2 border-transparent hover:border-[#E68332] group">
                                 {editable ? (
                                   <input
                                     type="text"
@@ -723,10 +811,12 @@ const ViewMoreFileDetails = () => {
                                     className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                                   />
                                 ) : (
-                                  tip.subject || "N/A"
+                                  <div className="line-clamp-2 group-hover:line-clamp-none">
+                                    {tip.subject || "N/A"}
+                                  </div>
                                 )}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <td className="px-4 py-3 text-sm">
                                 {editable ? (
                                   <input
                                     type="text"
@@ -735,10 +825,15 @@ const ViewMoreFileDetails = () => {
                                     className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                                   />
                                 ) : (
-                                  tip.submitted_by || "N/A"
+                                  <span className="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                    </svg>
+                                    {tip.submitted_by || "N/A"}
+                                  </span>
                                 )}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <td className="px-4 py-3 text-sm">
                                 {editable ? (
                                   <input
                                     type="date"
@@ -747,10 +842,13 @@ const ViewMoreFileDetails = () => {
                                     className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                                   />
                                 ) : (
-                                  tip.submitted_date || "N/A"
+                                  <span className="flex items-center text-gray-800">
+                                    <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
+                                    {tip.submitted_date || "N/A"}
+                                  </span>
                                 )}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <td className="px-4 py-3 text-sm">
                                 {editable ? (
                                   <input
                                     type="text"
@@ -759,10 +857,16 @@ const ViewMoreFileDetails = () => {
                                     className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                                   />
                                 ) : (
-                                  tip.approved_by || "N/A"
+                                  <span className="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                      <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                      <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5z" clipRule="evenodd" />
+                                    </svg>
+                                    {tip.approved_by || "N/A"}
+                                  </span>
                                 )}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <td className="px-4 py-3 text-sm">
                                 {editable ? (
                                   <input
                                     type="date"
@@ -771,10 +875,13 @@ const ViewMoreFileDetails = () => {
                                     className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                                   />
                                 ) : (
-                                  tip.approved_date || "N/A"
+                                  <span className="flex items-center text-gray-800">
+                                    <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
+                                    {tip.approved_date || "N/A"}
+                                  </span>
                                 )}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <td className="px-4 py-3 text-sm">
                                 {editable ? (
                                   <input
                                     type="text"
@@ -783,10 +890,12 @@ const ViewMoreFileDetails = () => {
                                     className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                                   />
                                 ) : (
-                                  tip.remarks || "N/A"
+                                  <div className="line-clamp-2">
+                                    {tip.remarks || "N/A"}
+                                  </div>
                                 )}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <td className="px-4 py-3 text-sm">
                                 {editable ? (
                                   <input
                                     type="date"
@@ -795,40 +904,30 @@ const ViewMoreFileDetails = () => {
                                     className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                                   />
                                 ) : (
-                                  tip.tippani_date || "N/A"
+                                  <span className="flex items-center text-gray-800">
+                                    <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
+                                    {tip.tippani_date || "N/A"}
+                                  </span>
                                 )}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <td className="px-4 py-3 text-sm">
                                 {editable ? (
                                   <input
-                                    type="number"
+                                    type="text"
                                     value={tip.page_no || ""}
                                     onChange={(e) => handleChange(e, "page_no", index, "tippani")}
                                     className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                                   />
                                 ) : (
-                                  tip.page_no || "N/A"
+                                  <span className="text-gray-900">{tip.page_no || "N/A"}</span>
                                 )}
                               </td>
-                            </AnimatedDiv>
+                            </tr>
                           ))
                         ) : (
-                          <tr>
-                            <td colSpan="8" className="px-6 py-10 text-center text-gray-500 bg-gray-50">
-                              <div className="flex flex-col items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <p className="font-medium">कुनै टिप्पणी उपलब्ध छैन</p>
-                                {editable && (
-                                  <button
-                                    onClick={() => setIsTippaniModalOpen(true)}
-                                    className="mt-4 px-4 py-2 bg-[#E68332] text-white rounded-md hover:bg-[#d9773b] text-sm"
-                                  >
-                                    + टिप्पणी थप्नुहोस्
-                                  </button>
-                                )}
-                              </div>
+                          <tr className="bg-white">
+                            <td colSpan="8" className="px-4 py-3 text-center text-gray-500">
+                              कुनै टिप्पणी उपलब्ध छैन
                             </td>
                           </tr>
                         )}
@@ -839,7 +938,7 @@ const ViewMoreFileDetails = () => {
               </AnimatedDiv>
             )}
 
-            {/* Letters and Documents Tab */}
+            {/* Documents Tab */}
             {activeTab === 2 && (
               <AnimatedDiv 
                 key="documents"
@@ -867,147 +966,107 @@ const ViewMoreFileDetails = () => {
                     )}
                   </div>
                   
-                  <div className="overflow-auto max-h-[400px] rounded-t-lg border border-gray-200">
-                    <table className="min-w-full table-auto border-none bg-gray-100 overflow-hidden">
-                      <thead>
-                        <tr className="bg-[#E68332] text-white border-b-2 border-gray-300 text-nowrap">
-                          <th className="py-2 px-4 text-left border-none">
-                            दर्ता नं
-                          </th>
-                          <th className="py-2 px-4 text-left border-none">
-                            चलानी नं
-                          </th>
-                          <th className="py-2 px-4 text-left border-none">मिति</th>
-                          <th className="py-2 px-4 text-left border-none">विषय</th>
-                          <th className="py-2 px-4 text-left border-none">
-                            पत्र मिति
-                          </th>
-                          <th className="py-2 px-4 text-left border-none">कार्यालय</th>
-                          <th className="py-2 px-4 text-left border-none">पाना संख्या</th>
+                  <div className="overflow-auto rounded-lg shadow-lg border border-gray-200">
+                    <table className="min-w-full divide-y divide-gray-200 table-fixed">
+                      <thead className="bg-gradient-to-r from-[#E68332] to-[#f0996a] text-white sticky top-0 z-10">
+                        <tr>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-32">दस्तावेज प्रकार</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">पेश गर्ने</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">पेश मिति</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">पृष्ठ संख्या</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-32">फाइल</th>
                         </tr>
                       </thead>
-                      <tbody>
-                        {letters_and_documents.map((doc, index) => (
-                          <tr
-                            key={index}
-                            className="border-b-2 border-gray-300 text-center"
-                          >
-                            <td className="py-2 px-4 border-none">
-                              {editable ? (
-                                <input
-                                  type="text"
-                                  value={doc.registration_no || ""}
-                                  onChange={(e) =>
-                                    handleChange(
-                                      e,
-                                      "registration_no",
-                                      index,
-                                      "document"
-                                    )
-                                  }
-                                  className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                                />
-                              ) : (
-                                doc.registration_no || "N/A"
-                              )}
-                            </td>
-                            <td className="py-2 px-4 border-none">
-                              {editable ? (
-                                <input
-                                  type="text"
-                                  value={doc.invoice_no || ""}
-                                  onChange={(e) =>
-                                    handleChange(e, "invoice_no", index, "document")
-                                  }
-                                  className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                                />
-                              ) : (
-                                doc.invoice_no || "N/A"
-                              )}
-                            </td>
-                            <td className="py-2 px-4 border-none">
-                              {editable ? (
-                                <input
-                                  type="date"
-                                  value={doc.date || ""}
-                                  onChange={(e) =>
-                                    handleChange(e, "date", index, "document")
-                                  }
-                                  className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                                />
-                              ) : (
-                                doc.date || "N/A"
-                              )}
-                            </td>
-                            <td className="py-2 px-4 border-none">
-                              {editable ? (
-                                <input
-                                  type="text"
-                                  value={doc.subject || ""}
-                                  onChange={(e) =>
-                                    handleChange(e, "subject", index, "document")
-                                  }
-                                  className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                                />
-                              ) : (
-                                doc.subject || "N/A"
-                              )}
-                            </td>
-                            <td className="py-2 px-4 border-none">
-                              {editable ? (
-                                <input
-                                  type="date"
-                                  value={doc.letter_date || ""}
-                                  onChange={(e) =>
-                                    handleChange(e, "letter_date", index, "document")
-                                  }
-                                  className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                                />
-                              ) : (
-                                doc.letter_date || "N/A"
-                              )}
-                            </td>
-                            <td className="py-2 px-4 border-none">
-                              {editable ? (
-                                <input
-                                  type="text"
-                                  value={doc.office || ""}
-                                  onChange={(e) =>
-                                    handleChange(e, "office", index, "document")
-                                  }
-                                  className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                                />
-                              ) : (
-                                doc.office || "N/A"
-                              )}
-                            </td>
-                            <td className="py-2 px-4 border-none">
-                              {editable ? (
-                                <input
-                                  type="text"
-                                  value={doc.page_no || ""}
-                                  onChange={(e) =>
-                                    handleChange(e, "page_no", index, "document")
-                                  }
-                                  className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                                />
-                              ) : (
-                                doc.page_no || "N/A"
-                              )}
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {Array.isArray(letters_and_documents) && letters_and_documents.length > 0 ? (
+                          letters_and_documents.map((doc, index) => (
+                            <tr
+                              key={index}
+                              className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} 
+                                hover:bg-yellow-50 transition-all duration-200 cursor-default`}
+                            >
+                              <td className="px-4 py-3 text-sm border-l-2 border-transparent hover:border-[#E68332] group">
+                                {editable ? (
+                                  <input
+                                    type="text"
+                                    value={doc.subject || ""}
+                                    onChange={(e) => handleChange(e, "subject", index, "document")}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                                  />
+                                ) : (
+                                  <div className="line-clamp-2 group-hover:line-clamp-none">
+                                    {doc.subject || "N/A"}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                {editable ? (
+                                  <input
+                                    type="text"
+                                    value={doc.submitted_by || ""}
+                                    onChange={(e) => handleChange(e, "submitted_by", index, "document")}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                                  />
+                                ) : (
+                                  <span className="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                    </svg>
+                                    {doc.submitted_by || "N/A"}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                {editable ? (
+                                  <input
+                                    type="date"
+                                    value={doc.submitted_date || ""}
+                                    onChange={(e) => handleChange(e, "submitted_date", index, "document")}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                                  />
+                                ) : (
+                                  <span className="flex items-center text-gray-800">
+                                    <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
+                                    {doc.submitted_date || "N/A"}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                {editable ? (
+                                  <input
+                                    type="text"
+                                    value={doc.page_no || ""}
+                                    onChange={(e) => handleChange(e, "page_no", index, "document")}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                                  />
+                                ) : (
+                                  <span className="text-gray-900">{doc.page_no || "N/A"}</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                {editable ? (
+                                  <input
+                                    type="text"
+                                    value={doc.file || ""}
+                                    onChange={(e) => handleChange(e, "file", index, "document")}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                                  />
+                                ) : (
+                                  <span className="text-gray-900">{doc.file || "N/A"}</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr className="bg-white">
+                            <td colSpan="5" className="px-4 py-3 text-center text-gray-500">
+                              कुनै कागजात उपलब्ध छैन
                             </td>
                           </tr>
-                        ))}
+                        )}
                       </tbody>
                     </table>
                   </div>
-                  {editable && (
-                    <button
-                      className="mt-4 px-4 py-2 bg-[#E68332] text-white rounded-md hover:bg-[#d9773b] transition-all"
-                      onClick={() => setIsDocumentModalOpen(true)}
-                    >
-                      कागजात थप्नुहोस्
-                    </button>
-                  )}
                 </div>
               </AnimatedDiv>
             )}
@@ -1028,122 +1087,125 @@ const ViewMoreFileDetails = () => {
                       जग्गा विवरण
                     </h3>
                     {editable && (
-                      <div className="space-x-2">
-                        <button
-                          className="px-4 py-2 bg-[#E68332] text-white rounded-md hover:bg-[#d9773b] transition-all flex items-center gap-2 shadow-sm"
-                          onClick={() => setIsLandDetailsModalOpen(true)}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                          </svg>
-                          जग्गा विवरण थप्नुहोस्
-                        </button>
-                        
-                        {landDetails.length > 0 && (
-                          <button
-                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-all"
-                            onClick={handleSaveLandDetails}
-                          >
-                            सुरक्षित गर्नुहोस्
-                          </button>
-                        )}
-                      </div>
+                      <button
+                        className="px-4 py-2 bg-[#E68332] text-white rounded-md hover:bg-[#d9773b] transition-all flex items-center gap-2 shadow-sm"
+                        onClick={addLandDetail}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                        </svg>
+                        नयाँ जग्गा विवरण थप्नुहोस्
+                      </button>
                     )}
                   </div>
                   
-                  <div className="overflow-auto max-h-[400px] rounded-t-lg border border-gray-200">
-                    <table className="min-w-full table-auto border-none bg-gray-100 overflow-hidden">
-                      <thead>
-                        <tr className="bg-[#E68332] text-white border-b-2 border-gray-300 text-nowrap">
-                          <th className="py-2 px-4 text-left border-none">जिल्ला</th>
-                          <th className="py-2 px-4 text-left border-none">नगरपालिका</th>
-                          <th className="py-2 px-4 text-left border-none">वार्ड नं</th>
-                          <th className="py-2 px-4 text-left border-none">कित्ता नं</th>
-                          <th className="py-2 px-4 text-left border-none">गुठी नाम</th>
-                          <th className="py-2 px-4 text-left border-none">जग्गा प्रकार</th>
+                  <div className="overflow-auto rounded-lg shadow-lg border border-gray-200">
+                    <table className="min-w-full divide-y divide-gray-200 table-fixed">
+                      <thead className="bg-gradient-to-r from-[#E68332] to-[#f0996a] text-white sticky top-0 z-10">
+                        <tr>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-32">जिल्ला</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">नगरपालिका</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">वार्ड नं</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">किट्टा नं</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-32">गुठी नाम</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">जग्गा प्रकार</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">सम्बन्धित फाइल</th>
                         </tr>
                       </thead>
-                      <tbody>
-                        {landDetails.map((land, index) => (
-                          <tr key={index} className="border-b-2 border-gray-300 text-center">
-                            <td className="py-2 px-4 border-none">
-                              {editable ? (
-                                <input
-                                  type="text"
-                                  value={land.district || ""}
-                                  onChange={(e) => handleLandDetailChange(e, "district", index)}
-                                  className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                                />
-                              ) : (
-                                land.district || "N/A"
-                              )}
-                            </td>
-                            <td className="py-2 px-4 border-none">
-                              {editable ? (
-                                <input
-                                  type="text"
-                                  value={land.municipality || ""}
-                                  onChange={(e) => handleLandDetailChange(e, "municipality", index)}
-                                  className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                                />
-                              ) : (
-                                land.municipality || "N/A"
-                              )}
-                            </td>
-                            <td className="py-2 px-4 border-none">
-                              {editable ? (
-                                <input
-                                  type="number"
-                                  value={land.ward_no || ""}
-                                  onChange={(e) => handleLandDetailChange(e, "ward_no", index)}
-                                  className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                                />
-                              ) : (
-                                land.ward_no || "N/A"
-                              )}
-                            </td>
-                            <td className="py-2 px-4 border-none">
-                              {editable ? (
-                                <input
-                                  type="text"
-                                  value={land.kitta_no || ""}
-                                  onChange={(e) => handleLandDetailChange(e, "kitta_no", index)}
-                                  className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                                />
-                              ) : (
-                                land.kitta_no || "N/A"
-                              )}
-                            </td>
-                            <td className="py-2 px-4 border-none">
-                              {editable ? (
-                                <input
-                                  type="text"
-                                  value={land.guthi_name || ""}
-                                  onChange={(e) => handleLandDetailChange(e, "guthi_name", index)}
-                                  className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                                />
-                              ) : (
-                                land.guthi_name || "N/A"
-                              )}
-                            </td>
-                            <td className="py-2 px-4 border-none">
-                              {editable ? (
-                                <select
-                                  value={land.land_type || ""}
-                                  onChange={(e) => handleLandDetailChange(e, "land_type", index)}
-                                  className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                                >
-                                  <option value="">--जग्गा प्रकार छान्नुहोस्--</option>
-                                  <option value="अधिनस्थ">अधिनस्थ</option>
-                                  <option value="रैतानी">रैतानी</option>
-                                  <option value="तैनाथी">तैनाथी</option>
-                                </select>
-                              ) : (
-                                land.land_type || "N/A"
-                              )}
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {Array.isArray(landDetails) && landDetails.length > 0 ? (
+                          landDetails.map((detail, index) => (
+                            <tr
+                              key={index}
+                              className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} 
+                                hover:bg-yellow-50 transition-all duration-200 cursor-default`}
+                            >
+                              <td className="px-4 py-3 text-sm border-l-2 border-transparent hover:border-[#E68332] group">
+                                {editable ? (
+                                  <input
+                                    type="text"
+                                    value={detail.district || ""}
+                                    onChange={(e) => handleLandDetailChange(e, "district", index)}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                                  />
+                                ) : (
+                                  <div className="line-clamp-2 group-hover:line-clamp-none">
+                                    {detail.district || "N/A"}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                {editable ? (
+                                  <input
+                                    type="text"
+                                    value={detail.municipality || ""}
+                                    onChange={(e) => handleLandDetailChange(e, "municipality", index)}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                                  />
+                                ) : (
+                                  <span className="text-gray-900">{detail.municipality || "N/A"}</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                {editable ? (
+                                  <input
+                                    type="text"
+                                    value={detail.ward_no || ""}
+                                    onChange={(e) => handleLandDetailChange(e, "ward_no", index)}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                                  />
+                                ) : (
+                                  <span className="text-gray-900">{detail.ward_no || "N/A"}</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                {editable ? (
+                                  <input
+                                    type="text"
+                                    value={detail.kitta_no || ""}
+                                    onChange={(e) => handleLandDetailChange(e, "kitta_no", index)}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                                  />
+                                ) : (
+                                  <span className="text-gray-900">{detail.kitta_no || "N/A"}</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                {editable ? (
+                                  <input
+                                    type="text"
+                                    value={detail.guthi_name || ""}
+                                    onChange={(e) => handleLandDetailChange(e, "guthi_name", index)}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                                  />
+                                ) : (
+                                  <span className="text-gray-900">{detail.guthi_name || "N/A"}</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                {editable ? (
+                                  <input
+                                    type="text"
+                                    value={detail.land_type || ""}
+                                    onChange={(e) => handleLandDetailChange(e, "land_type", index)}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                                  />
+                                ) : (
+                                  <span className="text-gray-900">{detail.land_type || "N/A"}</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                <span className="text-gray-900">{id}</span>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr className="bg-white">
+                            <td colSpan="7" className="px-4 py-3 text-center text-gray-500">
+                              कुनै जग्गा विवरण उपलब्ध छैन
                             </td>
                           </tr>
-                        ))}
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -1159,44 +1221,94 @@ const ViewMoreFileDetails = () => {
                 animate="active"
                 exit="inactive"
                 animationType="fade"
-                className="p-4"
               >
-                <h2 className="text-xl font-bold text-[#E68332] mb-6 flex items-center">
-                  <FaHistory className="mr-2" />
-                  फाइल इतिहास
-                </h2>
-                
-                <FileHistoryTimeline 
-                  historyData={fileHistory} 
-                  isLoading={false}
-                />
+                <div className="p-4">
+                  <h3 className="text-xl font-bold text-[#E68332] mb-4 flex items-center">
+                    <FaHistory className="mr-2" />
+                    फाइल इतिहास
+                  </h3>
+                  
+                  {fileHistory.length === 0 ? (
+                    <p className="text-center text-gray-500 py-4">
+                      कुनै इतिहास उपलब्ध छैन
+                    </p>
+                  ) : (
+                    <FileHistoryTimeline 
+                      data={fileHistory} 
+                      className="mt-4"
+                    />
+                  )}
+                </div>
               </AnimatedDiv>
             )}
           </TabContent>
         </div>
       </div>
 
-      {/* Modals with improved styling */}
-      <TippaniFormModal
-        isOpen={isTippaniModalOpen}
-        onClose={() => setIsTippaniModalOpen(false)}
-        onSubmit={addTippani}
-        fileId={id}
-      />
-
-      <DocumentFormModal
-        isOpen={isDocumentModalOpen}
-        onClose={() => setIsDocumentModalOpen(false)}
-        onSubmit={addDocument}
-        fileId={id}
-      />
-
-      {/* Land Details Modal */}
-      {isLandDetailsModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          {/* ...existing code... */}
-        </div>
-      )}
+      {/* Add this style block for animations and table responsiveness */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeOut {
+          from { opacity: 1; transform: translateY(0); }
+          to { opacity: 0; transform: translateY(10px); }
+        }
+        
+        .animate-fade {
+          animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        tr {
+          transition: all 0.2s ease;
+        }
+        
+        .line-clamp-1 {
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        
+        .line-clamp-none {
+          -webkit-line-clamp: unset;
+        }
+        
+        /* Make table more responsive */
+        @media (max-width: 768px) {
+          .table-fixed {
+            table-layout: fixed;
+          }
+          
+          /* Create horizontal scrolling for small screens */
+          .overflow-auto {
+            overflow-x: auto;
+            scrollbar-width: thin;
+          }
+          
+          .overflow-auto::-webkit-scrollbar {
+            height: 6px;
+          }
+          
+          .overflow-auto::-webkit-scrollbar-thumb {
+            background-color: rgba(230, 131, 50, 0.3);
+            border-radius: 3px;
+          }
+          
+          .overflow-auto::-webkit-scrollbar-track {
+            background-color: rgba(230, 131, 50, 0.1);
+          }
+        }
+      `}</style>
     </div>
   );
 };
