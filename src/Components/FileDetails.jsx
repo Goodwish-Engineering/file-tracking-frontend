@@ -385,7 +385,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
               }}
               options={{
                 calenderLocale: "ne",
-                valueLocale: "bs",
+                valueLocale: "en",
               }}
             />
           )}

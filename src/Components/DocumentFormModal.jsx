@@ -139,7 +139,7 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
                     onChange={(value, { bsDate }) =>
                       handleNepaliDateChange(name, value, bsDate)
                     }
-                    options={{ calenderLocale: "ne", valueLocale: "bs" }}
+                    options={{ calenderLocale: "ne", valueLocale: "en" }}
                     name={name}
                   />
                 ) : (

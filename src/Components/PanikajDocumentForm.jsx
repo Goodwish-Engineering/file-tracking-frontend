@@ -152,7 +152,7 @@ const PanjikaDocumentsForm = ({ onClose, isOpen }) => {
               }}
               options={{
                 calenderLocale: "ne",
-                valueLocale: "bs", // BS format for Bikram Sambat
+                valueLocale: "en", // BS format for Bikram Sambat
               }}
             />
           </div>
@@ -167,7 +167,7 @@ const PanjikaDocumentsForm = ({ onClose, isOpen }) => {
               }}
               options={{
                 calenderLocale: "ne",
-                valueLocale: "bs",
+                valueLocale: "en",
               }}
             />
           </div>

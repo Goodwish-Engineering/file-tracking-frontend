@@ -144,7 +144,7 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
               onChange={(value, { bsDate }) =>
                 handleNepaliDateChange("submitted_date", value, bsDate)
               }
-              options={{ calenderLocale: "ne", valueLocale: "bs" }}
+              options={{ calenderLocale: "ne", valueLocale: "en" }}
               name="submitted_date"
             />
           </div>
@@ -179,7 +179,7 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
               onChange={(value, { bsDate }) =>
                 handleNepaliDateChange("approved_date", value, bsDate)
               }
-              options={{ calenderLocale: "ne", valueLocale: "bs" }}
+              options={{ calenderLocale: "ne", valueLocale: "en" }}
               name="approved_date"
             />
           </div>
@@ -192,7 +192,7 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
               onChange={(value, { bsDate }) =>
                 handleNepaliDateChange("tippani_date", value, bsDate)
               }
-              options={{ calenderLocale: "ne", valueLocale: "bs" }}
+              options={{ calenderLocale: "ne", valueLocale: "en" }}
               name="tippani_date"
             />
           </div>
