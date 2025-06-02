@@ -185,6 +185,12 @@ const DocumentsTab = ({
               >
                 कार्यालय
               </th>
+              <th
+                scope="col"
+                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider"
+              >
+                पृष्ठ
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -199,106 +205,46 @@ const DocumentsTab = ({
                   } hover:bg-yellow-50 transition-all duration-200 cursor-default`}
                 >
                   <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <select
-                        value={doc.number_type || ""}
-                        onChange={(e) => handleChange(e, "number_type", index)}
-                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      >
-                        <option value="">-- चयन गर्नुहोस् --</option>
-                        <option value="दर्ता नं">दर्ता नं</option>
-                        <option value="चलानी नं">चलानी नं</option>
-                      </select>
-                    ) : (
-                      doc.registration_no || (
+                    {doc.registration_no || (
+                      <span className="text-gray-400 italic">N/A</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {doc.invoice_no || (
+                      <span className="text-gray-400 italic">N/A</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <span className="flex items-center text-gray-800">
+                      <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
+                      {doc.date || (
                         <span className="text-gray-400 italic">N/A</span>
-                      )
-                    )}
+                      )}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <input
-                        type="text"
-                        value={doc.number || ""}
-                        onChange={(e) => handleChange(e, "number", index)}
-                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      />
-                    ) : (
-                      doc.invoice_no || (
+                    <div className="line-clamp-2 hover:line-clamp-none">
+                      {doc.subject || (
                         <span className="text-gray-400 italic">N/A</span>
-                      )
-                    )}
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <NepaliDatePicker
-                        inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                        value={doc.date}
-                        onSelect={(value) => {
-                          const e = { target: { value: value } };
-                          handleChange(e, "date", index);
-                        }}
-                        className="w-full"
-                        options={{ calenderLocale: "ne", valueLocale: "bs" }}
-                      />
-                    ) : (
-                      <span className="flex items-center text-gray-800">
-                        <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
-                        {doc.date || (
-                          <span className="text-gray-400 italic">N/A</span>
-                        )}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <input
-                        type="text"
-                        value={doc.subject || ""}
-                        onChange={(e) => handleChange(e, "subject", index)}
-                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      />
-                    ) : (
-                      <div className="line-clamp-2 hover:line-clamp-none">
-                        {doc.subject || (
-                          <span className="text-gray-400 italic">N/A</span>
-                        )}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <NepaliDatePicker
-                        inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                        value={doc.letter_date}
-                        onSelect={(value) => {
-                          const e = { target: { value: value } };
-                          handleChange(e, "letter_date", index);
-                        }}
-                        className="w-full"
-                        options={{ calenderLocale: "ne", valueLocale: "bs" }}
-                      />
-                    ) : (
-                      <span className="flex items-center text-gray-800">
-                        <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
-                        {doc.letter_date || (
-                          <span className="text-gray-400 italic">N/A</span>
-                        )}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <input
-                        type="text"
-                        value={doc.office || ""}
-                        onChange={(e) => handleChange(e, "office", index)}
-                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      />
-                    ) : (
-                      doc.office || (
+                    <span className="flex items-center text-gray-800">
+                      <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
+                      {doc.letter_date || (
                         <span className="text-gray-400 italic">N/A</span>
-                      )
+                      )}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {doc.office || (
+                      <span className="text-gray-400 italic">N/A</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {doc.page_no || (
+                      <span className="text-gray-400 italic">N/A</span>
                     )}
                   </td>
                 </tr>
@@ -388,6 +334,13 @@ const DocumentsTab = ({
                       placeholder="कार्यालय"
                       className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {row.page_no ? (
+                      row.page_no
+                    ) : (
+                      <span className="text-gray-400 italic">N/A</span>
+                    )}
                   </td>
                 </tr>
               ))}
