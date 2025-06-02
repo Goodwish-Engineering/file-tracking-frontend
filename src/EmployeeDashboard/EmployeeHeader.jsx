@@ -118,8 +118,8 @@ const EmployeHeader = () => {
   return (
     <div className="flex flex-col md:flex-row w-full relative">
       {/* Large Screen Sidebar - hidden on mobile */}
-      <div className="min-h-screen rounded-lg left-0 sticky w-[18%] top-0 z-10 hidden md:flex flex-col bg-white p-2 shadow-lg border-r">
-        <div className="h-full flex flex-col justify-between">
+      <div className="h-screen overflow-y-scroll rounded-lg left-0 sticky w-[18%] top-0 z-10 hidden md:flex flex-col bg-white p-2 shadow-lg border-r">
+        <div className="flex flex-col justify-between">
           {/* Logo and app name */}
           <div>
             <div className="flex items-center justify-center gap-2 py-6 border-b mb-2">
@@ -146,14 +146,20 @@ const EmployeHeader = () => {
             {/* File Management Section */}
             <SectionTitle title="फाइल व्यवस्थापन" />
             
-            {level === "1" && (
+            {/* {level === "1" && (
               <NavItem
                 onClick={() => setTab("uploadTippani")}
                 isActive={tab === "uploadTippani"}
                 icon={<FaFile />}
                 label="फाइल अपलोड"
               />
-            )}
+            )} */}
+            <NavItem
+              onClick={() => setTab("uploadTippani")}
+              isActive={tab === "uploadTippani"}
+              icon={<FaFile />}
+              label="फाइल अपलोड"
+            />
             
             <NavItem
               onClick={() => setTab("veiwStatus")}
