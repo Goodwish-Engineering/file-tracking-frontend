@@ -1,17 +1,24 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { FaSearch, FaFilter, FaFileAlt, FaSpinner, FaCalendarAlt, FaExternalLinkAlt } from "react-icons/fa";
+import {
+  FaSearch,
+  FaFilter,
+  FaFileAlt,
+  FaSpinner,
+  FaCalendarAlt,
+  FaExternalLinkAlt,
+} from "react-icons/fa";
 import { BsFiles, BsSortAlphaDown, BsSortAlphaUp } from "react-icons/bs";
-
+import axios from "axios";
 const FileStatus = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
   const [fileStatuses, setFileStatuses] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("सबै फाइलहरू");
   const [loading, setLoading] = useState(true);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const navigate = useNavigate();
 
   // Simplified animation handling without framer-motion
@@ -20,11 +27,12 @@ const FileStatus = () => {
   // Add filter date state
   const [filterDate, setFilterDate] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-
+  const [fileTypes, setFileTypeData] = useState([]);
   useEffect(() => {
     fetchData();
+    fetchFileTypes();
   }, []);
-  
+
   useEffect(() => {
     // Trigger animation after data loads
     if (!loading && fileStatuses.length > 0) {
@@ -49,7 +57,20 @@ const FileStatus = () => {
       setLoading(false);
     }
   };
-
+  const fetchFileTypes = async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/file-type/`, {
+        headers: { Authorization: `Token ${token}` },
+      });
+      if (response.data) {
+        const names = response.data.map((item) => item.name);
+        setFileTypeData(names);
+      }
+    } catch (error) {
+      console.error("Error fetching Office data:", error);
+      alert("Error fetching office data");
+    }
+  };
   // Handle file row click to navigate to file details
   const handleRowClick = (fileId) => {
     navigate(`/file-details/${fileId}`);
@@ -57,9 +78,9 @@ const FileStatus = () => {
 
   // Sort function
   const requestSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
     }
     setSortConfig({ key, direction });
   };
@@ -83,8 +104,8 @@ const FileStatus = () => {
 
     // Filter by date if provided
     if (filterDate) {
-      filteredFiles = filteredFiles.filter(file => 
-        file.present_date && file.present_date.includes(filterDate)
+      filteredFiles = filteredFiles.filter(
+        (file) => file.present_date && file.present_date.includes(filterDate)
       );
     }
 
@@ -92,20 +113,22 @@ const FileStatus = () => {
     if (activeTab === "chaalu") {
       filteredFiles = filteredFiles.filter((file) => file.file_type === "चालु");
     } else if (activeTab === "tameli") {
-      filteredFiles = filteredFiles.filter((file) => file.file_type === "तामेली");
+      filteredFiles = filteredFiles.filter(
+        (file) => file.file_type === "तामेली"
+      );
     }
 
     // Apply sorting if configured
     if (sortConfig.key) {
       filteredFiles.sort((a, b) => {
-        const aValue = a[sortConfig.key] || '';
-        const bValue = b[sortConfig.key] || '';
-        
+        const aValue = a[sortConfig.key] || "";
+        const bValue = b[sortConfig.key] || "";
+
         if (aValue < bValue) {
-          return sortConfig.direction === 'asc' ? -1 : 1;
+          return sortConfig.direction === "asc" ? -1 : 1;
         }
         if (aValue > bValue) {
-          return sortConfig.direction === 'asc' ? 1 : -1;
+          return sortConfig.direction === "asc" ? 1 : -1;
         }
         return 0;
       });
@@ -119,9 +142,11 @@ const FileStatus = () => {
   // Get appropriate sort direction indicator with better icons
   const getSortDirectionIndicator = (key) => {
     if (sortConfig.key === key) {
-      return sortConfig.direction === 'asc' 
-        ? <BsSortAlphaDown className="inline ml-1 text-[#E68332]" /> 
-        : <BsSortAlphaUp className="inline ml-1 text-[#E68332]" />;
+      return sortConfig.direction === "asc" ? (
+        <BsSortAlphaDown className="inline ml-1 text-[#E68332]" />
+      ) : (
+        <BsSortAlphaUp className="inline ml-1 text-[#E68332]" />
+      );
     }
     return null;
   };
@@ -130,14 +155,18 @@ const FileStatus = () => {
   const EmptyState = () => (
     <div className="flex flex-col items-center justify-center py-16 bg-gray-50 rounded-lg">
       <BsFiles className="text-gray-400 text-6xl mb-4" />
-      <p className="text-lg text-gray-600 font-medium">कुनै फाइलहरू फेला परेनन्</p>
-      <p className="text-sm text-gray-500 mt-2">कृपया आफ्नो खोज मापदण्ड परिवर्तन गर्नुहोस् वा फिल्टर हटाउनुहोस्</p>
-      <button 
+      <p className="text-lg text-gray-600 font-medium">
+        कुनै फाइलहरू फेला परेनन्
+      </p>
+      <p className="text-sm text-gray-500 mt-2">
+        कृपया आफ्नो खोज मापदण्ड परिवर्तन गर्नुहोस् वा फिल्टर हटाउनुहोस्
+      </p>
+      <button
         onClick={() => {
           setSearchQuery("");
           setFilterDate("");
           setActiveTab("all");
-          setSortConfig({ key: null, direction: 'asc' });
+          setSortConfig({ key: null, direction: "asc" });
         }}
         className="mt-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md text-gray-700 transition-colors duration-200"
       >
@@ -147,16 +176,15 @@ const FileStatus = () => {
   );
 
   // Simple ActiveIndicator component as a replacement for framer-motion
-  const ActiveIndicator = ({ isActive }) => (
+  const ActiveIndicator = ({ isActive }) =>
     isActive && (
-      <div 
+      <div
         className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#E68332]"
         style={{
           animation: "fadeIn 0.3s ease-in-out",
         }}
       />
-    )
-  );
+    );
 
   // Enhanced tooltip component with better text wrapping and sizing
   const TextWithTooltip = ({ text, maxLength = 30 }) => {
@@ -164,14 +192,14 @@ const FileStatus = () => {
     const tooltipRef = useRef(null);
     const containerRef = useRef(null);
     const isLongText = text && text.length > maxLength;
-    
+
     // Calculate optimal position for tooltip when it becomes visible
     useEffect(() => {
       if (showTooltip && tooltipRef.current && containerRef.current) {
         const tooltip = tooltipRef.current;
         const container = containerRef.current;
         const rect = container.getBoundingClientRect();
-        
+
         // Calculate position - position tooltip ABOVE the text by default to avoid overlap with table content
         tooltip.style.position = "absolute";
         tooltip.style.bottom = "100%"; // Position above the text
@@ -182,41 +210,40 @@ const FileStatus = () => {
         tooltip.style.maxHeight = "200px"; // Limit max height
         tooltip.style.overflowY = "auto"; // Add scrolling for very long text
         tooltip.style.wordBreak = "break-word"; // Ensure text breaks properly
-        
+
         // Ensure tooltip doesn't go off-screen horizontally
         const tooltipRect = tooltip.getBoundingClientRect();
         if (tooltipRect.right > window.innerWidth) {
-          tooltip.style.left = 'auto';
-          tooltip.style.right = '0';
+          tooltip.style.left = "auto";
+          tooltip.style.right = "0";
         }
       }
     }, [showTooltip]);
-    
+
     // Only apply tooltip behavior if text is long enough
     if (!isLongText) {
       return <span className="text-sm">{text || "N/A"}</span>;
     }
-    
+
     return (
-      <div 
+      <div
         ref={containerRef}
         className="relative inline-block w-full cursor-default group"
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
-        <span className="truncate block w-full text-sm">
-          {text}
-        </span>
-        
+        <span className="truncate block w-full text-sm">{text}</span>
+
         {showTooltip && (
-          <div 
+          <div
             ref={tooltipRef}
             className="absolute p-3 rounded-md shadow-lg bg-white border border-gray-200 text-sm text-gray-800 whitespace-normal z-50"
             style={{
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-              wordBreak: 'break-word',
-              hyphens: 'auto',
-              textAlign: 'left'
+              boxShadow:
+                "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+              wordBreak: "break-word",
+              hyphens: "auto",
+              textAlign: "left",
             }}
           >
             {text}
@@ -230,26 +257,31 @@ const FileStatus = () => {
     <div className="p-6 min-h-screen bg-gray-50">
       {/* Page header */}
       <div className="mb-6 bg-white p-6 rounded-lg shadow-md border-l-4 border-[#E68332] transition-all duration-300 hover:shadow-lg">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">फाइल स्थिति</h1>
-        <p className="text-gray-600">सबै फाइलहरूको स्थिति हेर्नुहोस् र व्यवस्थापन गर्नुहोस्</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+          फाइल स्थिति
+        </h1>
+        <p className="text-gray-600">
+          सबै फाइलहरूको स्थिति हेर्नुहोस् र व्यवस्थापन गर्नुहोस्
+        </p>
       </div>
-      
+
       {/* Tab navigation with refined styling */}
       <div className="flex mb-6 border-b border-gray-200 overflow-x-auto bg-white rounded-t-lg shadow-md">
-        {["all", "chaalu", "tameli"].map((tab) => (
-          <button
-            key={tab}
-            className={`py-3 px-6 font-medium text-sm md:text-base relative ${
-              activeTab === tab
-                ? "text-[#E68332] font-semibold"
-                : "text-gray-600 hover:text-gray-800"
-            }`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab === "all" ? "सबै फाइलहरू" : tab === "chaalu" ? "चालु फाइलहरू" : "तामेली फाइलहरू"}
-            <ActiveIndicator isActive={activeTab === tab} />
-          </button>
-        ))}
+        {fileTypes.length > 0 &&
+          ["सबै फाइलहरू", ...fileTypes].map((tab) => (
+            <button
+              key={tab}
+              className={`py-3 px-6 font-medium text-sm md:text-base relative ${
+                activeTab === tab
+                  ? "text-[#E68332] font-semibold"
+                  : "text-gray-600 hover:text-gray-800"
+              }`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+              <ActiveIndicator isActive={activeTab === tab} />
+            </button>
+          ))}{" "}
       </div>
 
       {/* Search and filter section - Enhanced */}
@@ -267,28 +299,35 @@ const FileStatus = () => {
               className="pl-10 w-full py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
             />
           </div>
-          
+
           <div className="flex items-center">
-            <button 
+            <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-md border ${showFilters ? 'bg-[#E68332] text-white' : 'bg-white text-gray-700 border-gray-300'} transition-colors duration-200`}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-md border ${
+                showFilters
+                  ? "bg-[#E68332] text-white"
+                  : "bg-white text-gray-700 border-gray-300"
+              } transition-colors duration-200`}
             >
               <FaFilter size={14} />
               <span>फिल्टरहरू</span>
             </button>
           </div>
-          
+
           <div className="text-right text-gray-600 flex items-center justify-end">
             <FaFileAlt className="text-[#E68332] mr-2" />
-            <span className="font-medium">{filteredFiles.length}</span> फाइलहरू फेला परे
+            <span className="font-medium">{filteredFiles.length}</span> फाइलहरू
+            फेला परे
           </div>
         </div>
-        
+
         {showFilters && (
           <div className="mt-4 p-4 bg-gray-50 rounded-md border border-gray-200 animate-fadeIn">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">मितिद्वारा फिल्टर गर्नुहोस्</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  मितिद्वारा फिल्टर गर्नुहोस्
+                </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <FaCalendarAlt className="text-gray-400" />
@@ -301,14 +340,14 @@ const FileStatus = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="flex items-end">
-                <button 
+                <button
                   onClick={() => {
                     setSearchQuery("");
                     setFilterDate("");
                     setActiveTab("all");
-                    setSortConfig({ key: null, direction: 'asc' });
+                    setSortConfig({ key: null, direction: "asc" });
                   }}
                   className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md transition-colors"
                 >
@@ -322,10 +361,21 @@ const FileStatus = () => {
 
       {/* Instruction text with enhanced styling */}
       <div className="bg-blue-50 p-3 rounded-md mb-6 border-l-4 border-blue-400 flex items-center shadow-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5 text-blue-500 mr-2"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+            clipRule="evenodd"
+          />
         </svg>
-        <p className="text-blue-600 text-sm">फाइल विवरण हेर्न कुनै पनि पङ्क्तिमा क्लिक गर्नुहोस्</p>
+        <p className="text-blue-600 text-sm">
+          फाइल विवरण हेर्न कुनै पनि पङ्क्तिमा क्लिक गर्नुहोस्
+        </p>
       </div>
 
       {/* Loading state */}
@@ -343,40 +393,40 @@ const FileStatus = () => {
                 {/* Improved table header with bold text */}
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 sticky top-0">
                   <tr>
-                    <th 
-                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[8%]" 
-                      onClick={() => requestSort('id')}
+                    <th
+                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[8%]"
+                      onClick={() => requestSort("id")}
                     >
                       <div className="flex items-center">
                         <span>आईडी</span>
-                        {getSortDirectionIndicator('id')}
+                        {getSortDirectionIndicator("id")}
                       </div>
                     </th>
-                    <th 
-                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[10%]" 
-                      onClick={() => requestSort('file_number')}
+                    <th
+                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[10%]"
+                      onClick={() => requestSort("file_number")}
                     >
                       <div className="flex items-center">
                         <span>फाइल नं</span>
-                        {getSortDirectionIndicator('file_number')}
+                        {getSortDirectionIndicator("file_number")}
                       </div>
                     </th>
-                    <th 
-                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[25%]" 
-                      onClick={() => requestSort('file_name')}
+                    <th
+                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[25%]"
+                      onClick={() => requestSort("file_name")}
                     >
                       <div className="flex items-center">
                         <span>फाइलको नाम</span>
-                        {getSortDirectionIndicator('file_name')}
+                        {getSortDirectionIndicator("file_name")}
                       </div>
                     </th>
-                    <th 
-                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[26%]" 
-                      onClick={() => requestSort('subject')}
+                    <th
+                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[26%]"
+                      onClick={() => requestSort("subject")}
                     >
                       <div className="flex items-center">
                         <span>विषय</span>
-                        {getSortDirectionIndicator('subject')}
+                        {getSortDirectionIndicator("subject")}
                       </div>
                     </th>
                     <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[15%]">
@@ -384,13 +434,13 @@ const FileStatus = () => {
                         <span>फाइल प्रकार</span>
                       </div>
                     </th>
-                    <th 
-                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[16%]" 
-                      onClick={() => requestSort('days_submitted')}
+                    <th
+                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[16%]"
+                      onClick={() => requestSort("days_submitted")}
                     >
                       <div className="flex items-center">
                         <span>फाइल आएको समय</span>
-                        {getSortDirectionIndicator('days_submitted')}
+                        {getSortDirectionIndicator("days_submitted")}
                       </div>
                     </th>
                   </tr>
@@ -406,15 +456,20 @@ const FileStatus = () => {
                       style={{
                         animationDelay: `${index * 50}ms`,
                         animationFillMode: "both",
-                        animation: "fadeIn 0.5s ease-in-out"
+                        animation: "fadeIn 0.5s ease-in-out",
                       }}
                     >
                       <td className="p-4 text-sm text-gray-900">{file.id}</td>
-                      <td className="p-4 text-sm text-gray-900">{file.file_number}</td>
+                      <td className="p-4 text-sm text-gray-900">
+                        {file.file_number}
+                      </td>
                       <td className="p-4 font-medium text-gray-900">
                         <div className="flex items-center">
                           <FaFileAlt className="text-gray-400 mr-2 group-hover:text-[#E68332] transition-colors duration-200 flex-shrink-0" />
-                          <TextWithTooltip text={file.file_name} maxLength={25} />
+                          <TextWithTooltip
+                            text={file.file_name}
+                            maxLength={25}
+                          />
                         </div>
                       </td>
                       <td className="p-4 text-sm text-gray-600">
@@ -431,10 +486,15 @@ const FileStatus = () => {
                                 : "bg-gray-100 text-gray-800 border border-gray-200"
                             }`}
                           >
-                            <span className={`w-2 h-2 rounded-full mr-1.5 ${
-                              file.file_type === "चालु" ? "bg-green-500" : 
-                              file.file_type === "तामेली" ? "bg-yellow-500" : "bg-gray-500"
-                            }`}></span>
+                            <span
+                              className={`w-2 h-2 rounded-full mr-1.5 ${
+                                file.file_type === "चालु"
+                                  ? "bg-green-500"
+                                  : file.file_type === "तामेली"
+                                  ? "bg-yellow-500"
+                                  : "bg-gray-500"
+                              }`}
+                            ></span>
                             {file.file_type}
                           </span>
                         ) : (
@@ -461,14 +521,15 @@ const FileStatus = () => {
                 <BsFiles className="text-gray-300 text-6xl mb-4" />
                 <p className="text-xl font-medium mb-2">कुनै फाइल फेला परेन</p>
                 <p className="text-gray-500 max-w-md mx-auto">
-                  तपाईंको खोज मापदण्ड अनुसार कुनै फाइल फेला परेन। कृपया फिल्टरहरू परिवर्तन गर्नुहोस् वा अर्को खोज प्रयास गर्नुहोस्。
+                  तपाईंको खोज मापदण्ड अनुसार कुनै फाइल फेला परेन। कृपया
+                  फिल्टरहरू परिवर्तन गर्नुहोस् वा अर्को खोज प्रयास गर्नुहोस्。
                 </p>
-                <button 
+                <button
                   onClick={() => {
                     setSearchQuery("");
                     setFilterDate("");
                     setActiveTab("all");
-                    setSortConfig({ key: null, direction: 'asc' });
+                    setSortConfig({ key: null, direction: "asc" });
                   }}
                   className="mt-4 px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-md text-gray-700 transition-colors duration-200"
                 >
@@ -479,42 +540,54 @@ const FileStatus = () => {
           )}
         </div>
       )}
-      
+
       <style jsx>{`
         /* ...existing styles... */
-        
+
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
-        
+
         @keyframes scaleIn {
-          from { transform: scale(0.95); opacity: 0; }
-          to { transform: scale(1); opacity: 1; }
+          from {
+            transform: scale(0.95);
+            opacity: 0;
+          }
+          to {
+            transform: scale(1);
+            opacity: 1;
+          }
         }
-        
+
         .animate-fadeIn {
           animation: fadeIn 0.3s ease-in-out;
         }
-        
+
         .animate-scaleIn {
           animation: scaleIn 0.3s ease-out;
         }
-        
+
         .scrollbar-thin::-webkit-scrollbar {
           width: 8px;
           height: 8px;
         }
-        
+
         .scrollbar-thin::-webkit-scrollbar-track {
           background: #f1f1f1;
         }
-        
+
         .scrollbar-thin::-webkit-scrollbar-thumb {
           background-color: #cbd5e0;
           border-radius: 4px;
         }
-        
+
         .scrollbar-thin::-webkit-scrollbar-thumb:hover {
           background-color: #a0aec0;
         }
