@@ -323,7 +323,7 @@ const TippaniTab = ({
                         handleNewTippaniChange(e, "submitted_date", index);
                       }}
                       className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "bs" }}
+                      options={{ calenderLocale: "ne", valueLocale: "en" }}
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
@@ -346,7 +346,7 @@ const TippaniTab = ({
                         handleNewTippaniChange(e, "approved_date", index);
                       }}
                       className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "bs" }}
+                      options={{ calenderLocale: "ne", valueLocale: "en" }}
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
@@ -369,7 +369,7 @@ const TippaniTab = ({
                         handleNewTippaniChange(e, "tippani_date", index);
                       }}
                       className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "bs" }}
+                      options={{ calenderLocale: "ne", valueLocale: "en" }}
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">

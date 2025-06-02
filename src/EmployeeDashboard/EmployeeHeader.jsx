@@ -146,14 +146,20 @@ const EmployeHeader = () => {
             {/* File Management Section */}
             <SectionTitle title="फाइल व्यवस्थापन" />
             
-            {level === "1" && (
+            {/* {level === "1" && (
               <NavItem
                 onClick={() => setTab("uploadTippani")}
                 isActive={tab === "uploadTippani"}
                 icon={<FaFile />}
                 label="फाइल अपलोड"
               />
-            )}
+            )} */}
+            <NavItem
+              onClick={() => setTab("uploadTippani")}
+              isActive={tab === "uploadTippani"}
+              icon={<FaFile />}
+              label="फाइल अपलोड"
+            />
             
             <NavItem
               onClick={() => setTab("veiwStatus")}
