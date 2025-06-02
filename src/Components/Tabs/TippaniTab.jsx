@@ -86,7 +86,7 @@ const TippaniTab = ({ editable, fileDetails, setFileDetails, baseUrl, token, id,
           "Content-Type": "application/json",
           Authorization: `token ${token}`,
         },
-        body: JSON.stringify({ tippani: updatedTippani }),
+        body: JSON.stringify({ updatedTippani }),
       });
 
       if (!response.ok) {
