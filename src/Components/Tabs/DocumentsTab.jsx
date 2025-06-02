@@ -286,7 +286,7 @@ const DocumentsTab = ({
                         handleNewDocumentChange(e, "date", index);
                       }}
                       className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "bs" }}
+                      options={{ calenderLocale: "ne", valueLocale: "en" }}
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
@@ -310,7 +310,7 @@ const DocumentsTab = ({
                         handleNewDocumentChange(e, "letter_date", index);
                       }}
                       className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "bs" }}
+                      options={{ calenderLocale: "ne", valueLocale: "en" }}
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
