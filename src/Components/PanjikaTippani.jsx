@@ -144,7 +144,7 @@ const PanjikaTippani = ({ isOpen, onClose }) => {
               }}
               options={{
                 calenderLocale: "ne",
-                valueLocale: "bs",
+                valueLocale: "en",
               }}
             />
           </div>
@@ -179,7 +179,7 @@ const PanjikaTippani = ({ isOpen, onClose }) => {
               }}
               options={{
                 calenderLocale: "ne",
-                valueLocale: "bs",
+                valueLocale: "en",
               }}
             />
           </div>
@@ -194,7 +194,7 @@ const PanjikaTippani = ({ isOpen, onClose }) => {
               }}
               options={{
                 calenderLocale: "ne",
-                valueLocale: "bs",
+                valueLocale: "en",
               }}
             />
           </div>

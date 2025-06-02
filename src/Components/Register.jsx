@@ -592,7 +592,7 @@ const Registration = () => {
               onChange={(value, { bsDate }) =>
                 handleNepaliDateChange("citizenship_date_of_issue", value, bsDate)
               }
-              options={{ calenderLocale: "ne", valueLocale: "bs" }}
+              options={{ calenderLocale: "ne", valueLocale: "en" }}
               name="citizenship_date_of_issue"
             />
           </label>
@@ -661,7 +661,7 @@ const Registration = () => {
               onChange={(value, { bsDate }) =>
                 handleNepaliDateChange("date_joined", value, bsDate)
               }
-              options={{ calenderLocale: "ne", valueLocale: "bs" }}
+              options={{ calenderLocale: "ne", valueLocale: "en" }}
               name="date_joined"
             />
           </label>
@@ -674,7 +674,7 @@ const Registration = () => {
               onChange={(value, { bsDate }) =>
                 handleNepaliDateChange("recess_date", value, bsDate)
               }
-              options={{ calenderLocale: "ne", valueLocale: "bs" }}
+              options={{ calenderLocale: "ne", valueLocale: "en" }}
               name="recess_date"
             />
           </label>
@@ -737,7 +737,7 @@ const Registration = () => {
               onChange={(value, { bsDate }) =>
                 handleNepaliDateChange("duration", value, bsDate)
               }
-              options={{ calenderLocale: "ne", valueLocale: "bs" }}
+              options={{ calenderLocale: "ne", valueLocale: "en" }}
               name="duration"
             />
           </label>
