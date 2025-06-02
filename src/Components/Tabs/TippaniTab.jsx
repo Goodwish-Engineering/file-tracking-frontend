@@ -59,6 +59,7 @@ const TippaniTab = ({
         remarks: "",
         tippani_date: "",
         page_no: "",
+        related_file: id,
       }));
 
     setNewTippaniRows(newRows);
@@ -66,13 +67,6 @@ const TippaniTab = ({
     setIsPageCountModalOpen(false);
   };
 
-  // Handle changes to existing tippani
-  const handleChange = (e, field, index) => {
-    const value = e.target.value;
-    const updatedTippani = [...(fileDetails.tippani || [])];
-    updatedTippani[index][field] = value;
-    setFileDetails({ ...fileDetails, tippani: updatedTippani });
-  };
 
   // Handle changes to new tippani rows
   const handleNewTippaniChange = (e, field, index) => {
@@ -101,18 +95,14 @@ const TippaniTab = ({
         }
       }
 
-      const updatedTippani = [
-        ...(fileDetails.tippani || []),
-        ...newTippaniRows,
-      ];
-      console.log("request:", updatedTippani);
-      const response = await fetch(`${baseUrl}/file/${id}/`, {
-        method: "PATCH",
+      console.log("newtippani:", newTippaniRows);
+      const response = await fetch(`${baseUrl}/tippani/`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `token ${token}`,
         },
-        body: JSON.stringify({ updatedTippani }),
+        body: JSON.stringify(newTippaniRows),
       });
 
       if (!response.ok) {
@@ -218,154 +208,70 @@ const TippaniTab = ({
                   } hover:bg-yellow-50 transition-all duration-200 cursor-default`}
                 >
                   <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <input
-                        type="text"
-                        value={tip.subject || ""}
-                        onChange={(e) => handleChange(e, "subject", index)}
-                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      />
-                    ) : (
-                      <div className="line-clamp-2 group-hover:line-clamp-none">
-                        {tip.subject || "N/A"}
-                      </div>
-                    )}
+                    <div className="line-clamp-2 group-hover:line-clamp-none">
+                      {tip.subject || "N/A"}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <input
-                        type="text"
-                        value={tip.submitted_by || ""}
-                        onChange={(e) => handleChange(e, "submitted_by", index)}
-                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      />
-                    ) : (
-                      <span className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-3 w-3 mr-1 text-gray-500"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        {tip.submitted_by || "N/A"}
-                      </span>
-                    )}
+                    <span className="flex items-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3 w-3 mr-1 text-gray-500"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      {tip.submitted_by || "N/A"}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <NepaliDatePicker
-                        inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                        value={tip.submitted_date}
-                        onSelect={(value) => {
-                          const e = { target: { value: value } };
-                          handleChange(e, "submitted_date", index);
-                        }}
-                        className="w-full"
-                        options={{ calenderLocale: "ne", valueLocale: "bs" }}
-                      />
-                    ) : (
-                      <span className="flex items-center text-gray-800">
-                        <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
-                        {tip.submitted_date || "N/A"}
-                      </span>
-                    )}
+                    <span className="flex items-center text-gray-800">
+                      <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
+                      {tip.submitted_date || "N/A"}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <input
-                        type="text"
-                        value={tip.approved_by || ""}
-                        onChange={(e) => handleChange(e, "approved_by", index)}
-                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      />
-                    ) : (
-                      <span className="flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-3 w-3 mr-1 text-gray-500"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                          <path
-                            fillRule="evenodd"
-                            d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        {tip.approved_by || "N/A"}
-                      </span>
-                    )}
+                    <span className="flex items-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3 w-3 mr-1 text-gray-500"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                        <path
+                          fillRule="evenodd"
+                          d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      {tip.approved_by || "N/A"}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <NepaliDatePicker
-                        inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                        value={tip.approved_date}
-                        onSelect={(value) => {
-                          const e = { target: { value: value } };
-                          handleChange(e, "approved_date", index);
-                        }}
-                        className="w-full"
-                        options={{ calenderLocale: "ne", valueLocale: "bs" }}
-                      />
-                    ) : (
-                      <span className="flex items-center text-gray-800">
-                        <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
-                        {tip.approved_date || "N/A"}
-                      </span>
-                    )}
+                    <span className="flex items-center text-gray-800">
+                      <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
+                      {tip.approved_date || "N/A"}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <input
-                        type="text"
-                        value={tip.remarks || ""}
-                        onChange={(e) => handleChange(e, "remarks", index)}
-                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      />
-                    ) : (
-                      <div className="line-clamp-2">{tip.remarks || "N/A"}</div>
-                    )}
+                    <div className="line-clamp-2">{tip.remarks || "N/A"}</div>
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <NepaliDatePicker
-                        inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                        value={tip.tippani_date}
-                        onSelect={(value) => {
-                          const e = { target: { value: value } };
-                          handleChange(e, "tippani_date", index);
-                        }}
-                        className="w-full"
-                        options={{ calenderLocale: "ne", valueLocale: "bs" }}
-                      />
-                    ) : (
-                      <span className="flex items-center text-gray-800">
-                        <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
-                        {tip.tippani_date || "N/A"}
-                      </span>
-                    )}
+                    <span className="flex items-center text-gray-800">
+                      <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
+                      {tip.tippani_date || "N/A"}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {editable ? (
-                      <input
-                        type="text"
-                        value={tip.page_no || ""}
-                        onChange={(e) => handleChange(e, "page_no", index)}
-                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      />
-                    ) : (
-                      <span className="text-gray-900">
-                        {tip.page_no || "N/A"}
-                      </span>
-                    )}
+                    <span className="text-gray-900">
+                      {tip.page_no || "N/A"}
+                    </span>
                   </td>
                 </tr>
               ))
@@ -417,7 +323,7 @@ const TippaniTab = ({
                         handleNewTippaniChange(e, "submitted_date", index);
                       }}
                       className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "bs" }}
+                      options={{ calenderLocale: "ne", valueLocale: "en" }}
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
@@ -440,7 +346,7 @@ const TippaniTab = ({
                         handleNewTippaniChange(e, "approved_date", index);
                       }}
                       className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "bs" }}
+                      options={{ calenderLocale: "ne", valueLocale: "en" }}
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
@@ -463,7 +369,7 @@ const TippaniTab = ({
                         handleNewTippaniChange(e, "tippani_date", index);
                       }}
                       className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "bs" }}
+                      options={{ calenderLocale: "ne", valueLocale: "en" }}
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
