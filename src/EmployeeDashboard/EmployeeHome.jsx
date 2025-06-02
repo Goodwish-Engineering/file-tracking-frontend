@@ -60,8 +60,8 @@ const EmployeeHome = () => {
       setLoading(true);
       setError(null);
       try {
-        // We'll make three API calls in parallel for better performance
-        const [fileStatsPromise, notificationsPromise, transferredFilesPromise] = await Promise.allSettled([
+        // We'll make two API calls in parallel for better performance
+        const [fileStatsPromise, notificationsPromise] = await Promise.allSettled([
           // 1. Get file statistics - adapting from FileStatus.jsx pattern
           fetch(`${baseUrl}/file/`, {
             headers: { Authorization: `token ${token}` }
@@ -70,17 +70,13 @@ const EmployeeHome = () => {
           // 2. Get notifications - adapting from Notification.jsx pattern
           fetch(`${baseUrl}/notification/`, {
             headers: { Authorization: `token ${token}` }
-          }),
-          
-          // 3. Get transferred files - adapting from TransferredFiles.jsx pattern
-          fetch(`${baseUrl}/file/transferred/`, {
-            headers: { Authorization: `token ${token}` }
           })
         ]);
         
         // Process file statistics
         let totalFiles = 0;
         let pendingFiles = 0;
+        let transferredFiles = 0; // Initialize transferred files count
         let recentUploads = [];
         let departmentFiles = [];
         let departments = {};
@@ -88,6 +84,13 @@ const EmployeeHome = () => {
         if (fileStatsPromise.status === 'fulfilled' && fileStatsPromise.value.ok) {
           const filesData = await fileStatsPromise.value.json();
           totalFiles = filesData.length;
+          
+          // Calculate transferred files using the same logic as TransferredFiles.jsx
+          const transferredFilesData = filesData.filter(
+            (file) =>
+              file.approvals && file.approvals.some((approval) => approval.is_transferred)
+          );
+          transferredFiles = transferredFilesData.length;
           
           // Calculate pending files (files not transferred)
           pendingFiles = filesData.filter(file => 
@@ -129,14 +132,6 @@ const EmployeeHome = () => {
           notifications = notificationsData
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
             .slice(0, 5);
-        }
-        
-        // Process transferred files
-        let transferredFiles = 0;
-        if (transferredFilesPromise.status === 'fulfilled' && transferredFilesPromise.value.ok) {
-          const transferredData = await transferredFilesPromise.value.json();
-          // Fix: correctly count transferred files
-          transferredFiles = transferredData.length;
         }
         
         // Update state with all collected data
