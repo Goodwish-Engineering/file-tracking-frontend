@@ -26,7 +26,8 @@ import { useNavigate } from "react-router-dom";
 import { removeLogin, removeUser } from "../app/loginSlice";
 import NonTransferFile3 from "../Components/NonTransfer3";
 import TransferedFile from "../Components/TransferedFiles";
-import AdminDashboardHome from "./AdminDashboardHome"; // We'll create this component later
+import AdminDashboardHome from "./AdminDashboardHome";
+import FileTypeManagement from "./FileTypeManagement";
 
 const AdminDashboard = () => {
   const [tab, setTab] = useState(localStorage.getItem("adminTab") || "dashboard");
@@ -123,6 +124,7 @@ const AdminDashboard = () => {
     { id: "filedetails", label: "फाइल विवरण", icon: <FaFileAlt /> },
     { id: "register", label: "कर्मचारी दर्ता", icon: <FaUserPlus /> },
     { id: "add-office", label: "शाखा व्यवस्थापन", icon: <FaBuilding /> },
+    { id: "file-types", label: "फाइल प्रकार", icon: <FaFileAlt /> },
     { id: "nontransfer3", label: "स्थानान्तरण नगरिएको", icon: <FaExchangeAlt /> },
     { id: "transfered", label: "स्थानान्तरण गरिएको", icon: <FaExchangeAlt /> },
     { id: "deleted-files", label: "मेटिएका फाइलहरू", icon: <FaTrashAlt /> },
@@ -143,6 +145,8 @@ const AdminDashboard = () => {
         return <Notification onNotificationRead={fetchNotifications} />;
       case "add-office":
         return <AddOffice />;
+      case "file-types":
+        return <FileTypeManagement />;
       case "nontransfer3":
         return <NonTransferFile3 />;
       case "transfered":
