@@ -46,6 +46,7 @@ const AdminDashboardHome = () => {
     transferredFiles: 0,
     officesCount: 0,
     departmentsCount: 0,
+    fileTypesCount: 0,
     deletedFiles: 0,
     recentFiles: [],
     recentEmployees: [],
@@ -60,7 +61,7 @@ const AdminDashboardHome = () => {
       setLoading(true);
       try {
         // Make parallel API calls for better performance
-        const [employeesPromise, filesPromise, officesPromise, transferredFilesPromise, deletedFilesPromise] = 
+        const [employeesPromise, filesPromise, officesPromise, transferredFilesPromise, deletedFilesPromise, fileTypesPromise] = 
           await Promise.allSettled([
             fetch(`${baseUrl}/user/all/`, {
               headers: { Authorization: `token ${token}` }
@@ -71,11 +72,13 @@ const AdminDashboardHome = () => {
             fetch(`${baseUrl}/offices/`, {
               headers: { Authorization: `token ${token}` }
             }),
-            // Modified: Using direct file API with filtering in the component
             fetch(`${baseUrl}/file/`, {
               headers: { Authorization: `token ${token}` }
             }),
             fetch(`${baseUrl}/file/deleted/`, {
+              headers: { Authorization: `token ${token}` }
+            }),
+            fetch(`${baseUrl}/file-type/`, {
               headers: { Authorization: `token ${token}` }
             })
           ]);
@@ -173,6 +176,14 @@ const AdminDashboardHome = () => {
           deletedFiles = deletedData.length;
         }
         
+        // Process file types data
+        let fileTypesCount = 0;
+        
+        if (fileTypesPromise.status === 'fulfilled' && fileTypesPromise.value.ok) {
+          const fileTypesData = await fileTypesPromise.value.json();
+          fileTypesCount = fileTypesData.length;
+        }
+        
         // Update stats with all collected data
         setStats({
           employeeCount,
@@ -181,6 +192,7 @@ const AdminDashboardHome = () => {
           transferredFiles,
           officesCount,
           departmentsCount,
+          fileTypesCount,
           deletedFiles,
           recentFiles,
           recentEmployees,
@@ -260,7 +272,7 @@ const AdminDashboardHome = () => {
         <p className="text-gray-600 mt-1">फाइल ट्र्याकिंग प्रणालीको समग्र स्थिति हेर्नुहोस्</p>
       </div>
 
-      {/* Stats Cards - Fixed navigation */}
+      {/* Stats Cards - Updated with file types */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard 
           title="कर्मचारीहरू" 
@@ -317,22 +329,21 @@ const AdminDashboardHome = () => {
         />
         
         <StatCard 
+          title="फाइल प्रकारहरू" 
+          value={stats.fileTypesCount} 
+          icon={<FaFileAlt />} 
+          bgColor="bg-cyan-50" 
+          textColor="text-cyan-600"
+          tabName="file-types"
+        />
+        
+        <StatCard 
           title="मेटिएका फाइलहरू" 
           value={stats.deletedFiles} 
           icon={<FaTrash />} 
           bgColor="bg-red-50" 
           textColor="text-red-600"
           tabName="deleted-files"
-        />
-        
-        <StatCard 
-          title="अन्य कार्यहरू" 
-          value="" 
-          icon={<FaSearch />} 
-          bgColor="bg-gray-50" 
-          textColor="text-gray-600"
-          isAction={true}
-          tabName="empdetails"
         />
       </div>
       
