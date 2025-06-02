@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { FaMapMarkerAlt, FaCheck } from "react-icons/fa";
+import { FaMapMarkerAlt, FaCheck, FaPlus, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 
 const LandDetailsTab = ({ 
@@ -12,7 +12,9 @@ const LandDetailsTab = ({
   id, 
   fetchLandDetails 
 }) => {
-  // State for new land detail form
+  // State for showing the new land detail row
+  const [showNewRow, setShowNewRow] = useState(false);
+  // State for new land detail
   const [newLandDetail, setNewLandDetail] = useState({
     district: "",
     municipality: "",
@@ -53,9 +55,25 @@ const LandDetailsTab = ({
       return;
     }
 
-    setLandDetails(prev => [...prev, newLandDetail]);
+    setLandDetails(prev => [...prev, {...newLandDetail}]);
     
     // Reset the form
+    setNewLandDetail({
+      district: "",
+      municipality: "",
+      ward_no: "",
+      kitta_no: "",
+      guthi_name: "",
+      land_type: "",
+      related_file: id,
+    });
+    
+    setShowNewRow(false);
+  };
+
+  // Cancel adding new land detail
+  const cancelAddNewLand = () => {
+    setShowNewRow(false);
     setNewLandDetail({
       district: "",
       municipality: "",
@@ -116,24 +134,15 @@ const LandDetailsTab = ({
         </h3>
         {editable && (
           <div className="flex gap-3">
-            <button
-              className="px-4 py-2 bg-[#E68332] text-white rounded-md hover:bg-[#d9773b] transition-all flex items-center gap-2 shadow-sm"
-              onClick={addLandDetail}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
+            {!showNewRow && (
+              <button
+                className="px-4 py-2 bg-[#E68332] text-white rounded-md hover:bg-[#d9773b] transition-all flex items-center gap-2 shadow-sm"
+                onClick={() => setShowNewRow(true)}
               >
-                <path
-                  fillRule="evenodd"
-                  d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              नयाँ जग्गा विवरण थप्नुहोस्
-            </button>
+                <FaPlus className="text-sm" />
+                नयाँ जग्गा विवरण थप्नुहोस्
+              </button>
+            )}
             <button
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-all flex items-center gap-2"
               onClick={handleSaveLandDetails}
@@ -145,8 +154,8 @@ const LandDetailsTab = ({
         )}
       </div>
 
-      {/* Existing Land Details Table */}
-      <div className="overflow-auto rounded-lg shadow-lg border border-gray-200">
+      {/* Land Details Table */}
+      <div className="overflow-auto rounded-lg shadow-lg border border-gray-200 mb-4">
         <table className="min-w-full divide-y divide-gray-200 table-fixed">
           <thead className="bg-gradient-to-r from-[#E68332] to-[#f0996a] text-white sticky top-0 z-10">
             <tr>
@@ -157,16 +166,20 @@ const LandDetailsTab = ({
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-32">गुठी नाम</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">जग्गा प्रकार</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">सम्बन्धित फाइल</th>
+              {editable && showNewRow && (
+                <th scope="col" className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider w-24 md:w-28">कार्य</th>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
+            {/* Existing Land Detail Rows */}
             {Array.isArray(landDetails) && landDetails.length > 0 ? (
               landDetails.map((detail, index) => (
                 <tr
                   key={`land-detail-${index}`}
                   className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-yellow-50 transition-all duration-200 cursor-default`}
                 >
-                  <td className="px-4 py-3 text-sm border-l-2 border-transparent hover:border-[#E68332] group">
+                  <td className="px-4 py-3 text-sm">
                     {editable ? (
                       <input
                         type="text"
@@ -245,85 +258,104 @@ const LandDetailsTab = ({
                   </td>
                 </tr>
               ))
-            ) : (
+            ) : !showNewRow ? (
               <tr className="bg-white">
                 <td colSpan="7" className="px-4 py-3 text-center text-gray-500">
                   कुनै जग्गा विवरण उपलब्ध छैन
+                </td>
+              </tr>
+            ) : null}
+            
+            {/* New Land Detail Row */}
+            {editable && showNewRow && (
+              <tr className="bg-green-50 hover:bg-green-100 border-b border-gray-200">
+                <td className="px-4 py-3 text-sm">
+                  <input
+                    type="text"
+                    value={newLandDetail.district}
+                    onChange={(e) => handleNewLandDetailChange(e, "district")}
+                    placeholder="जिल्ला*"
+                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                    required
+                  />
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  <input
+                    type="text"
+                    value={newLandDetail.municipality}
+                    onChange={(e) => handleNewLandDetailChange(e, "municipality")}
+                    placeholder="नगरपालिका"
+                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                  />
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  <input
+                    type="text"
+                    value={newLandDetail.ward_no}
+                    onChange={(e) => handleNewLandDetailChange(e, "ward_no")}
+                    placeholder="वार्ड नं"
+                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                  />
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  <input
+                    type="text"
+                    value={newLandDetail.kitta_no}
+                    onChange={(e) => handleNewLandDetailChange(e, "kitta_no")}
+                    placeholder="किट्टा नं*"
+                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                    required
+                  />
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  <input
+                    type="text"
+                    value={newLandDetail.guthi_name}
+                    onChange={(e) => handleNewLandDetailChange(e, "guthi_name")}
+                    placeholder="गुठी नाम"
+                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                  />
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  <input
+                    type="text"
+                    value={newLandDetail.land_type}
+                    onChange={(e) => handleNewLandDetailChange(e, "land_type")}
+                    placeholder="जग्गा प्रकार"
+                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                  />
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  <span className="text-gray-900">{id}</span>
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={addLandDetail}
+                      className="p-1.5 bg-green-500 text-white rounded hover:bg-green-600 transition-all"
+                      title="थप्नुहोस्"
+                    >
+                      <FaCheck />
+                    </button>
+                    <button
+                      onClick={cancelAddNewLand}
+                      className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600 transition-all"
+                      title="रद्द गर्नुहोस्"
+                    >
+                      <FaTimes />
+                    </button>
+                  </div>
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-
-      {/* New Land Detail Input Form */}
+      
+      {/* Instructions */}
       {editable && (
-        <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-          <h4 className="text-lg font-semibold text-[#E68332] mb-4">नयाँ जग्गा विवरण</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">जिल्ला*</label>
-              <input
-                type="text"
-                value={newLandDetail.district}
-                onChange={(e) => handleNewLandDetailChange(e, "district")}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                placeholder="जिल्ला प्रविष्ट गर्नुहोस्"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">नगरपालिका</label>
-              <input
-                type="text"
-                value={newLandDetail.municipality}
-                onChange={(e) => handleNewLandDetailChange(e, "municipality")}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                placeholder="नगरपालिका/गाउँपालिका"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">वार्ड नं</label>
-              <input
-                type="text"
-                value={newLandDetail.ward_no}
-                onChange={(e) => handleNewLandDetailChange(e, "ward_no")}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                placeholder="वार्ड नं"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">किट्टा नं*</label>
-              <input
-                type="text"
-                value={newLandDetail.kitta_no}
-                onChange={(e) => handleNewLandDetailChange(e, "kitta_no")}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                placeholder="किट्टा नं"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">गुठी नाम</label>
-              <input
-                type="text"
-                value={newLandDetail.guthi_name}
-                onChange={(e) => handleNewLandDetailChange(e, "guthi_name")}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                placeholder="गुठी नाम"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">जग्गा प्रकार</label>
-              <input
-                type="text"
-                value={newLandDetail.land_type}
-                onChange={(e) => handleNewLandDetailChange(e, "land_type")}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                placeholder="जग्गा प्रकार"
-              />
-            </div>
-          </div>
+        <div className="mt-2 text-sm text-gray-500 italic">
+          <span className="text-red-500">*</span> चिन्ह भएका फिल्डहरू आवश्यक छन्。
         </div>
       )}
     </motion.div>
