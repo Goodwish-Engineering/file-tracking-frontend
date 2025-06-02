@@ -52,19 +52,12 @@ const DocumentsTab = ({
         letter_date: "",
         office: "",
         page_no: index + 1,
+        related_file: id,
       }));
 
     setNewDocumentRows(newRows);
     setAddingNewDocuments(true);
     setIsPageCountModalOpen(false);
-  };
-
-  // Handle changes to existing documents
-  const handleChange = (e, field, index) => {
-    const value = e.target.value;
-    const updatedDocs = [...(fileDetails.letters_and_documents || [])];
-    updatedDocs[index][field] = value;
-    setFileDetails({ ...fileDetails, letters_and_documents: updatedDocs });
   };
 
   // Handle changes to new document rows
@@ -93,20 +86,16 @@ const DocumentsTab = ({
           return;
         }
       }
-
-      const updatedDocuments = [
-        ...(fileDetails.letters_and_documents || []),
-        ...newDocumentRows,
-      ];
-      const response = await fetch(`${baseUrl}/file/${id}/`, {
-        method: "PATCH",
+      console.log("request:", newDocumentRows);
+      const response = await fetch(`${baseUrl}/letter-document/`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `token ${token}`,
         },
-        body: JSON.stringify({ updatedDocuments }),
+        body: JSON.stringify(newDocumentRows),
       });
-
+      console.log(response);
       if (!response.ok) {
         throw new Error(`Server responded with status: ${response.status}`);
       }
@@ -145,7 +134,7 @@ const DocumentsTab = ({
         )}
       </div>
 
-      <div className="overflow-auto rounded-lg shadow-lg border border-gray-200 mb-4">
+      <div className=" rounded-lg shadow-lg border border-gray-200 mb-4">
         <table className="min-w-full divide-y divide-gray-200 table-fixed">
           <thead className="bg-gradient-to-r from-[#E68332] to-[#f0996a] text-white sticky top-0 z-10">
             <tr>
@@ -205,12 +194,12 @@ const DocumentsTab = ({
                   } hover:bg-yellow-50 transition-all duration-200 cursor-default`}
                 >
                   <td className="px-4 py-3 text-sm">
-                    {doc.registration_no || (
+                    {doc.number_type || (
                       <span className="text-gray-400 italic">N/A</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {doc.invoice_no || (
+                    {doc.number || (
                       <span className="text-gray-400 italic">N/A</span>
                     )}
                   </td>
@@ -294,7 +283,7 @@ const DocumentsTab = ({
                       value={row.date}
                       onSelect={(value) => {
                         const e = { target: { value: value } };
-                        handleChange(e, "date", index);
+                        handleNewDocumentChange(e, "date", index);
                       }}
                       className="w-full"
                       options={{ calenderLocale: "ne", valueLocale: "bs" }}
@@ -318,7 +307,7 @@ const DocumentsTab = ({
                       value={row.letter_date}
                       onSelect={(value) => {
                         const e = { target: { value: value } };
-                        handleChange(e, "letter_date", index);
+                        handleNewDocumentChange(e, "letter_date", index);
                       }}
                       className="w-full"
                       options={{ calenderLocale: "ne", valueLocale: "bs" }}

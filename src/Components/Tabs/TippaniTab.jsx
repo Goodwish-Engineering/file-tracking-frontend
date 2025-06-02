@@ -67,13 +67,6 @@ const TippaniTab = ({
     setIsPageCountModalOpen(false);
   };
 
-  // Handle changes to existing tippani
-  const handleChange = (e, field, index) => {
-    const value = e.target.value;
-    const updatedTippani = [...(fileDetails.tippani || [])];
-    updatedTippani[index][field] = value;
-    setFileDetails({ ...fileDetails, tippani: updatedTippani });
-  };
 
   // Handle changes to new tippani rows
   const handleNewTippaniChange = (e, field, index) => {
@@ -102,19 +95,14 @@ const TippaniTab = ({
         }
       }
 
-      const updatedTippani = [
-        // ...(fileDetails.tippani || []),
-        ...newTippaniRows,
-      ];
       console.log("newtippani:", newTippaniRows);
-      console.log("request:", updatedTippani);
       const response = await fetch(`${baseUrl}/tippani/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `token ${token}`,
         },
-        body: JSON.stringify(newTippaniRows[0]),
+        body: JSON.stringify(newTippaniRows),
       });
 
       if (!response.ok) {
