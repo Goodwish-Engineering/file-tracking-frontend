@@ -97,7 +97,7 @@ const Notification = ({ onNotificationRead }) => {
   const markAllAsRead = async () => {
     try {
       const response = await fetch(`${baseUrl}/notification/mark-all-read/`, {
-        method: "POST",
+        method: "PATCH",
         headers: {
           Authorization: `token ${token}`,
         },
