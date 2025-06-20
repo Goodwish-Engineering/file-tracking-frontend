@@ -13,6 +13,7 @@ import {
 import { BsFileEarmark } from "react-icons/bs";
 import { GrStatusInfo } from "react-icons/gr";
 import { MdSubject } from "react-icons/md";
+import FormField from "./Common/FormField";
 
 const FileDetails = ({ setShowButton, clearData }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
@@ -176,6 +177,15 @@ const FileDetails = ({ setShowButton, clearData }) => {
     }));
   };
 
+  // Create a unified change handler for all inputs
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   // Handle select inputs (which still use controlled approach)
   const handleSelectChange = (e) => {
     const { name, value } = e.target;
@@ -298,115 +308,6 @@ const FileDetails = ({ setShowButton, clearData }) => {
     }
   };
 
-  // Create form field component with uncontrolled inputs for text fields
-  const FormField = ({
-    label,
-    name,
-    type,
-    options = [],
-    placeholder,
-    required = false,
-    icon,
-  }) => {
-    if (type === "select") {
-      return (
-        <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md">
-          <label
-            htmlFor={name}
-            className="block font-medium text-gray-700 mb-2 items-center"
-          >
-            {icon && <span className="mr-2 text-[#ED772F]">{icon}</span>}
-            {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
-          </label>
-          <select
-            id={name}
-            name={name}
-            value={formData[name]}
-            onChange={handleSelectChange}
-            className={`w-full border ${
-              required && !formData[name] ? "border-red-300" : "border-gray-300"
-            } rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#ED772F] focus:border-[#ED772F] transition-all duration-200 outline-none text-gray-700`}
-            disabled={options.length === 0 && name !== "province"}
-            required={required}
-          >
-            <option value="">{placeholder || `Select ${label}`}</option>
-            {options.map((option) => (
-              <option
-                key={typeof option === "object" ? option.id : option}
-                value={
-                  typeof option === "object" ? option.id.toString() : option
-                }
-              >
-                {typeof option === "object" ? option.name : option}
-              </option>
-            ))}
-          </select>
-          {required && !formData[name] && (
-            <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
-          )}
-        </div>
-      );
-    } else if (type === "date") {
-      return (
-        <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md p-2">
-          <label
-            htmlFor={name}
-            className="block font-medium text-gray-700 items-center mb-2"
-          >
-            <FaCalendarAlt className="mr-2 text-[#ED772F]" />
-            {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
-          </label>
-
-          <input
-            type="text"
-            id={name}
-            name={name}
-            value={formData[name] || ""}
-            onChange={(e) => {
-              const formattedValue = formatDateInput(e.target.value);
-              setFormData((prev) => ({ ...prev, [name]: formattedValue }));
-            }}
-            placeholder="YYYY-MM-DD"
-            maxLength="10"
-            className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#ED772F] text-gray-700"
-            required={required}
-          />
-
-          {required && !formData[name] && (
-            <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
-          )}
-        </div>
-      );
-    } else {
-      // Use uncontrolled components for text inputs
-      return (
-        <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md">
-          <label
-            htmlFor={name}
-            className="block font-medium text-gray-700 mb-2  items-center"
-          >
-            {icon && <span className="mr-2 text-[#ED772F]">{icon}</span>}
-            {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
-          </label>
-          <input
-            id={name}
-            type={type || "text"}
-            name={name}
-            defaultValue={formData[name]}
-            onBlur={handleBlur}
-            className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#ED772F] focus:border-[#ED772F] transition-all duration-200 outline-none text-gray-700"
-            placeholder={placeholder}
-            ref={inputRefs[name]}
-            required={required}
-          />
-        </div>
-      );
-    }
-  };
-
   return (
     <>
       <div className="w-[95%] md:w-[85%] mt-4 md:mt-5 md:my-10 mx-auto p-6 bg-white rounded-xl shadow-lg">
@@ -446,8 +347,9 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 type="select"
                 options={fileTypes}
                 placeholder="फाइल प्रकार छान्नुहोस्"
-                // required={true}
                 icon={<FaFile />}
+                value={formData.file_type}
+                onChange={handleSelectChange}
               />
 
               <FormField
@@ -456,6 +358,8 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 icon={<FaFile />}
                 required={true}
                 placeholder="फाइलको नाम लेख्नुहोस्"
+                value={formData.file_name}
+                onChange={handleInputChange}
               />
 
               <FormField
@@ -464,15 +368,18 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 required={true}
                 icon={<MdSubject />}
                 placeholder="फाइलको विषय लेख्नुहोस्"
+                value={formData.subject}
+                onChange={handleInputChange}
               />
 
-              {/* Add the responsible person field here */}
               <FormField
                 label="फाइलको जिम्मेवार व्यक्ति"
                 name="submitted_by"
                 icon={<FaUserCircle />}
                 required={true}
                 placeholder="जिम्मेवार व्यक्तिको नाम लेख्नुहोस्"
+                value={formData.submitted_by}
+                onChange={handleInputChange}
               />
 
               <FormField
@@ -480,6 +387,8 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 name="present_date"
                 type="date"
                 required={true}
+                value={formData.present_date}
+                onChange={handleInputChange}
               />
             </div>
           </div>
@@ -499,6 +408,8 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 placeholder="प्रदेश छान्नुहोस्"
                 required={true}
                 icon={<FaMapMarkerAlt />}
+                value={formData.province}
+                onChange={handleSelectChange}
               />
 
               <FormField
@@ -509,6 +420,8 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 placeholder="जिल्ला छान्नुहोस्"
                 required={true}
                 icon={<FaMapMarkerAlt />}
+                value={formData.district}
+                onChange={handleSelectChange}
               />
 
               <FormField
@@ -519,6 +432,8 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 placeholder="नगरपालिका छान्नुहोस्"
                 required={true}
                 icon={<FaMapMarkerAlt />}
+                value={formData.municipality}
+                onChange={handleSelectChange}
               />
 
               <FormField
@@ -527,6 +442,8 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 placeholder="वार्ड नम्बर राख्नुहोस्"
                 required={true}
                 icon={<FaMapMarkerAlt />}
+                value={formData.ward_no}
+                onChange={handleInputChange}
               />
 
               <FormField
@@ -534,6 +451,8 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 name="tole"
                 placeholder="टोलको नाम राख्नुहोस्"
                 icon={<FaMapMarkerAlt />}
+                value={formData.tole}
+                onChange={handleInputChange}
               />
             </div>
           </div>
@@ -553,6 +472,8 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 placeholder="कार्यालय छान्नुहोस्"
                 required={true}
                 icon={<FaBuilding />}
+                value={formData.related_guthi}
+                onChange={handleSelectChange}
               />
 
               <FormField
@@ -563,6 +484,8 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 placeholder="विभाग छान्नुहोस्"
                 required={true}
                 icon={<FaBuilding />}
+                value={formData.related_department}
+                onChange={handleSelectChange}
               />
             </div>
           </div>

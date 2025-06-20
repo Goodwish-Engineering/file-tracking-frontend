@@ -5,7 +5,6 @@ import "react-toastify/dist/ReactToastify.css";
 import {
   FaFileAlt,
   FaBuilding,
-  FaCalendarAlt,
   FaUserCircle,
   FaSave,
   FaTimes,
@@ -13,6 +12,7 @@ import {
 } from "react-icons/fa";
 import { BsFileEarmark } from "react-icons/bs";
 import { MdSubject } from "react-icons/md";
+import FormField from "./Common/FormField";
 
 const AddChalani = ({ isOpen, onClose, onSuccess }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
@@ -178,124 +178,6 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
     }
   };
 
-  const FormField = ({ 
-    label, 
-    name, 
-    type = "text", 
-    options = [], 
-    placeholder, 
-    required = false, 
-    icon,
-    isTextarea = false,
-    rows = 3 
-  }) => {
-    if (type === "select") {
-      return (
-        <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md">
-          <label
-            htmlFor={name}
-            className="block font-medium text-gray-700 mb-2 items-center"
-          >
-            {icon && <span className="mr-2 text-[#E68332]">{icon}</span>}
-            {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
-          </label>
-          <select
-            id={name}
-            name={name}
-            value={formData[name] || ""}
-            onChange={handleChange}
-            className={`w-full border ${
-              required && !formData[name] ? "border-red-300" : "border-gray-300"
-            } rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#E68332] focus:border-[#E68332] transition-all duration-200 outline-none text-gray-700`}
-            required={required}
-          >
-            <option value="">{placeholder || `${label} छान्नुहोस्`}</option>
-            {options.map((option) => (
-              <option
-                key={option.id || option.value}
-                value={option.id || option.value}
-              >
-                {option.name || option.file_name || option.label}
-              </option>
-            ))}
-          </select>
-          {required && !formData[name] && (
-            <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
-          )}
-        </div>
-      );
-    } else if (type === "date") {
-      return (
-        <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md p-2">
-          <label
-            htmlFor={name}
-            className="block font-medium text-gray-700 items-center mb-2"
-          >
-            <FaCalendarAlt className="mr-2 text-[#E68332]" />
-            {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
-          </label>
-
-          <input
-            type="text"
-            id={name}
-            name={name}
-            value={formData[name] || ""}
-            onChange={handleChange}
-            placeholder="YYYY-MM-DD"
-            maxLength="10"
-            className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#E68332] focus:border-[#E68332] transition-all duration-200 outline-none text-gray-700"
-            required={required}
-            autoComplete="off"
-          />
-
-          {required && !formData[name] && (
-            <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
-          )}
-        </div>
-      );
-    } else {
-      return (
-        <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md">
-          <label
-            htmlFor={name}
-            className="block font-medium text-gray-700 mb-2 items-center"
-          >
-            {icon && <span className="mr-2 text-[#E68332]">{icon}</span>}
-            {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
-          </label>
-          {isTextarea ? (
-            <textarea
-              id={name}
-              name={name}
-              value={formData[name] || ""}
-              onChange={handleChange}
-              rows={rows}
-              className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#E68332] focus:border-[#E68332] transition-all duration-200 outline-none text-gray-700 resize-none"
-              placeholder={placeholder}
-              required={required}
-              autoComplete="off"
-            />
-          ) : (
-            <input
-              id={name}
-              type={type}
-              name={name}
-              value={formData[name] || ""}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#E68332] focus:border-[#E68332] transition-all duration-200 outline-none text-gray-700"
-              placeholder={placeholder}
-              required={required}
-              autoComplete="off"
-            />
-          )}
-        </div>
-      );
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -344,6 +226,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   icon={<FaFileAlt />}
                   required={true}
                   placeholder="चलानी नम्बर लेख्नुहोस्"
+                  value={formData.chalani_number}
+                  onChange={handleChange}
                 />
 
                 <FormField
@@ -351,6 +235,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   name="chalani_date"
                   type="date"
                   required={true}
+                  value={formData.chalani_date}
+                  onChange={handleChange}
                 />
 
                 <FormField
@@ -360,6 +246,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   options={files}
                   placeholder="फाइल छान्नुहोस्"
                   icon={<FaFileAlt />}
+                  value={formData.related_file}
+                  onChange={handleChange}
                 />
 
                 <FormField
@@ -367,12 +255,16 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   name="patra_sankhya"
                   icon={<FaFileAlt />}
                   placeholder="पत्र संख्या लेख्नुहोस्"
+                  value={formData.patra_sankhya}
+                  onChange={handleChange}
                 />
 
                 <FormField
                   label="पत्र मिति"
                   name="patra_miti"
                   type="date"
+                  value={formData.patra_miti}
+                  onChange={handleChange}
                 />
 
                 <FormField
@@ -380,6 +272,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   name="reference_number"
                   icon={<FaFileAlt />}
                   placeholder="सन्दर्भ नम्बर लेख्नुहोस्"
+                  value={formData.reference_number}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -398,6 +292,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   options={departments}
                   placeholder="विभाग छान्नुहोस्"
                   icon={<FaBuilding />}
+                  value={formData.related_department}
+                  onChange={handleChange}
                 />
 
                 <FormField
@@ -407,6 +303,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   options={offices}
                   placeholder="कार्यालय छान्नुहोस्"
                   icon={<FaBuilding />}
+                  value={formData.related_office}
+                  onChange={handleChange}
                 />
 
                 <FormField
@@ -416,6 +314,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   options={departments}
                   placeholder="बुझाउने विभाग छान्नुहोस्"
                   icon={<FaBuilding />}
+                  value={formData.receiving_department}
+                  onChange={handleChange}
                 />
 
                 <FormField
@@ -425,6 +325,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   options={offices}
                   placeholder="बुझाउने कार्यालय छान्नुहोस्"
                   icon={<FaBuilding />}
+                  value={formData.receiving_office}
+                  onChange={handleChange}
                 />
 
                 <FormField
@@ -432,6 +334,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   name="sender_name"
                   icon={<FaUserCircle />}
                   placeholder="पठाउने व्यक्तिको नाम"
+                  value={formData.sender_name}
+                  onChange={handleChange}
                 />
 
                 <FormField
@@ -439,6 +343,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   name="receiver_name"
                   icon={<FaUserCircle />}
                   placeholder="बुझाउने व्यक्तिको नाम"
+                  value={formData.receiver_name}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -457,6 +363,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   rows={3}
                   icon={<MdSubject />}
                   placeholder="विषय लेख्नुहोस्"
+                  value={formData.subject}
+                  onChange={handleChange}
                 />
 
                 <FormField
@@ -472,6 +380,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   ]}
                   placeholder="पाठाउने तरिका छान्नुहोस्"
                   icon={<FaPaperPlane />}
+                  value={formData.dispatch_method}
+                  onChange={handleChange}
                 />
 
                 <FormField
@@ -485,6 +395,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                     { value: "urgent", label: "अति जरुरी" },
                   ]}
                   icon={<FaFileAlt />}
+                  value={formData.urgency_level}
+                  onChange={handleChange}
                 />
 
                 <FormField
@@ -492,6 +404,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   name="pana_sankhya"
                   icon={<FaFileAlt />}
                   placeholder="पाना संख्या लेख्नुहोस्"
+                  value={formData.pana_sankhya}
+                  onChange={handleChange}
                 />
 
                 <FormField
@@ -499,6 +413,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   name="karmachari"
                   icon={<FaUserCircle />}
                   placeholder="कर्मचारीको नाम लेख्नुहोस्"
+                  value={formData.karmachari}
+                  onChange={handleChange}
                 />
               </div>
               
@@ -510,6 +426,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   rows={3}
                   icon={<MdSubject />}
                   placeholder="कैफियत लेख्नुहोस्"
+                  value={formData.remarks}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -566,3 +484,4 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
 };
 
 export default AddChalani;
+
