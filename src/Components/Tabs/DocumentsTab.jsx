@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaRegFileAlt, FaCalendarAlt, FaCheck, FaTimes } from "react-icons/fa";
 import { MdAdd, MdClose } from "react-icons/md";
 import { toast } from "react-toastify";
-import { NepaliDatePicker } from "nepali-datepicker-reactjs";
-import "nepali-datepicker-reactjs/dist/index.css";
+
 const DocumentsTab = ({
   editable,
   fileDetails,
@@ -60,9 +59,26 @@ const DocumentsTab = ({
     setIsPageCountModalOpen(false);
   };
 
+  // Format date input as YYYY-MM-DD
+  const formatDateInput = (value) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 4) {
+      return numbers;
+    } else if (numbers.length <= 6) {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
+    } else {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4, 6)}-${numbers.slice(6, 8)}`;
+    }
+  };
+
   // Handle changes to new document rows
   const handleNewDocumentChange = (e, field, index) => {
-    const value = e.target.value;
+    let value = e.target.value;
+    
+    if (field.includes('date') || field.includes('miti')) {
+      value = formatDateInput(value);
+    }
+    
     setNewDocumentRows((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
@@ -278,15 +294,15 @@ const DocumentsTab = ({
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <NepaliDatePicker
-                      inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      value={row.date}
-                      onSelect={(value) => {
-                        const e = { target: { value: value } };
-                        handleNewDocumentChange(e, "date", index);
-                      }}
-                      className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "en" }}
+                    <input
+                      type="text"
+                      value={row.date || ""}
+                      onChange={(e) =>
+                        handleNewDocumentChange(e, "date", index)
+                      }
+                      placeholder="YYYY-MM-DD"
+                      maxLength="10"
+                      className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
@@ -302,15 +318,15 @@ const DocumentsTab = ({
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <NepaliDatePicker
-                      inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      value={row.letter_date}
-                      onSelect={(value) => {
-                        const e = { target: { value: value } };
-                        handleNewDocumentChange(e, "letter_date", index);
-                      }}
-                      className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "en" }}
+                    <input
+                      type="text"
+                      value={row.letter_date || ""}
+                      onChange={(e) =>
+                        handleNewDocumentChange(e, "letter_date", index)
+                      }
+                      placeholder="YYYY-MM-DD"
+                      maxLength="10"
+                      className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">

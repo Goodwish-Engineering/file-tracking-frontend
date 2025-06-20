@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { NepaliDatePicker } from "nepali-datepicker-reactjs";
-import "nepali-datepicker-reactjs/dist/index.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -26,17 +24,30 @@ const PanjikaDocumentsForm = ({ onClose, isOpen }) => {
   });
   const [datePickerKey, setDatePickerKey] = useState(0);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  // Format date input as YYYY-MM-DD
+  const formatDateInput = (value) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 4) {
+      return numbers;
+    } else if (numbers.length <= 6) {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
+    } else {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4, 6)}-${numbers.slice(
+        6,
+        8
+      )}`;
+    }
   };
 
-  const handleNepaliDateChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-    console.log(`Date field ${field} updated:`, value);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    let processedValue = value;
+    if (name.includes("date") || name.includes("miti")) {
+      processedValue = formatDateInput(value);
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: processedValue }));
   };
 
   const handleSubmit = async (e) => {
@@ -143,32 +154,26 @@ const PanjikaDocumentsForm = ({ onClose, isOpen }) => {
           </div>
           <div>
             <label className="block text-gray-800">मिति</label>
-            <NepaliDatePicker
-              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+            <input
+              type="text"
               name="date"
               value={formData.date}
-              onSelect={(value) => {
-                handleNepaliDateChange("date", value);
-              }}
-              options={{
-                calenderLocale: "ne",
-                valueLocale: "en", // BS format for Bikram Sambat
-              }}
+              onChange={handleInputChange}
+              placeholder="YYYY-MM-DD"
+              maxLength="10"
+              className="w-full border border-gray-300 rounded-md shadow-sm p-2"
             />
           </div>
           <div>
             <label className="block text-gray-800">पत्र मिति</label>
-            <NepaliDatePicker
-              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+            <input
+              type="text"
               name="letter_date"
               value={formData.letter_date}
-              onSelect={(value) => {
-                handleNepaliDateChange("letter_date", value);
-              }}
-              options={{
-                calenderLocale: "ne",
-                valueLocale: "en",
-              }}
+              onChange={handleInputChange}
+              placeholder="YYYY-MM-DD"
+              maxLength="10"
+              className="w-full border border-gray-300 rounded-md shadow-sm p-2"
             />
           </div>
           <div>

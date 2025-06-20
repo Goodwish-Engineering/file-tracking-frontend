@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { NepaliDatePicker } from "nepali-datepicker-reactjs";
-import "nepali-datepicker-reactjs/dist/index.css";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -20,31 +18,46 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
     tippani_date: "",
     page_no: "",
     related_file: fileId,
-    file: null, // Change from empty string to null
+    file: null,
   });
   const [showAddButton, setShowAddButton] = useState(false);
-  const [datePickerKey, setDatePickerKey] = useState(0);
+
+  // Format date input as YYYY-MM-DD
+  const formatDateInput = (value) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 4) {
+      return numbers;
+    } else if (numbers.length <= 6) {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
+    } else {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4, 6)}-${numbers.slice(
+        6,
+        8
+      )}`;
+    }
+  };
 
   // Handle input changes, including file selection
   const handleChange = (e) => {
-    if (e.target.name === "file") {
+    const { name, value } = e.target;
+
+    if (name === "file") {
       setCurrentTippani({
         ...currentTippani,
         file: e.target.files[0], // Correctly store the file
       });
+    } else if (name.includes("date") || name.includes("miti")) {
+      const formattedValue = formatDateInput(value);
+      setCurrentTippani({
+        ...currentTippani,
+        [name]: formattedValue,
+      });
     } else {
       setCurrentTippani({
         ...currentTippani,
-        [e.target.name]: e.target.value,
+        [name]: value,
       });
     }
-  };
-
-  const handleNepaliDateChange = (field, value, bsDate) => {
-    setCurrentTippani((prev) => ({
-      ...prev,
-      [field]: bsDate || value,
-    }));
   };
 
   // Handle form submission
@@ -137,15 +150,15 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
           </div>
           <div>
             <label className="block text-gray-800">पेश मिति</label>
-            <NepaliDatePicker
-              key={datePickerKey + "submitted_date"}
-              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
-              value={currentTippani.submitted_date || ""}
-              onChange={(value, { bsDate }) =>
-                handleNepaliDateChange("submitted_date", value, bsDate)
-              }
-              options={{ calenderLocale: "ne", valueLocale: "en" }}
+            <input
+              type="text"
               name="submitted_date"
+              value={currentTippani.submitted_date}
+              onChange={handleChange}
+              placeholder="YYYY-MM-DD"
+              maxLength="10"
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
+              required
             />
           </div>
           <div>
@@ -172,28 +185,27 @@ const TippaniFormModal = ({ isOpen, onClose, fileId }) => {
           </div>
           <div>
             <label className="block text-gray-800">स्वीकृति मिति</label>
-            <NepaliDatePicker
-              key={datePickerKey + "approved_date"}
-              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
-              value={currentTippani.approved_date || ""}
-              onChange={(value, { bsDate }) =>
-                handleNepaliDateChange("approved_date", value, bsDate)
-              }
-              options={{ calenderLocale: "ne", valueLocale: "en" }}
+            <input
+              type="text"
               name="approved_date"
+              value={currentTippani.approved_date}
+              onChange={handleChange}
+              placeholder="YYYY-MM-DD"
+              maxLength="10"
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
+              required
             />
           </div>
           <div>
             <label className="block text-gray-800">टिप्पणी मिति</label>
-            <NepaliDatePicker
-              key={datePickerKey + "tippani_date"}
-              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
-              value={currentTippani.tippani_date || ""}
-              onChange={(value, { bsDate }) =>
-                handleNepaliDateChange("tippani_date", value, bsDate)
-              }
-              options={{ calenderLocale: "ne", valueLocale: "en" }}
+            <input
+              type="text"
               name="tippani_date"
+              value={currentTippani.tippani_date}
+              onChange={handleChange}
+              placeholder="YYYY-MM-DD"
+              maxLength="10"
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"
             />
           </div>
           <div>

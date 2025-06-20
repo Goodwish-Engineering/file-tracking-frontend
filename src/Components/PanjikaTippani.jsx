@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { NepaliDatePicker } from "nepali-datepicker-reactjs";
-import "nepali-datepicker-reactjs/dist/index.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -25,19 +23,33 @@ const PanjikaTippani = ({ isOpen, onClose }) => {
     related_file: fileId,
   });
 
-  const handleChange = (e) => {
-    setCurrentTippani({
-      ...currentTippani,
-      [e.target.name]: e.target.value,
-    });
+  // Format date input as YYYY-MM-DD
+  const formatDateInput = (value) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 4) {
+      return numbers;
+    } else if (numbers.length <= 6) {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
+    } else {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4, 6)}-${numbers.slice(
+        6,
+        8
+      )}`;
+    }
   };
 
-  const handleNepaliDateChange = (field, value) => {
-    setCurrentTippani((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-    console.log(`Date field ${field} updated:`, value);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    let processedValue = value;
+    if (name.includes("date") || name.includes("miti")) {
+      processedValue = formatDateInput(value);
+    }
+
+    setCurrentTippani({
+      ...currentTippani,
+      [name]: processedValue,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -135,17 +147,14 @@ const PanjikaTippani = ({ isOpen, onClose }) => {
           </div>
           <div>
             <label className="block text-gray-800 font-medium">पेश मिति</label>
-            <NepaliDatePicker
-              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+            <input
+              type="text"
               name="submitted_date"
               value={currentTippani.submitted_date}
-              onSelect={(value) => {
-                handleNepaliDateChange("submitted_date", value);
-              }}
-              options={{
-                calenderLocale: "ne",
-                valueLocale: "en",
-              }}
+              onChange={handleChange}
+              placeholder="YYYY-MM-DD"
+              maxLength="10"
+              className="w-full border border-gray-300 rounded-md shadow-sm p-2"
             />
           </div>
           <div>
@@ -170,32 +179,26 @@ const PanjikaTippani = ({ isOpen, onClose }) => {
           </div>
           <div>
             <label className="block text-gray-800 font-medium">स्वीकृति मिति</label>
-            <NepaliDatePicker
-              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+            <input
+              type="text"
               name="approved_date"
               value={currentTippani.approved_date}
-              onSelect={(value) => {
-                handleNepaliDateChange("approved_date", value);
-              }}
-              options={{
-                calenderLocale: "ne",
-                valueLocale: "en",
-              }}
+              onChange={handleChange}
+              placeholder="YYYY-MM-DD"
+              maxLength="10"
+              className="w-full border border-gray-300 rounded-md shadow-sm p-2"
             />
           </div>
           <div>
             <label className="block text-gray-800 font-medium">टिप्पणी मिति</label>
-            <NepaliDatePicker
-              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+            <input
+              type="text"
               name="tippani_date"
               value={currentTippani.tippani_date}
-              onSelect={(value) => {
-                handleNepaliDateChange("tippani_date", value);
-              }}
-              options={{
-                calenderLocale: "ne",
-                valueLocale: "en",
-              }}
+              onChange={handleChange}
+              placeholder="YYYY-MM-DD"
+              maxLength="10"
+              className="w-full border border-gray-300 rounded-md shadow-sm p-2"
             />
           </div>
           <div>
