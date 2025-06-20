@@ -15,6 +15,11 @@ import EmployeHeader from "./EmployeeDashboard/EmployeeHeader.jsx";
 import UserDetails from "./EmployeeDashboard/UserDetails.jsx";
 import AddDepartOfOffice from "./AdminDashboard/AddDepartOfOffice.jsx";
 import FileHistory from "./Components/FileHistory.jsx";
+import DartaList from "./Components/DartaList.jsx";
+import ChalaniList from "./Components/ChalaniList.jsx";
+import DartaDetails from "./Components/DartaDetails.jsx";
+import ChalaniDetails from "./Components/ChalaniDetails.jsx";
+
 const router = createBrowserRouter([
   {
     element: <App />,
@@ -29,6 +34,10 @@ const router = createBrowserRouter([
       { element: <UserDetails/>, path:'/userDetails'},
       { element: <AddDepartOfOffice/>, path:'/addDepartment/:officeId'},
       { element: <FileHistory/>, path: "/file-history/:id"},
+      { element: <DartaList/>, path: "/darta-list"},
+      { element: <ChalaniList/>, path: "/chalani-list"},
+      { element: <DartaDetails/>, path: "/darta-details/:id"},
+      { element: <ChalaniDetails/>, path: "/chalani-details/:id"},
     ],
   },
 ]);

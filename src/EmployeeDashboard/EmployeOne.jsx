@@ -16,6 +16,8 @@ import logo from "/logo192.png";
 import NonTransferFile from "../Components/NonTranferFile";
 import Notification from "../Components/Notification";
 import FileRequest from "../Components/FileRequest";
+import DartaList from "../Components/DartaList";
+import AddDarta from "../Components/AddDarta";
 
 const EmployeOne = () => {
   const [tab, setTab] = useState("notification");
@@ -53,6 +55,8 @@ const EmployeOne = () => {
         {tab === "nontransfer" && <NonTransferFile />}
         {tab === "filerequest" && <FileRequest />}
         {tab === "notification" && <Notification />}
+        {tab === "darta-list" && <DartaList />}
+        {tab === "add-darta" && <AddDarta />}
       </div>
       <div className="md:hidden lg:hidden fixed top-2 py-4 right-4">
         {menue ? (
@@ -121,6 +125,14 @@ const EmployeOne = () => {
                 File Request
               </h3>
             )}
+            <h3
+              onClick={() => handleTabChange("darta-list")}
+              className={`w-full cursor-pointer ${
+                tab === "darta-list" && "bg-yellow-700"
+              } hover:bg-yellow-700 px-3 py-1 rounded-md`}
+            >
+              दर्ता रेकर्डहरू
+            </h3>
             <button
               onClick={() => handleTabChange("notification")}
               className={`w-full cursor-pointer ${
@@ -188,6 +200,14 @@ const EmployeOne = () => {
               File Request
             </h3>
           )}
+          <h3
+            onClick={() => handleTabChange("darta-list")}
+            className={`w-full cursor-pointer ${
+              tab === "darta-list" && "bg-yellow-700"
+            } hover:bg-yellow-700 px-3 py-1 rounded-md`}
+          >
+            दर्ता रेकर्डहरू
+          </h3>
           <button
             onClick={() => handleTabChange("notification")}
             className={`w-full cursor-pointer ${

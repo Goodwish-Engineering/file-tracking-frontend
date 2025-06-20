@@ -10,6 +10,7 @@ import FileRequest from "../Components/FileRequest";
 import TransferedFile from "../Components/TransferedFiles";
 import EmployeeHome from "./EmployeeHome";
 import Notification from "../Components/Notification";
+import DartaList from "../Components/DartaList";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { FaFile, FaRegFileAlt, FaUserCircle } from "react-icons/fa";
@@ -17,7 +18,10 @@ import { AiFillAppstore } from "react-icons/ai";
 import { IoIosNotifications } from "react-icons/io";
 import { FiShieldOff } from "react-icons/fi";
 import { MdOutlineTurnRight, MdDashboard } from "react-icons/md";
+import { BsFileEarmark } from "react-icons/bs";
 import NonTransferFile3 from "../Components/NonTransfer3";
+import ChalaniList from "../Components/ChalaniList";
+import { FaPaperPlane } from "react-icons/fa";
 
 const EmployeHeader = () => {
   // Get activeTab from localStorage if exists, otherwise default to notification
@@ -146,14 +150,6 @@ const EmployeHeader = () => {
             {/* File Management Section */}
             <SectionTitle title="फाइल व्यवस्थापन" />
             
-            {/* {level === "1" && (
-              <NavItem
-                onClick={() => setTab("uploadTippani")}
-                isActive={tab === "uploadTippani"}
-                icon={<FaFile />}
-                label="फाइल अपलोड"
-              />
-            )} */}
             <NavItem
               onClick={() => setTab("uploadTippani")}
               isActive={tab === "uploadTippani"}
@@ -201,6 +197,22 @@ const EmployeHeader = () => {
                 />
               </>
             )}
+            
+            {/* Document Management Section */}
+            <SectionTitle title="कागजात व्यवस्थापन" />
+            <NavItem
+              onClick={() => setTab("dartalist")}
+              isActive={tab === "dartalist"}
+              icon={<BsFileEarmark />}
+              label="दर्ता रेकर्डहरू"
+            />
+            
+            <NavItem
+              onClick={() => setTab("chalanilist")}
+              isActive={tab === "chalanilist"}
+              icon={<FaPaperPlane />}
+              label="चलानी रेकर्डहरू"
+            />
             
             {/* Notifications section */}
             <SectionTitle title="सूचना" />
@@ -353,6 +365,22 @@ const EmployeHeader = () => {
             </>
           )}
           
+          {/* Document Management Section */}
+          <SectionTitle title="कागजात व्यवस्थापन" />
+          <NavItem
+            onClick={() => handleTabChange("dartalist")}
+            isActive={tab === "dartalist"}
+            icon={<BsFileEarmark />}
+            label="दर्ता रेकर्डहरू"
+          />
+          
+          <NavItem
+            onClick={() => handleTabChange("chalanilist")}
+            isActive={tab === "chalanilist"}
+            icon={<FaPaperPlane />}
+            label="चलानी रेकर्डहरू"
+          />
+          
           {/* Notifications section */}
           <SectionTitle title="सूचना" />
           <NavItem
@@ -386,6 +414,8 @@ const EmployeHeader = () => {
         {tab === "notification" && <Notification onNotificationRead={fetchNotifications} />}
         {tab === "transfered" && <TransferedFile />}
         {tab === "nontransfer3" && <NonTransferFile3 />}
+        {tab === "dartalist" && <DartaList />}
+        {tab === "chalanilist" && <ChalaniList />}
       </div>
     </div>
   );
