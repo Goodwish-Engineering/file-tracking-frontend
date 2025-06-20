@@ -6,6 +6,8 @@ import Notification from "../Components/Notification";
 import UserDetails from "../EmployeeDashboard/UserDetails";
 import AddOffice from "./AddOffice";
 import DeletedFile from "../Components/DeletedFile";
+import DartaList from "../Components/DartaList";
+import AddDarta from "../Components/AddDarta";
 import { 
   FaBuilding, 
   FaUserCog, 
@@ -125,6 +127,7 @@ const AdminDashboard = () => {
     { id: "register", label: "कर्मचारी दर्ता", icon: <FaUserPlus /> },
     { id: "add-office", label: "शाखा व्यवस्थापन", icon: <FaBuilding /> },
     { id: "file-types", label: "फाइल प्रकार", icon: <FaFileAlt /> },
+    { id: "darta-list", label: "दर्ता रेकर्डहरू", icon: <FaFileAlt /> },
     { id: "nontransfer3", label: "स्थानान्तरण नगरिएको", icon: <FaExchangeAlt /> },
     { id: "transfered", label: "स्थानान्तरण गरिएको", icon: <FaExchangeAlt /> },
     { id: "deleted-files", label: "मेटिएका फाइलहरू", icon: <FaTrashAlt /> },
@@ -147,6 +150,10 @@ const AdminDashboard = () => {
         return <AddOffice />;
       case "file-types":
         return <FileTypeManagement />;
+      case "darta-list":
+        return <DartaList />;
+      case "add-darta":
+        return <AddDarta />;
       case "nontransfer3":
         return <NonTransferFile3 />;
       case "transfered":
