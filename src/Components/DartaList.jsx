@@ -85,7 +85,7 @@ const DartaList = () => {
             record.subject?.toLowerCase() || "",
             record.patra_sankhya?.toLowerCase() || "",
             record.chalani_number?.toLowerCase() || "",
-            record.related_file?.file_name?.toLowerCase() || "",
+            record.related_file_detail?.file_name?.toLowerCase() || "",
           ].some((field) => field.includes(query))
         )
     );

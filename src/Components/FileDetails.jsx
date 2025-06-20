@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { NepaliDatePicker } from "nepali-datepicker-reactjs";
-import "nepali-datepicker-reactjs/dist/index.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -285,6 +283,21 @@ const FileDetails = ({ setShowButton, clearData }) => {
     }
   };
 
+  // Format date input as YYYY-MM-DD
+  const formatDateInput = (value) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 4) {
+      return numbers;
+    } else if (numbers.length <= 6) {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
+    } else {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4, 6)}-${numbers.slice(
+        6,
+        8
+      )}`;
+    }
+  };
+
   // Create form field component with uncontrolled inputs for text fields
   const FormField = ({
     label,
@@ -334,61 +347,32 @@ const FileDetails = ({ setShowButton, clearData }) => {
           )}
         </div>
       );
-    } else if (type === "nepali-date" || type === "date") {
+    } else if (type === "date") {
       return (
         <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md p-2">
-          <div className="flex justify-between items-center mb-2">
-            <label
-              htmlFor={name}
-              className="block font-medium text-gray-700 items-center"
-            >
-              <FaCalendarAlt className="mr-2 text-[#ED772F]" />
-              {label}
-              {required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+          <label
+            htmlFor={name}
+            className="block font-medium text-gray-700 items-center mb-2"
+          >
+            <FaCalendarAlt className="mr-2 text-[#ED772F]" />
+            {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </label>
 
-            {/* Toggle between date picker and manual input */}
-            <button
-              type="button"
-              onClick={() => setUseManualDateInput(!useManualDateInput)}
-              className="text-xs text-blue-600 hover:underline"
-            >
-              {useManualDateInput
-                ? "प्रयोग गर्नुहोस् पिकर"
-                : "म्यानुअल इनपुट प्रयोग गर्नुहोस्"}
-            </button>
-          </div>
-
-          {useManualDateInput ? (
-            // Manual date input option
-            <input
-              type="text"
-              name={name}
-              value={formData[name] || ""}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, [name]: e.target.value }))
-              }
-              placeholder="YYYY-MM-DD वा YYYY/MM/DD"
-              className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#ED772F] text-gray-700"
-              required={required}
-            />
-          ) : (
-            // Nepali Date Picker option
-            <NepaliDatePicker
-              key={datePickerKey + name}
-              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#ED772F] text-gray-700"
-              className="w-full"
-              name={name}
-              value={formData[name]}
-              onSelect={(value) => {
-                setFormData((prev) => ({ ...prev, [name]: value }));
-              }}
-              options={{
-                calenderLocale: "ne",
-                valueLocale: "en",
-              }}
-            />
-          )}
+          <input
+            type="text"
+            id={name}
+            name={name}
+            value={formData[name] || ""}
+            onChange={(e) => {
+              const formattedValue = formatDateInput(e.target.value);
+              setFormData((prev) => ({ ...prev, [name]: formattedValue }));
+            }}
+            placeholder="YYYY-MM-DD"
+            maxLength="10"
+            className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#ED772F] text-gray-700"
+            required={required}
+          />
 
           {required && !formData[name] && (
             <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
@@ -494,7 +478,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
               <FormField
                 label="हालको मिति"
                 name="present_date"
-                type="nepali-date"
+                type="date"
                 required={true}
               />
             </div>

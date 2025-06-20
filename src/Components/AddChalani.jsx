@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { NepaliDatePicker } from "nepali-datepicker-reactjs";
-import "nepali-datepicker-reactjs/dist/index.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -45,8 +43,6 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
   const [departments, setDepartments] = useState([]);
   const [offices, setOffices] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [useManualDateInput, setUseManualDateInput] = useState(false);
-  const [useManualPatraDateInput, setUseManualPatraDateInput] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -104,18 +100,29 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+  // Format date input as YYYY-MM-DD
+  const formatDateInput = (value) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 4) {
+      return numbers;
+    } else if (numbers.length <= 6) {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
+    } else {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4, 6)}-${numbers.slice(6, 8)}`;
+    }
   };
 
-  const handleDateChange = (name, value) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+    let processedValue = value;
+    if (name.includes('date') || name.includes('miti')) {
+      processedValue = formatDateInput(value);
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: processedValue,
     }));
   };
 
@@ -218,60 +225,30 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
           )}
         </div>
       );
-    } else if (type === "nepali-date") {
-      const isPatraDate = name === "patra_miti";
-      const useManual = isPatraDate ? useManualPatraDateInput : useManualDateInput;
-      const setUseManual = isPatraDate ? setUseManualPatraDateInput : setUseManualDateInput;
-      
+    } else if (type === "date") {
       return (
         <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md p-2">
-          <div className="flex justify-between items-center mb-2">
-            <label
-              htmlFor={name}
-              className="block font-medium text-gray-700 items-center"
-            >
-              <FaCalendarAlt className="mr-2 text-[#E68332]" />
-              {label}
-              {required && <span className="text-red-500 ml-1">*</span>}
-            </label>
+          <label
+            htmlFor={name}
+            className="block font-medium text-gray-700 items-center mb-2"
+          >
+            <FaCalendarAlt className="mr-2 text-[#E68332]" />
+            {label}
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </label>
 
-            <button
-              type="button"
-              onClick={() => setUseManual(!useManual)}
-              className="text-xs text-blue-600 hover:underline"
-            >
-              {useManual
-                ? "डेट पिकर प्रयोग गर्नुहोस्"
-                : "म्यानुअल इनपुट प्रयोग गर्नुहोस्"}
-            </button>
-          </div>
-
-          {useManual ? (
-            <input
-              type="text"
-              id={name}
-              name={name}
-              value={formData[name] || ""}
-              onChange={handleChange}
-              placeholder="YYYY-MM-DD वा YYYY/MM/DD"
-              className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#E68332] focus:border-[#E68332] transition-all duration-200 outline-none text-gray-700"
-              required={required}
-              autoComplete="off"
-            />
-          ) : (
-            <NepaliDatePicker
-              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#E68332] text-gray-700"
-              className="w-full"
-              name={name}
-              value={formData[name] || ""}
-              onChange={(value) => handleDateChange(name, value)}
-              onSelect={(value) => handleDateChange(name, value)}
-              options={{
-                calenderLocale: "ne",
-                valueLocale: "en",
-              }}
-            />
-          )}
+          <input
+            type="text"
+            id={name}
+            name={name}
+            value={formData[name] || ""}
+            onChange={handleChange}
+            placeholder="YYYY-MM-DD"
+            maxLength="10"
+            className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#E68332] focus:border-[#E68332] transition-all duration-200 outline-none text-gray-700"
+            required={required}
+            autoComplete="off"
+          />
 
           {required && !formData[name] && (
             <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
@@ -372,7 +349,7 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                 <FormField
                   label="चलानी मिति"
                   name="chalani_date"
-                  type="nepali-date"
+                  type="date"
                   required={true}
                 />
 
@@ -395,7 +372,7 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                 <FormField
                   label="पत्र मिति"
                   name="patra_miti"
-                  type="nepali-date"
+                  type="date"
                 />
 
                 <FormField

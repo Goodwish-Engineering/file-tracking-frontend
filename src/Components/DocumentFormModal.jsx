@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { NepaliDatePicker } from "nepali-datepicker-reactjs";
-import "nepali-datepicker-reactjs/dist/index.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -26,29 +24,41 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
   const [showNewForm, setShowNewForm] = useState(false);
   const [datePickerKey, setDatePickerKey] = useState(0);
 
-  // Helper to get today's BS date string (manual calculation fallback)
-  const getTodayBS = () => {
-    // Use today's AD date and format as YYYY-MM-DD for fallback
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const dd = String(today.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
+  // Format date input as YYYY-MM-DD
+  const formatDateInput = (value) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 4) {
+      return numbers;
+    } else if (numbers.length <= 6) {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
+    } else {
+      return `${numbers.slice(0, 4)}-${numbers.slice(4, 6)}-${numbers.slice(
+        6,
+        8
+      )}`;
+    }
   };
 
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: files ? files[0] : value, // Handle file input
-    }));
-  };
 
-  const handleNepaliDateChange = (field, value, bsDate) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: bsDate || value,
-    }));
+    if (name === "file") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files ? files[0] : value,
+      }));
+    } else if (name.includes("date") || name.includes("miti")) {
+      const formattedValue = formatDateInput(value);
+      setFormData((prev) => ({
+        ...prev,
+        [name]: formattedValue,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -132,15 +142,14 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
               <div key={name} className="mb-2">
                 <label className="block text-gray-800 mb-2">{label}</label>
                 {type === "date" ? (
-                  <NepaliDatePicker
-                    key={datePickerKey + name}
-                    inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
-                    value={formData[name] || getTodayBS()}
-                    onChange={(value, { bsDate }) =>
-                      handleNepaliDateChange(name, value, bsDate)
-                    }
-                    options={{ calenderLocale: "ne", valueLocale: "en" }}
+                  <input
+                    type="text"
                     name={name}
+                    value={formData[name] || ""}
+                    onChange={handleInputChange}
+                    placeholder="YYYY-MM-DD"
+                    maxLength="10"
+                    className="w-full p-2 border border-gray-300 rounded"
                   />
                 ) : (
                   <input
@@ -151,7 +160,7 @@ const DocumentFormModal = ({ isOpen, onClose, fileId }) => {
                     className="w-full p-2 border border-gray-300 rounded"
                     {...(type === "file"
                       ? { accept: "application/pdf, image/*" }
-                      : {})} // Accept PDFs and images
+                      : {})}
                   />
                 )}
               </div>
