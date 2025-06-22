@@ -3,6 +3,8 @@ import registerdetails from "./registerdetails.json";
 import { useContext } from "react";
 import { ApiContext } from "../config/baseUrl";
 import { useSelector } from "react-redux";
+import { NepaliDatePicker } from "nepali-datepicker-reactjs";
+import "nepali-datepicker-reactjs/dist/index.css";
 
 const Registration = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
@@ -85,32 +87,11 @@ const Registration = () => {
     punishment_description: "",
   });
 
-  // Format date input as YYYY-MM-DD
-  const formatDateInput = (value) => {
-    const numbers = value.replace(/\D/g, "");
-    if (numbers.length <= 4) {
-      return numbers;
-    } else if (numbers.length <= 6) {
-      return `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
-    } else {
-      return `${numbers.slice(0, 4)}-${numbers.slice(4, 6)}-${numbers.slice(
-        6,
-        8
-      )}`;
-    }
-  };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    let processedValue = value;
-    if (name.includes("date") || name.includes("miti") || name === "duration") {
-      processedValue = formatDateInput(value);
-    }
-
     setFormData((prevData) => ({
       ...prevData,
-      [name]: processedValue,
+      [name]: value,
     }));
   };
 
@@ -321,6 +302,13 @@ const Registration = () => {
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
+    }));
+  };
+
+  const handleNepaliDateChange = (field, value, bsDate) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: bsDate || value,
     }));
   };
 
@@ -597,14 +585,15 @@ const Registration = () => {
           </label>
           <label className="flex flex-col">
             जारी मिति
-            <input
-              type="text"
+            <NepaliDatePicker
+              key={datePickerKey + "citizenship_date_of_issue"}
+              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+              value={formData.citizenship_date_of_issue || ""}
+              onChange={(value, { bsDate }) =>
+                handleNepaliDateChange("citizenship_date_of_issue", value, bsDate)
+              }
+              options={{ calenderLocale: "ne", valueLocale: "en" }}
               name="citizenship_date_of_issue"
-              value={formData.citizenship_date_of_issue}
-              onChange={handleChange}
-              placeholder="YYYY-MM-DD"
-              maxLength="10"
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </label>
           <label className="flex flex-col">
@@ -665,26 +654,28 @@ const Registration = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
             सामेल भएको मिति
-            <input
-              type="text"
+            <NepaliDatePicker
+              key={datePickerKey + "date_joined"}
+              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+              value={formData.date_joined || ""}
+              onChange={(value, { bsDate }) =>
+                handleNepaliDateChange("date_joined", value, bsDate)
+              }
+              options={{ calenderLocale: "ne", valueLocale: "en" }}
               name="date_joined"
-              value={formData.date_joined}
-              onChange={handleChange}
-              placeholder="YYYY-MM-DD"
-              maxLength="10"
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </label>
           <label className="flex flex-col">
             अवकाश मिति(Recess Date)
-            <input
-              type="text"
+            <NepaliDatePicker
+              key={datePickerKey + "recess_date"}
+              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+              value={formData.recess_date || ""}
+              onChange={(value, { bsDate }) =>
+                handleNepaliDateChange("recess_date", value, bsDate)
+              }
+              options={{ calenderLocale: "ne", valueLocale: "en" }}
               name="recess_date"
-              value={formData.recess_date}
-              onChange={handleChange}
-              placeholder="YYYY-MM-DD"
-              maxLength="10"
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </label>
           <label className="flex flex-col">
@@ -739,14 +730,15 @@ const Registration = () => {
           </label>
           <label className="flex flex-col">
             अवधि
-            <input
-              type="text"
+            <NepaliDatePicker
+              key={datePickerKey + "duration"}
+              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
+              value={formData.duration || ""}
+              onChange={(value, { bsDate }) =>
+                handleNepaliDateChange("duration", value, bsDate)
+              }
+              options={{ calenderLocale: "ne", valueLocale: "en" }}
               name="duration"
-              value={formData.duration}
-              onChange={handleChange}
-              placeholder="YYYY-MM-DD"
-              maxLength="10"
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </label>
 

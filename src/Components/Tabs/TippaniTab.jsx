@@ -8,6 +8,8 @@ import {
 } from "react-icons/fa";
 import { MdAdd, MdClose } from "react-icons/md";
 import { toast } from "react-toastify";
+import { NepaliDatePicker } from "nepali-datepicker-reactjs";
+import "nepali-datepicker-reactjs/dist/index.css";
 
 const TippaniTab = ({
   editable,
@@ -65,26 +67,10 @@ const TippaniTab = ({
     setIsPageCountModalOpen(false);
   };
 
-  // Format date input as YYYY-MM-DD
-  const formatDateInput = (value) => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 4) {
-      return numbers;
-    } else if (numbers.length <= 6) {
-      return `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
-    } else {
-      return `${numbers.slice(0, 4)}-${numbers.slice(4, 6)}-${numbers.slice(6, 8)}`;
-    }
-  };
 
   // Handle changes to new tippani rows
   const handleNewTippaniChange = (e, field, index) => {
-    let value = e.target.value;
-    
-    if (field.includes('date') || field.includes('miti')) {
-      value = formatDateInput(value);
-    }
-    
+    const value = e.target.value;
     setNewTippaniRows((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
@@ -329,15 +315,15 @@ const TippaniTab = ({
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <input
-                      type="text"
-                      value={row.submitted_date || ""}
-                      onChange={(e) =>
-                        handleNewTippaniChange(e, "submitted_date", index)
-                      }
-                      placeholder="YYYY-MM-DD"
-                      maxLength="10"
-                      className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                    <NepaliDatePicker
+                      inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                      value={row.submitted_date}
+                      onSelect={(value) => {
+                        const e = { target: { value: value } };
+                        handleNewTippaniChange(e, "submitted_date", index);
+                      }}
+                      className="w-full"
+                      options={{ calenderLocale: "ne", valueLocale: "en" }}
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
@@ -352,15 +338,15 @@ const TippaniTab = ({
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <input
-                      type="text"
-                      value={row.approved_date || ""}
-                      onChange={(e) =>
-                        handleNewTippaniChange(e, "approved_date", index)
-                      }
-                      placeholder="YYYY-MM-DD"
-                      maxLength="10"
-                      className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                    <NepaliDatePicker
+                      inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                      value={row.approved_date}
+                      onSelect={(value) => {
+                        const e = { target: { value: value } };
+                        handleNewTippaniChange(e, "approved_date", index);
+                      }}
+                      className="w-full"
+                      options={{ calenderLocale: "ne", valueLocale: "en" }}
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
@@ -375,15 +361,15 @@ const TippaniTab = ({
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <input
-                      type="text"
-                      value={row.tippani_date || ""}
-                      onChange={(e) =>
-                        handleNewTippaniChange(e, "tippani_date", index)
-                      }
-                      placeholder="YYYY-MM-DD"
-                      maxLength="10"
-                      className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                    <NepaliDatePicker
+                      inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                      value={row.tippani_date}
+                      onSelect={(value) => {
+                        const e = { target: { value: value } };
+                        handleNewTippaniChange(e, "tippani_date", index);
+                      }}
+                      className="w-full"
+                      options={{ calenderLocale: "ne", valueLocale: "en" }}
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">

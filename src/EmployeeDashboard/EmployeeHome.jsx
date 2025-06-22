@@ -53,88 +53,139 @@ const EmployeeHome = () => {
   const [error, setError] = useState(null);
   const [recentNotifications, setRecentNotifications] = useState([]);
   const [currentNepaliDate, setCurrentNepaliDate] = useState('');
-  const [showChart, setShowChart] = useState(false); // Add this state for toggling between table and chart
+  const [showChart, setShowChart] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       setLoading(true);
       setError(null);
+      
       try {
-        // We'll make two API calls in parallel for better performance
-        const [fileStatsPromise, notificationsPromise] = await Promise.allSettled([
-          // 1. Get file statistics - adapting from FileStatus.jsx pattern
-          fetch(`${baseUrl}/file/`, {
-            headers: { Authorization: `token ${token}` }
-          }),
-          
-          // 2. Get notifications - adapting from Notification.jsx pattern
-          fetch(`${baseUrl}/notification/`, {
-            headers: { Authorization: `token ${token}` }
-          })
-        ]);
-        
-        // Process file statistics
+        // Check if baseUrl and token exist
+        if (!baseUrl || !token) {
+          throw new Error("API configuration missing. Please login again.");
+        }
+
+        console.log("Fetching dashboard data with baseUrl:", baseUrl);
+
+        // Fetch file statistics with better error handling
         let totalFiles = 0;
         let pendingFiles = 0;
-        let transferredFiles = 0; // Initialize transferred files count
+        let transferredFiles = 0;
         let recentUploads = [];
         let departmentFiles = [];
         let departments = {};
         
-        if (fileStatsPromise.status === 'fulfilled' && fileStatsPromise.value.ok) {
-          const filesData = await fileStatsPromise.value.json();
-          totalFiles = filesData.length;
-          
-          // Calculate transferred files using the same logic as TransferredFiles.jsx
-          const transferredFilesData = filesData.filter(
-            (file) =>
-              file.approvals && file.approvals.some((approval) => approval.is_transferred)
-          );
-          transferredFiles = transferredFilesData.length;
-          
-          // Calculate pending files (files not transferred)
-          pendingFiles = filesData.filter(file => 
-            !(file.approvals && file.approvals.some(approval => approval.is_transferred))
-          ).length;
-          
-          // Process department-wise file distribution
-          filesData.forEach(file => {
-            if (file.department && file.department.name) {
-              const deptName = file.department.name;
-              departments[deptName] = (departments[deptName] || 0) + 1;
+        try {
+          const fileResponse = await fetch(`${baseUrl}/file/`, {
+            headers: { 
+              Authorization: `Token ${token}`,
+              'Content-Type': 'application/json'
             }
           });
           
-          // Convert to array for chart
-          departmentFiles = Object.keys(departments).map(dept => ({
-            department: dept,
-            count: departments[dept]
-          }));
-          
-          // Get 5 most recent uploads
-          recentUploads = filesData
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .slice(0, 5)
-            .map(file => ({
-              file_name: file.file_name,
-              file_type: file.file_type,
-              created_at: file.created_at,
-              status: file.approvals && file.approvals.some(approval => approval.is_transferred) 
-                ? 'transferred' 
-                : 'pending'
-            }));
+          if (fileResponse.ok) {
+            const filesData = await fileResponse.json();
+            console.log("Files data:", filesData);
+            
+            // Handle both paginated and non-paginated responses
+            let actualFilesData = [];
+            
+            // Check if response has pagination structure
+            if (filesData.data && Array.isArray(filesData.data)) {
+              actualFilesData = filesData.data;
+              // Use total_items from pagination response if available
+              totalFiles = filesData.total_items || actualFilesData.length;
+            } else if (Array.isArray(filesData)) {
+              actualFilesData = filesData;
+              totalFiles = actualFilesData.length;
+            }
+            
+            if (actualFilesData.length > 0) {
+              // Only set totalFiles if not already set from pagination data
+              if (totalFiles === 0) {
+                totalFiles = actualFilesData.length;
+              }
+              
+              // Calculate transferred files
+              const transferredFilesData = actualFilesData.filter(
+                (file) =>
+                  file.approvals && Array.isArray(file.approvals) && 
+                  file.approvals.some((approval) => approval.is_transferred)
+              );
+              transferredFiles = transferredFilesData.length;
+              
+              // Calculate pending files
+              pendingFiles = actualFilesData.filter(file => 
+                !(file.approvals && Array.isArray(file.approvals) && 
+                  file.approvals.some(approval => approval.is_transferred))
+              ).length;
+              
+              // Process department-wise file distribution
+              actualFilesData.forEach(file => {
+                if (file.related_department && file.related_department.name) {
+                  const deptName = file.related_department.name;
+                  departments[deptName] = (departments[deptName] || 0) + 1;
+                }
+              });
+              
+              // Convert to array for chart
+              departmentFiles = Object.keys(departments).map(dept => ({
+                department: dept,
+                count: departments[dept]
+              }));
+              
+              // Get recent uploads
+              recentUploads = actualFilesData
+                .filter(file => file.created_at)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .slice(0, 5)
+                .map(file => ({
+                  file_name: file.file_name || 'Unknown File',
+                  file_type: typeof file.file_type === 'object' ? 
+                    (file.file_type?.name || 'Unknown Type') : 
+                    (file.file_type || 'Unknown Type'),
+                  created_at: file.created_at,
+                  status: file.approvals && Array.isArray(file.approvals) && 
+                          file.approvals.some(approval => approval.is_transferred) 
+                    ? 'transferred' 
+                    : 'pending'
+                }));
+            }
+          } else {
+            console.warn("Failed to fetch files:", fileResponse.status);
+          }
+        } catch (fileError) {
+          console.error("Error fetching files:", fileError);
         }
         
-        // Process notifications
+        // Fetch notifications with better error handling
         let notifications = [];
-        if (notificationsPromise.status === 'fulfilled' && notificationsPromise.value.ok) {
-          const notificationsData = await notificationsPromise.value.json();
-          notifications = notificationsData
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .slice(0, 5);
+        try {
+          const notificationResponse = await fetch(`${baseUrl}/notification/`, {
+            headers: { 
+              Authorization: `Token ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (notificationResponse.ok) {
+            const notificationsData = await notificationResponse.json();
+            console.log("Notifications data:", notificationsData);
+            
+            if (Array.isArray(notificationsData)) {
+              notifications = notificationsData
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .slice(0, 5);
+            }
+          } else {
+            console.warn("Failed to fetch notifications:", notificationResponse.status);
+          }
+        } catch (notificationError) {
+          console.error("Error fetching notifications:", notificationError);
         }
         
-        // Update state with all collected data
+        // Update state with collected data
         setStats({
           totalFiles,
           pendingFiles,
@@ -144,6 +195,7 @@ const EmployeeHome = () => {
         });
         
         setRecentNotifications(notifications);
+        
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
         setError("डाशबोर्ड डाटा लोड गर्न समस्या भयो। कृपया पछि फेरि प्रयास गर्नुहोस्।");
@@ -154,63 +206,120 @@ const EmployeeHome = () => {
 
     fetchDashboardData();
     
-    // Set current Nepali date
-    const today = new Date();
-    setCurrentNepaliDate(formatNepaliDate(today));
+    // Set current Nepali date with fallback
+    try {
+      const today = new Date();
+      setCurrentNepaliDate(formatNepaliDate ? formatNepaliDate(today) : today.toLocaleDateString());
+    } catch (dateError) {
+      console.error("Date formatting error:", dateError);
+      setCurrentNepaliDate(new Date().toLocaleDateString());
+    }
   }, [baseUrl, token]);
 
+  // Enhanced handleAction with better debugging and error handling
   const handleAction = (action) => {
-    // Store the selected tab in localStorage so EmployeeHeader can pick it up
-    if (action === "upload" && level === "1") {
-      localStorage.setItem("activeTab", "uploadTippani");
-    } else if (action === "status") {
-      localStorage.setItem("activeTab", "veiwStatus");
-    } else if (action === "nontransfer") {
-      if (level === "2") {
-        localStorage.setItem("activeTab", "nontransfer");
-      } else if (level === "3" || level === "4") {
-        localStorage.setItem("activeTab", "nontransfer3");
+    try {
+      console.log(`Action clicked: ${action}`); // More detailed logging
+      
+      // Store the selected tab in localStorage
+      const tabMappings = {
+        upload: "uploadTippani",
+        status: "veiwStatus", 
+        nontransfer: level === "2" ? "nontransfer" : "nontransfer3",
+        transferred: "transfered",
+        request: "filerequest",
+        notification: "notification"
+      };
+
+      const activeTab = tabMappings[action];
+      if (activeTab) {
+        console.log(`Setting activeTab: ${activeTab}`);
+        localStorage.setItem("activeTab", activeTab);
+        
+        // Force a small delay to ensure localStorage is set before navigation
+        setTimeout(() => {
+          // Use window.location for more reliable navigation
+          window.location.href = "/employeeheader";
+        }, 50);
+      } else {
+        console.warn(`No tab mapping found for action: ${action}`);
+        navigate("/employeeheader");
       }
-    } else if (action === "transferred") {
-      localStorage.setItem("activeTab", "transfered");
-    } else if (action === "request") {
-      localStorage.setItem("activeTab", "filerequest");
-    } else if (action === "notification") {
-      localStorage.setItem("activeTab", "notification");
+    } catch (error) {
+      console.error("Navigation error:", error);
+      // Ultimate fallback - direct page change
+      window.location.href = "/employeeheader";
     }
-    
-    // Force a refresh of the current page which will trigger EmployeeHeader 
-    // to read the new activeTab from localStorage
-    window.location.reload();
   };
 
-  // Reusable card component
+  // Safe number conversion with better error handling
+  const safeToNepaliDigits = (value) => {
+    try {
+      if (value === null || value === undefined) {
+        return "0";
+      }
+      
+      const numValue = typeof value === 'number' ? value : parseInt(value) || 0;
+      
+      if (toNepaliDigits && typeof toNepaliDigits === 'function') {
+        const result = toNepaliDigits(numValue);
+        return typeof result === 'string' ? result : String(numValue);
+      }
+      
+      return String(numValue);
+    } catch (error) {
+      console.error("Error converting to Nepali digits:", error);
+      return String(value || 0);
+    }
+  };
+
+  // Reusable card component with improved clickability
   const StatCard = ({ title, value, icon, color, onClick }) => (
     <div 
-      onClick={onClick}
-      className={`bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 ${color} transform hover:-translate-y-1`}
+      onClick={(e) => {
+        e.stopPropagation(); // Prevent event bubbling
+        console.log(`StatCard clicked: ${title}`);
+        if (onClick) onClick();
+      }}
+      className={`bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 ${color} transform hover:-translate-y-1 pointer-events-auto relative z-10`}
+      style={{ position: 'relative' }} // Ensure position context
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-500 text-sm mb-1">{title}</p>
-          <h3 className="text-2xl font-bold text-gray-800">{toNepaliDigits(value)}</h3>
+          <p className="text-gray-500 text-sm mb-1">{String(title || '')}</p>
+          <h3 className="text-2xl font-bold text-gray-800">{safeToNepaliDigits(value)}</h3>
         </div>
         <div className={icon.props.className}>
           {icon}
         </div>
       </div>
+      {/* Transparent overlay to improve clickability */}
+      <div 
+        className="absolute inset-0 cursor-pointer" 
+        onClick={(e) => {
+          e.stopPropagation();
+          console.log(`Overlay clicked: ${title}`);
+          if (onClick) onClick();
+        }}
+        aria-hidden="true"
+      />
     </div>
   );
 
-  // Action button component
+  // Action button component with improved click handling
   const ActionButton = ({ label, icon, onClick, color = "indigo", disabled = false }) => (
     <button
-      onClick={onClick}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log(`ActionButton clicked: ${label}`);
+        if (!disabled && onClick) onClick();
+      }}
       disabled={disabled}
       className={`flex items-center justify-center gap-2 p-3 rounded-md ${
         disabled 
           ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
-          : `${color} hover:opacity-90 hover:shadow-md`
+          : `${color} hover:opacity-90 hover:shadow-md cursor-pointer`
       } transition-all duration-300 w-full`}
     >
       {icon}
@@ -218,19 +327,23 @@ const EmployeeHome = () => {
     </button>
   );
 
-  // Helper function to format date in Nepali BS format
+  // Helper function to format date with fallback
   const formatDate = (dateString) => {
     if (!dateString) return 'मिति उपलब्ध छैन';
-    return formatNepaliDate(dateString);
+    try {
+      return formatNepaliDate ? formatNepaliDate(dateString) : new Date(dateString).toLocaleDateString();
+    } catch (error) {
+      return new Date(dateString).toLocaleDateString();
+    }
   };
 
-  // Department File Chart configuration
+  // Department File Chart configuration with error handling
   const chartData = {
-    labels: stats.departmentFiles.map(item => item.department),
+    labels: stats.departmentFiles.map(item => item.department || 'Unknown'),
     datasets: [
       {
         label: 'फाइलहरूको संख्या',
-        data: stats.departmentFiles.map(item => item.count),
+        data: stats.departmentFiles.map(item => item.count || 0),
         backgroundColor: [
           'rgba(255, 99, 132, 0.6)',
           'rgba(54, 162, 235, 0.6)',
@@ -254,6 +367,7 @@ const EmployeeHome = () => {
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         display: false,
@@ -272,7 +386,7 @@ const EmployeeHome = () => {
         ticks: {
           precision: 0,
           callback: function(value) {
-            return toNepaliDigits(value);
+            return safeToNepaliDigits(value);
           }
         }
       }
@@ -283,6 +397,7 @@ const EmployeeHome = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#ED772F] border-r-transparent"></div>
+        <span className="ml-3 text-gray-600">डाटा लोड हुँदैछ...</span>
       </div>
     );
   }
@@ -291,13 +406,21 @@ const EmployeeHome = () => {
     return (
       <div className="flex flex-col items-center justify-center h-64 p-6 bg-red-50 rounded-lg text-red-700">
         <FaInfoCircle className="text-4xl mb-4" />
-        <p className="text-center">{error}</p>
-        <button 
-          onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-[#ED772F] text-white rounded-lg hover:bg-[#c36f2a]"
-        >
-          पुन: प्रयास गर्नुहोस्
-        </button>
+        <p className="text-center mb-4">{error}</p>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-[#ED772F] text-white rounded-lg hover:bg-[#c36f2a]"
+          >
+            पुन: प्रयास गर्नुहोस्
+          </button>
+          <button 
+            onClick={() => navigate("/login")}
+            className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+          >
+            लग इन गर्नुहोस्
+          </button>
+        </div>
       </div>
     );
   }
@@ -342,7 +465,6 @@ const EmployeeHome = () => {
           onClick={() => level !== "1" ? handleAction("nontransfer") : handleAction("status")}
         />
         
-        {/* Only show transferred files card for level 2 and above */}
         {level !== "1" && (
           <StatCard 
             title="स्थानान्तरण गरिएका फाइलहरू" 
@@ -387,7 +509,6 @@ const EmployeeHome = () => {
                   color="bg-yellow-50 text-yellow-600" 
                 />
                 
-                {/* Only show transferred files action button for level 2 and above */}
                 <ActionButton 
                   label="स्थानान्तरण गरिएको फाइल" 
                   icon={<RiFileTransferFill />} 
@@ -463,9 +584,15 @@ const EmployeeHome = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {stats.recentUploads.map((file, index) => (
                       <tr key={index} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{file.file_name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{file.file_type}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(file.created_at)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {String(file.file_name || 'Unknown File')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {String(file.file_type || 'Unknown Type')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDate(file.created_at)}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             file.status === 'transferred' ? 'bg-green-100 text-green-800' : 
@@ -473,7 +600,7 @@ const EmployeeHome = () => {
                             'bg-gray-100 text-gray-800'
                           }`}>
                             {file.status === 'transferred' ? 'स्वीकृत' : 
-                            file.status === 'pending' ? 'प्रक्रियामा' : file.status}
+                            file.status === 'pending' ? 'प्रक्रियामा' : String(file.status || 'अज्ञात')}
                           </span>
                         </td>
                       </tr>
@@ -540,3 +667,4 @@ const EmployeeHome = () => {
 };
 
 export default EmployeeHome;
+

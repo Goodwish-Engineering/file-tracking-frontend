@@ -8,9 +8,9 @@ import {
   FaUserCircle,
   FaSave,
   FaTimes,
+  FaCalendarAlt,
 } from "react-icons/fa";
-import { BsFileEarmark } from "react-icons/bs";
-import { MdSubject } from "react-icons/md";
+import { MdSubject, MdDescription } from "react-icons/md";
 import FormField from "./Common/FormField";
 
 const AddDarta = ({ isOpen, onClose, onSuccess }) => {
@@ -21,8 +21,8 @@ const AddDarta = ({ isOpen, onClose, onSuccess }) => {
     darta_number: "",
     darta_date: "",
     related_file: "",
-    related_department: "",
     related_office: "",
+    related_department: "",
     related_faat: "",
     patra_sankhya: "",
     patra_miti: "",
@@ -37,133 +37,177 @@ const AddDarta = ({ isOpen, onClose, onSuccess }) => {
   });
 
   const [files, setFiles] = useState([]);
-  const [departments, setDepartments] = useState([]);
   const [offices, setOffices] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [faats, setFaats] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [useManualDateInput, setUseManualDateInput] = useState(false);
-  const [useManualPatraDateInput, setUseManualPatraDateInput] = useState(false);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    fetchFiles();
-    fetchDepartments();
-    fetchOffices();
-  }, []);
+    if (isOpen) {
+      fetchDropdownData();
+    }
+  }, [isOpen]);
 
-  const fetchFiles = async () => {
+  const fetchDropdownData = async () => {
     try {
-      const response = await fetch(`${baseUrl}/file/`, {
-        headers: {
-          Authorization: `token ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setFiles(data.filter(file => !file.is_disabled));
+      const [filesRes, officesRes] = await Promise.all([
+        fetch(`${baseUrl}/file/`, {
+          headers: { Authorization: `Token ${token}` },
+        }),
+        fetch(`${baseUrl}/offices/`, {
+          headers: { Authorization: `Token ${token}` },
+        }),
+      ]);
+
+      if (filesRes.ok) {
+        const filesData = await filesRes.json();
+        // Handle paginated response
+        const actualFiles = filesData.data || filesData;
+        setFiles(Array.isArray(actualFiles) ? actualFiles.filter(file => !file.is_disabled) : []);
+      }
+
+      if (officesRes.ok) {
+        const officesData = await officesRes.json();
+        setOffices(Array.isArray(officesData) ? officesData : []);
       }
     } catch (error) {
-      console.error("Error fetching files:", error);
+      console.error("Error fetching dropdown data:", error);
+      setFiles([]);
+      setOffices([]);
     }
   };
 
-  const fetchDepartments = async () => {
-    try {
-      const response = await fetch(`${baseUrl}/department/`, {
-        headers: {
-          Authorization: `token ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setDepartments(data);
-      }
-    } catch (error) {
-      console.error("Error fetching departments:", error);
-    }
-  };
-
-  const fetchOffices = async () => {
-    try {
-      const response = await fetch(`${baseUrl}/offices/`, {
-        headers: {
-          Authorization: `token ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setOffices(data);
-      }
-    } catch (error) {
-      console.error("Error fetching offices:", error);
-    }
-  };
-
-  // Format date input as YYYY-MM-DD
-  const formatDateInput = (value) => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 4) {
-      return numbers;
-    } else if (numbers.length <= 6) {
-      return `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
-    } else {
-      return `${numbers.slice(0, 4)}-${numbers.slice(4, 6)}-${numbers.slice(6, 8)}`;
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    
-    let processedValue = value;
-    if (name.includes('date') || name.includes('miti')) {
-      processedValue = formatDateInput(value);
-    }
-    
+  // Handle office selection and load its departments
+  const handleOfficeChange = async (e) => {
+    const officeId = e.target.value;
     setFormData(prev => ({
       ...prev,
-      [name]: processedValue,
+      related_office: officeId,
+      related_department: "",
+      related_faat: "",
     }));
+
+    if (officeId) {
+      try {
+        const response = await fetch(`${baseUrl}/department/?office=${officeId}`, {
+          headers: { Authorization: `Token ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setDepartments(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+        setDepartments([]);
+      }
+    } else {
+      setDepartments([]);
+      setFaats([]);
+    }
+  };
+
+  // Handle department selection and load its faats
+  const handleDepartmentChange = async (e) => {
+    const departmentId = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      related_department: departmentId,
+      related_faat: "",
+    }));
+
+    if (departmentId) {
+      try {
+        const response = await fetch(`${baseUrl}/faat/?department=${departmentId}`, {
+          headers: { Authorization: `Token ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setFaats(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error("Error fetching faats:", error);
+        setFaats([]);
+      }
+    } else {
+      setFaats([]);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.darta_number.trim()) {
+      newErrors.darta_number = "दर्ता नम्बर आवश्यक छ";
+    }
+    
+    if (!formData.darta_date) {
+      newErrors.darta_date = "दर्ता मिति आवश्यक छ";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
+      const submitData = {
+        ...formData,
+        related_file: formData.related_file || null,
+        related_office: formData.related_office || null,
+        related_department: formData.related_department || null,
+        related_faat: formData.related_faat || null,
+        sending_department: formData.sending_department || null,
+      };
+
       const response = await fetch(`${baseUrl}/darta/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `token ${token}`,
+          Authorization: `Token ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       });
 
       if (response.ok) {
         toast.success("दर्ता रेकर्ड सफलतापूर्वक थपियो!");
-        onSuccess?.(); // Call success callback
-        onClose(); // Close modal
-        // Reset form
-        setFormData({
-          darta_number: "",
-          darta_date: "",
-          related_file: "",
-          related_department: "",
-          related_office: "",
-          related_faat: "",
-          patra_sankhya: "",
-          patra_miti: "",
-          chalani_number: "",
-          subject: "",
-          sending_department: "",
-          tok_aadesh_dine: "",
-          pana_sankhya: "",
-          remarks: "",
-          patra_bujaune_faat: "",
-          karmachari: "",
-        });
+        onSuccess?.();
+        onClose();
+        resetForm();
       } else {
         const errorData = await response.json();
+        if (errorData) {
+          const backendErrors = {};
+          Object.keys(errorData).forEach(key => {
+            backendErrors[key] = errorData[key][0] || "त्रुटि भयो";
+          });
+          setErrors(backendErrors);
+        }
         toast.error("दर्ता रेकर्ड थप्न असफल भयो।");
-        console.error("Error:", errorData);
       }
     } catch (error) {
       console.error("Error submitting darta:", error);
@@ -173,276 +217,321 @@ const AddDarta = ({ isOpen, onClose, onSuccess }) => {
     }
   };
 
-  // Don't render if modal is not open
+  const resetForm = () => {
+    setFormData({
+      darta_number: "",
+      darta_date: "",
+      related_file: "",
+      related_office: "",
+      related_department: "",
+      related_faat: "",
+      patra_sankhya: "",
+      patra_miti: "",
+      chalani_number: "",
+      subject: "",
+      sending_department: "",
+      tok_aadesh_dine: "",
+      pana_sankhya: "",
+      remarks: "",
+      patra_bujaune_faat: "",
+      karmachari: "",
+    });
+    setErrors({});
+    setDepartments([]);
+    setFaats([]);
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-        {/* Modal Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-[#f9f1ea] to-[#fcf8f5] p-6 rounded-t-xl border-b border-gray-200">
-          <div className="flex items-center justify-between">
+      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-[#E68332] to-[#c36f2a] text-white rounded-t-xl">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <FaFileAlt />
+            नयाँ दर्ता थप्नुहोस्
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-colors"
+          >
+            <FaTimes size={20} />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Basic Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-[#E68332]">
-                नयाँ दर्ता रेकर्ड थप्नुहोस्
-              </h1>
-              <p className="text-gray-600 text-lg mt-2">
-                दर्ता रेकर्डको सम्पूर्ण विवरण भर्नुहोस्
-              </p>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                दर्ता नम्बर *
+              </label>
+              <input
+                type="text"
+                name="darta_number"
+                value={formData.darta_number}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all ${
+                  errors.darta_number ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder="दर्ता नम्बर प्रविष्ट गर्नुहोस्"
+              />
+              {errors.darta_number && (
+                <p className="text-red-500 text-sm mt-1">{errors.darta_number}</p>
+              )}
             </div>
+
+            <div className="mb-0">
+              <FormField
+                label="दर्ता मिति"
+                name="darta_date"
+                type="date"
+                value={formData.darta_date}
+                onChange={handleInputChange}
+                required={true}
+              />
+              {errors.darta_date && (
+                <p className="text-red-500 text-sm mt-1">{errors.darta_date}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Related Information with Hierarchy: Office > Department > Faat */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                सम्बन्धित कार्यालय
+              </label>
+              <select
+                name="related_office"
+                value={formData.related_office}
+                onChange={handleOfficeChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
+              >
+                <option value="">कार्यालय छान्नुहोस्</option>
+                {offices.map((office) => (
+                  <option key={office.id} value={office.id}>
+                    {office.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                सम्बन्धित विभाग
+              </label>
+              <select
+                name="related_department"
+                value={formData.related_department}
+                onChange={handleDepartmentChange}
+                disabled={!formData.related_office}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">विभाग छान्नुहोस्</option>
+                {departments.map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                सम्बन्धित फाँट
+              </label>
+              <select
+                name="related_faat"
+                value={formData.related_faat}
+                onChange={handleInputChange}
+                disabled={!formData.related_department}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">फाँट छान्नुहोस्</option>
+                {faats.map((faat) => (
+                  <option key={faat.id} value={faat.id}>
+                    {faat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* File and Document Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                सम्बन्धित फाइल
+              </label>
+              <select
+                name="related_file"
+                value={formData.related_file}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
+              >
+                <option value="">फाइल छान्नुहोस्</option>
+                {files.map((file) => (
+                  <option key={file.id} value={file.id}>
+                    {String(file.file_name || 'Unknown File')} (#{String(file.file_number || 'N/A')})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                पत्र संख्या
+              </label>
+              <input
+                type="text"
+                name="patra_sankhya"
+                value={formData.patra_sankhya}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
+                placeholder="पत्र संख्या प्रविष्ट गर्नुहोस्"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="mb-0">
+              <FormField
+                label="पत्र मिति"
+                name="patra_miti"
+                type="date"
+                value={formData.patra_miti}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                चलानी नम्बर
+              </label>
+              <input
+                type="text"
+                name="chalani_number"
+                value={formData.chalani_number}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
+                placeholder="चलानी नम्बर प्रविष्ट गर्नुहोस्"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                पाना संख्या
+              </label>
+              <input
+                type="text"
+                name="pana_sankhya"
+                value={formData.pana_sankhya}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
+                placeholder="पाना संख्या प्रविष्ट गर्नुहोस्"
+              />
+            </div>
+          </div>
+
+          {/* Additional Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                टोक आदेश दिने
+              </label>
+              <input
+                type="text"
+                name="tok_aadesh_dine"
+                value={formData.tok_aadesh_dine}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
+                placeholder="टोक आदेश दिने व्यक्तिको नाम"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                कर्मचारी
+              </label>
+              <input
+                type="text"
+                name="karmachari"
+                value={formData.karmachari}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
+                placeholder="कर्मचारीको नाम प्रविष्ट गर्नुहोस्"
+              />
+            </div>
+          </div>
+
+          {/* Subject */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              विषय
+            </label>
+            <div className="relative">
+              <MdSubject className="absolute left-3 top-3 text-gray-400" />
+              <textarea
+                name="subject"
+                value={formData.subject}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all resize-vertical"
+                placeholder="विषय प्रविष्ट गर्नुहोस्"
+              />
+            </div>
+          </div>
+
+          {/* Remarks */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              कैफियत
+            </label>
+            <div className="relative">
+              <MdDescription className="absolute left-3 top-3 text-gray-400" />
+              <textarea
+                name="remarks"
+                value={formData.remarks}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all resize-vertical"
+                placeholder="कैफियत प्रविष्ट गर्नुहोस्"
+              />
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
             <button
+              type="button"
               onClick={onClose}
-              className="flex items-center justify-center w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-full transition-colors"
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              <FaTimes className="text-gray-600" />
+              रद्द गर्नुहोस्
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-6 py-3 bg-[#E68332] text-white rounded-lg hover:bg-[#c36f2a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  सुरक्षित गर्दै...
+                </>
+              ) : (
+                <>
+                  <FaSave />
+                  सुरक्षित गर्नुहोस्
+                </>
+              )}
             </button>
           </div>
-        </div>
-
-        {/* Modal Body */}
-        <div className="p-6">
-          <form onSubmit={handleSubmit} className="animate-fadeIn">
-            <div className="mb-6 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-              <p className="text-sm text-gray-600 flex items-center gap-2">
-                <span className="text-red-500 font-bold">*</span>
-                चिन्ह भएका फिल्ड अनिवार्य छन्
-              </p>
-            </div>
-
-            {/* Basic Information Section */}
-            <div className="border-b pb-6 mb-8">
-              <h2 className="text-xl font-semibold mb-6 text-gray-700 flex items-center">
-                <BsFileEarmark className="mr-2 text-[#E68332]" />
-                आधारभूत जानकारी
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  label="दर्ता नम्बर"
-                  name="darta_number"
-                  icon={<FaFileAlt />}
-                  required={true}
-                  placeholder="दर्ता नम्बर लेख्नुहोस्"
-                  value={formData.darta_number}
-                  onChange={handleChange}
-                />
-
-                <FormField
-                  label="दर्ता मिति"
-                  name="darta_date"
-                  type="date"
-                  required={true}
-                  value={formData.darta_date}
-                  onChange={handleChange}
-                />
-
-                <FormField
-                  label="सम्बन्धित फाइल"
-                  name="related_file"
-                  type="select"
-                  options={files}
-                  placeholder="फाइल छान्नुहोस्"
-                  icon={<FaFileAlt />}
-                  value={formData.related_file}
-                  onChange={handleChange}
-                />
-
-                <FormField
-                  label="पत्र संख्या"
-                  name="patra_sankhya"
-                  icon={<FaFileAlt />}
-                  placeholder="पत्र संख्या लेख्नुहोस्"
-                  value={formData.patra_sankhya}
-                  onChange={handleChange}
-                />
-
-                <FormField
-                  label="पत्र मिति"
-                  name="patra_miti"
-                  type="date"
-                  value={formData.patra_miti}
-                  onChange={handleChange}
-                />
-
-                <FormField
-                  label="चलानी नम्बर"
-                  name="chalani_number"
-                  icon={<FaFileAlt />}
-                  placeholder="चलानी नम्बर लेख्नुहोस्"
-                  value={formData.chalani_number}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
-            {/* Office Information Section */}
-            <div className="border-b pb-6 mb-8">
-              <h2 className="text-xl font-semibold mb-6 text-gray-700 flex items-center">
-                <FaBuilding className="mr-2 text-[#E68332]" />
-                कार्यालय जानकारी
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  label="सम्बन्धित विभाग"
-                  name="related_department"
-                  type="select"
-                  options={departments}
-                  placeholder="विभाग छान्नुहोस्"
-                  icon={<FaBuilding />}
-                  value={formData.related_department}
-                  onChange={handleChange}
-                />
-
-                <FormField
-                  label="सम्बन्धित कार्यालय"
-                  name="related_office"
-                  type="select"
-                  options={offices}
-                  placeholder="कार्यालय छान्नुहोस्"
-                  icon={<FaBuilding />}
-                  value={formData.related_office}
-                  onChange={handleChange}
-                />
-
-                <FormField
-                  label="सम्बन्धित फाँट"
-                  name="related_faat"
-                  type="select"
-                  options={offices}
-                  placeholder="फाँट छान्नुहोस्"
-                  icon={<FaBuilding />}
-                  value={formData.related_faat}
-                  onChange={handleChange}
-                />
-
-                <FormField
-                  label="पठाउने विभाग"
-                  name="sending_department"
-                  type="select"
-                  options={departments}
-                  placeholder="पठाउने विभाग छान्नुहोस्"
-                  icon={<FaBuilding />}
-                  value={formData.sending_department}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
-            {/* Additional Details Section */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-6 text-gray-700 flex items-center">
-                <MdSubject className="mr-2 text-[#E68332]" />
-                अन्य विवरणहरू
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  label="विषय"
-                  name="subject"
-                  isTextarea={true}
-                  rows={3}
-                  icon={<MdSubject />}
-                  placeholder="विषय लेख्नुहोस्"
-                  value={formData.subject}
-                  onChange={handleChange}
-                />
-
-                <FormField
-                  label="टोक आदेश दिने"
-                  name="tok_aadesh_dine"
-                  icon={<FaUserCircle />}
-                  placeholder="टोक आदेश दिने व्यक्तिको नाम"
-                  value={formData.tok_aadesh_dine}
-                  onChange={handleChange}
-                />
-
-                <FormField
-                  label="पाना संख्या"
-                  name="pana_sankhya"
-                  icon={<FaFileAlt />}
-                  placeholder="पाना संख्या लेख्नुहोस्"
-                  value={formData.pana_sankhya}
-                  onChange={handleChange}
-                />
-
-                <FormField
-                  label="पत्र बुझाउने फाँट"
-                  name="patra_bujaune_faat"
-                  icon={<FaBuilding />}
-                  placeholder="पत्र बुझाउने फाँट"
-                  value={formData.patra_bujaune_faat}
-                  onChange={handleChange}
-                />
-
-                <FormField
-                  label="कर्मचारी"
-                  name="karmachari"
-                  icon={<FaUserCircle />}
-                  placeholder="कर्मचारीको नाम लेख्नुहोस्"
-                  value={formData.karmachari}
-                  onChange={handleChange}
-                />
-              </div>
-              
-              <div className="mt-6">
-                <FormField
-                  label="कैफियत"
-                  name="remarks"
-                  isTextarea={true}
-                  rows={3}
-                  icon={<MdSubject />}
-                  placeholder="कैफियत लेख्नुहोस्"
-                  value={formData.remarks}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
-            {/* Submit Buttons */}
-            <div className="flex justify-center gap-4 mt-8 sticky bottom-0 bg-white py-4 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 flex items-center gap-2"
-              >
-                <FaTimes />
-                रद्द गर्नुहोस्
-              </button>
-              
-              <button
-                type="submit"
-                className={`px-8 py-3 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 text-lg font-medium ${
-                  isSubmitting 
-                    ? "bg-gray-400 cursor-not-allowed" 
-                    : "bg-[#E68332] hover:bg-[#d9773b]"
-                }`}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    सुरक्षित गर्दै...
-                  </>
-                ) : (
-                  <>
-                    <FaSave />
-                    सुरक्षित गर्नुहोस्
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
+        </form>
       </div>
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-in-out;
-        }
-      `}</style>
     </div>
   );
 };
