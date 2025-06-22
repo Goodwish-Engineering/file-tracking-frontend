@@ -86,6 +86,7 @@ const DartaList = () => {
             record.patra_sankhya?.toLowerCase() || "",
             record.chalani_number?.toLowerCase() || "",
             record.related_file_detail?.file_name?.toLowerCase() || "",
+            record.remarks?.toLowerCase() || "",
           ].some((field) => field.includes(query))
         )
     );
@@ -310,7 +311,7 @@ const DartaList = () => {
                         <span>विषय</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[15%]">
+                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[12%]">
                       <div className="flex items-center">
                         <span>पत्र संख्या</span>
                       </div>
@@ -325,9 +326,9 @@ const DartaList = () => {
                         <span>सम्बन्धित फाइल</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[14%]">
+                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[17%]">
                       <div className="flex items-center">
-                        <span>कार्यहरू</span>
+                        <span>कैफियत</span>
                       </div>
                     </th>
                   </tr>
@@ -338,6 +339,7 @@ const DartaList = () => {
                   {filteredRecords.map((record, index) => (
                     <tr
                       key={record.id}
+                      onClick={() => navigate(`/darta-details/${record.id}`)}
                       className="group hover:bg-[#FFF8F3] transition-all duration-200 cursor-pointer"
                       style={{
                         animationDelay: `${index * 50}ms`,
@@ -360,7 +362,7 @@ const DartaList = () => {
                       <td className="p-4 font-medium text-gray-900">
                         <div className="flex items-center">
                           <MdSubject className="text-gray-400 mr-2 flex-shrink-0" />
-                          <TextWithTooltip text={record.subject} maxLength={25} />
+                          <TextWithTooltip text={record.subject} maxLength={22} />
                         </div>
                       </td>
                       <td className="p-4 text-sm text-gray-600">
@@ -382,14 +384,9 @@ const DartaList = () => {
                         </div>
                       </td>
                       <td className="p-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => navigate(`/darta-details/${record.id}`)}
-                            className="text-blue-600 hover:text-white hover:bg-blue-600 bg-blue-50 px-3 py-1 rounded-md transition-all duration-200 inline-flex items-center gap-1"
-                          >
-                            <FaExternalLinkAlt className="text-xs" />
-                            हेर्नुहोस्
-                          </button>
+                        <div className="flex items-center">
+                          <FaExternalLinkAlt className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-2" />
+                          <TextWithTooltip text={record.remarks} maxLength={20} />
                         </div>
                       </td>
                     </tr>

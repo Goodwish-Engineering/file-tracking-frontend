@@ -81,9 +81,11 @@ const ChalaniList = () => {
             record.chalani_number?.toLowerCase() || "",
             record.subject?.toLowerCase() || "",
             record.patra_sankhya?.toLowerCase() || "",
-            record.sender_name?.toLowerCase() || "",
-            record.receiver_name?.toLowerCase() || "",
             record.related_file?.file_name?.toLowerCase() || "",
+            record.related_department?.name?.toLowerCase() || "",
+            record.related_office?.name?.toLowerCase() || "",
+            record.sending_department?.name?.toLowerCase() || "",
+            record.remarks?.toLowerCase() || "",
           ].some((field) => field.includes(query))
         )
     );
@@ -91,12 +93,6 @@ const ChalaniList = () => {
     if (filterDate) {
       filteredRecords = filteredRecords.filter(
         (record) => record.chalani_date && record.chalani_date.includes(filterDate)
-      );
-    }
-
-    if (filterUrgency) {
-      filteredRecords = filteredRecords.filter(
-        (record) => record.urgency_level === filterUrgency
       );
     }
 
@@ -223,7 +219,7 @@ const ChalaniList = () => {
             </div>
             <input
               type="text"
-              placeholder="चलानी नम्बर, विषय, पत्र संख्या, पठाउने/बुझाउने व्यक्तिद्वारा खोज्नुहोस्..."
+              placeholder="चलानी नम्बर, विषय, पत्र संख्या, फाइल नाम, विभाग, कार्यालय वा कैफियतद्वारा खोज्नुहोस्..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 w-full py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
@@ -252,7 +248,7 @@ const ChalaniList = () => {
 
         {showFilters && (
           <div className="mt-4 p-4 bg-gray-50 rounded-md border border-gray-200 animate-fadeIn">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   मितिद्वारा फिल्टर गर्नुहोस्
@@ -270,29 +266,11 @@ const ChalaniList = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  जरुरी स्तरद्वारा फिल्टर
-                </label>
-                <select
-                  value={filterUrgency}
-                  onChange={(e) => setFilterUrgency(e.target.value)}
-                  className="w-full py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                >
-                  <option value="">सबै स्तर</option>
-                  <option value="low">कम</option>
-                  <option value="medium">मध्यम</option>
-                  <option value="high">उच्च</option>
-                  <option value="urgent">अति जरुरी</option>
-                </select>
-              </div>
-
               <div className="flex items-end">
                 <button
                   onClick={() => {
                     setSearchQuery("");
                     setFilterDate("");
-                    setFilterUrgency("");
                     setSortConfig({ key: null, direction: "asc" });
                   }}
                   className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md transition-colors"
@@ -338,29 +316,29 @@ const ChalaniList = () => {
                         {getSortDirectionIndicator("chalani_date")}
                       </div>
                     </th>
-                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[18%]">
+                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[20%]">
                       <div className="flex items-center">
                         <span>विषय</span>
                       </div>
                     </th>
                     <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[12%]">
                       <div className="flex items-center">
-                        <span>पठाउने व्यक्ति</span>
+                        <span>पत्र संख्या</span>
                       </div>
                     </th>
                     <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[12%]">
                       <div className="flex items-center">
-                        <span>बुझाउने व्यक्ति</span>
+                        <span>पृष्ठ संख्या</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[10%]">
+                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[15%]">
                       <div className="flex items-center">
-                        <span>जरुरी स्तर</span>
+                        <span>सम्बन्धित फाइल</span>
                       </div>
                     </th>
-                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[12%]">
+                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[17%]">
                       <div className="flex items-center">
-                        <span>कार्यहरू</span>
+                        <span>कैफियत</span>
                       </div>
                     </th>
                   </tr>
@@ -371,6 +349,7 @@ const ChalaniList = () => {
                   {filteredRecords.map((record, index) => (
                     <tr
                       key={record.id}
+                      onClick={() => navigate(`/chalani-details/${record.id}`)}
                       className="group hover:bg-[#FFF8F3] transition-all duration-200 cursor-pointer"
                       style={{
                         animationDelay: `${index * 50}ms`,
@@ -393,27 +372,28 @@ const ChalaniList = () => {
                       <td className="p-4 font-medium text-gray-900">
                         <div className="flex items-center">
                           <MdSubject className="text-gray-400 mr-2 flex-shrink-0" />
-                          <TextWithTooltip text={record.subject} maxLength={20} />
+                          <TextWithTooltip text={record.subject} maxLength={22} />
                         </div>
                       </td>
                       <td className="p-4 text-sm text-gray-600">
-                        <TextWithTooltip text={record.sender_name} maxLength={15} />
+                        {record.patra_sankhya || "N/A"}
                       </td>
                       <td className="p-4 text-sm text-gray-600">
-                        <TextWithTooltip text={record.receiver_name} maxLength={15} />
+                        {record.pana_sankhya || "N/A"}
                       </td>
                       <td className="p-4 text-sm text-gray-600">
-                        {getUrgencyBadge(record.urgency_level)}
+                        <div className="flex items-center">
+                          <FaFileAlt className="text-gray-400 mr-2" />
+                          <TextWithTooltip 
+                            text={record.related_file?.file_name || "कुनै फाइल छैन"} 
+                            maxLength={15} 
+                          />
+                        </div>
                       </td>
                       <td className="p-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => navigate(`/chalani-details/${record.id}`)}
-                            className="text-blue-600 hover:text-white hover:bg-blue-600 bg-blue-50 px-3 py-1 rounded-md transition-all duration-200 inline-flex items-center gap-1"
-                          >
-                            <FaExternalLinkAlt className="text-xs" />
-                            हेर्नुहोस्
-                          </button>
+                        <div className="flex items-center">
+                          <FaExternalLinkAlt className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-2" />
+                          <TextWithTooltip text={record.remarks} maxLength={20} />
                         </div>
                       </td>
                     </tr>
@@ -434,7 +414,6 @@ const ChalaniList = () => {
                   onClick={() => {
                     setSearchQuery("");
                     setFilterDate("");
-                    setFilterUrgency("");
                     setSortConfig({ key: null, direction: "asc" });
                   }}
                   className="mt-4 px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-md text-gray-700 transition-colors duration-200"
@@ -493,3 +472,5 @@ const ChalaniList = () => {
 };
 
 export default ChalaniList;
+
+
