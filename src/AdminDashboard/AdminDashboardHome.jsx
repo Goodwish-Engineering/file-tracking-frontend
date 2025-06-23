@@ -11,7 +11,8 @@ import {
   FaChartBar,
   FaSearch,
   FaUserTie,
-  FaInfoCircle
+  FaInfoCircle,
+  FaSpinner
 } from 'react-icons/fa';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -37,7 +38,7 @@ ChartJS.register(
 const AdminDashboardHome = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  const navigate = useNavigate();
   
   const [stats, setStats] = useState({
     employeeCount: 0,
@@ -59,129 +60,154 @@ const AdminDashboardHome = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       setLoading(true);
+      setError(null);
+      
       try {
-        // Make parallel API calls for better performance
-        const [employeesPromise, filesPromise, officesPromise, transferredFilesPromise, deletedFilesPromise, fileTypesPromise] = 
-          await Promise.allSettled([
-            fetch(`${baseUrl}/user/all/`, {
-              headers: { Authorization: `token ${token}` }
-            }),
-            fetch(`${baseUrl}/file/`, {
-              headers: { Authorization: `token ${token}` }
-            }),
-            fetch(`${baseUrl}/offices/`, {
-              headers: { Authorization: `token ${token}` }
-            }),
-            fetch(`${baseUrl}/file/`, {
-              headers: { Authorization: `token ${token}` }
-            }),
-            fetch(`${baseUrl}/file/deleted/`, {
-              headers: { Authorization: `token ${token}` }
-            }),
-            fetch(`${baseUrl}/file-type/`, {
-              headers: { Authorization: `token ${token}` }
-            })
-          ]);
-
-        // Process employees data
+        // Fetch employees data
         let employeeCount = 0;
         let recentEmployees = [];
-        
-        if (employeesPromise.status === 'fulfilled' && employeesPromise.value.ok) {
-          const employeesData = await employeesPromise.value.json();
-          // Filter out superusers
-          const filteredData = employeesData.filter((user) => !user.is_superuser);
-          employeeCount = filteredData.length;
+        try {
+          const employeesResponse = await fetch(`${baseUrl}/user/all/`, {
+            headers: { Authorization: `Token ${token}` }
+          });
           
-          // Get 5 most recent employees
-          recentEmployees = [...filteredData]
-            .sort((a, b) => new Date(b.date_joined) - new Date(a.date_joined))
-            .slice(0, 5);
+          if (employeesResponse.ok) {
+            const employeesData = await employeesResponse.json();
+            if (Array.isArray(employeesData)) {
+              // Filter out superusers
+              const filteredData = employeesData.filter(user => !user.is_superuser);
+              employeeCount = filteredData.length;
+              
+              // Get 5 most recent employees
+              recentEmployees = [...filteredData]
+                .sort((a, b) => new Date(b.date_joined || 0) - new Date(a.date_joined || 0))
+                .slice(0, 5);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching employees:", error);
         }
 
-        // Process files data
+        // Fetch files data
         let totalFiles = 0;
         let pendingFiles = 0;
+        let transferredFiles = 0;
         let recentFiles = [];
         let filesByDepartment = [];
         let departmentCounts = {};
-        let filesData = [];
         
-        if (filesPromise.status === 'fulfilled' && filesPromise.value.ok) {
-          filesData = await filesPromise.value.json();
-          totalFiles = filesData.length;
-          
-          // Count pending files (files not transferred)
-          pendingFiles = filesData.filter(file => 
-            !(file.approvals && file.approvals.some(approval => approval.is_transferred))
-          ).length;
-          
-          // Get 5 most recent files
-          recentFiles = filesData
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .slice(0, 5);
-            
-          // Count files by department
-          filesData.forEach(file => {
-            if (file.department && file.department.name) {
-              const deptName = file.department.name;
-              departmentCounts[deptName] = (departmentCounts[deptName] || 0) + 1;
-            }
+        try {
+          const filesResponse = await fetch(`${baseUrl}/file/`, {
+            headers: { Authorization: `Token ${token}` }
           });
           
-          // Convert to array for chart
-          filesByDepartment = Object.entries(departmentCounts).map(([name, count]) => ({
-            name,
-            count
-          }));
+          if (filesResponse.ok) {
+            let filesData = await filesResponse.json();
+            
+            // Check if the response is paginated
+            if (filesData && filesData.data && Array.isArray(filesData.data)) {
+              filesData = filesData.data;
+            } else if (!Array.isArray(filesData)) {
+              filesData = [];
+            }
+            
+            totalFiles = filesData.length;
+            
+            // Count pending and transferred files
+            pendingFiles = filesData.filter(file => 
+              !(file.approvals && Array.isArray(file.approvals) && 
+                file.approvals.some(approval => approval.is_transferred))
+            ).length;
+            
+            transferredFiles = filesData.filter(file => 
+              file.approvals && Array.isArray(file.approvals) && 
+              file.approvals.some(approval => approval.is_transferred)
+            ).length;
+            
+            // Get recent files
+            recentFiles = [...filesData]
+              .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+              .slice(0, 5);
+            
+            // Count files by department
+            filesData.forEach(file => {
+              if (file.related_department && file.related_department.name) {
+                const deptName = file.related_department.name;
+                departmentCounts[deptName] = (departmentCounts[deptName] || 0) + 1;
+              } else if (file.department && file.department.name) {
+                const deptName = file.department.name;
+                departmentCounts[deptName] = (departmentCounts[deptName] || 0) + 1;
+              }
+            });
+            
+            // Convert to array for chart
+            filesByDepartment = Object.entries(departmentCounts)
+              .map(([name, count]) => ({ name, count }))
+              .sort((a, b) => b.count - a.count) // Sort by count in descending order
+              .slice(0, 10); // Take only top 10 departments for better visualization
+          }
+        } catch (error) {
+          console.error("Error fetching files:", error);
         }
-        
-        // Process offices data
+
+        // Fetch offices data
         let officesCount = 0;
         let departmentsCount = 0;
         
-        if (officesPromise.status === 'fulfilled' && officesPromise.value.ok) {
-          const officesData = await officesPromise.value.json();
-          officesCount = officesData.length;
+        try {
+          const officesResponse = await fetch(`${baseUrl}/offices/`, {
+            headers: { Authorization: `Token ${token}` }
+          });
           
-          // Count all departments across all offices
-          departmentsCount = officesData.reduce((total, office) => {
-            return total + (office.departments ? office.departments.length : 0);
-          }, 0);
-        }
-        
-        // Process transferred files data - FIXED: Now using the same filesData to count transferred files
-        let transferredFiles = 0;
-        
-        if (transferredFilesPromise.status === 'fulfilled' && transferredFilesPromise.value.ok) {
-          // If we have already fetched files data, use it to count transferred files
-          if (filesData.length > 0) {
-            transferredFiles = filesData.filter(file => 
-              file.approvals && file.approvals.some(approval => approval.is_transferred)
-            ).length;
-          } else {
-            // Otherwise, fetch it from the transferred files endpoint
-            const transferredFilesData = await transferredFilesPromise.value.json();
-            transferredFiles = transferredFilesData.filter(file => 
-              file.approvals && file.approvals.some(approval => approval.is_transferred)
-            ).length;
+          if (officesResponse.ok) {
+            const officesData = await officesResponse.json();
+            if (Array.isArray(officesData)) {
+              officesCount = officesData.length;
+              
+              // Count departments
+              departmentsCount = officesData.reduce((total, office) => {
+                return total + (office.departments && Array.isArray(office.departments) ? office.departments.length : 0);
+              }, 0);
+            }
           }
+        } catch (error) {
+          console.error("Error fetching offices:", error);
         }
-        
-        // Process deleted files data
+
+        // Fetch deleted files data
         let deletedFiles = 0;
         
-        if (deletedFilesPromise.status === 'fulfilled' && deletedFilesPromise.value.ok) {
-          const deletedData = await deletedFilesPromise.value.json();
-          deletedFiles = deletedData.length;
+        try {
+          const deletedResponse = await fetch(`${baseUrl}/file/deleted/`, {
+            headers: { Authorization: `Token ${token}` }
+          });
+          
+          if (deletedResponse.ok) {
+            const deletedData = await deletedResponse.json();
+            if (Array.isArray(deletedData)) {
+              deletedFiles = deletedData.length;
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching deleted files:", error);
         }
-        
-        // Process file types data
+
+        // Fetch file types data
         let fileTypesCount = 0;
         
-        if (fileTypesPromise.status === 'fulfilled' && fileTypesPromise.value.ok) {
-          const fileTypesData = await fileTypesPromise.value.json();
-          fileTypesCount = fileTypesData.length;
+        try {
+          const fileTypesResponse = await fetch(`${baseUrl}/file-type/`, {
+            headers: { Authorization: `Token ${token}` }
+          });
+          
+          if (fileTypesResponse.ok) {
+            const fileTypesData = await fileTypesResponse.json();
+            if (Array.isArray(fileTypesData)) {
+              fileTypesCount = fileTypesData.length;
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching file types:", error);
         }
         
         // Update stats with all collected data
@@ -226,6 +252,7 @@ const AdminDashboardHome = () => {
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         display: false,
@@ -238,13 +265,39 @@ const AdminDashboardHome = () => {
         },
       },
     },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0
+        }
+      }
+    }
+  };
+
+  // Helper function for safe date formatting
+  const formatDate = (dateString) => {
+    if (!dateString) return '—';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '—'; // Invalid date
+      
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return date.toLocaleDateString(undefined, options);
+    } catch (error) {
+      return '—'; // Return a dash for any error
+    }
   };
 
   // Loading state
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#ED772F] border-r-transparent"></div>
+        <div className="text-center">
+          <FaSpinner className="animate-spin text-5xl text-[#ED772F] mb-4 mx-auto" />
+          <p className="text-gray-600">डाटा लोड हुँदैछ...</p>
+        </div>
       </div>
     );
   }
@@ -272,12 +325,12 @@ const AdminDashboardHome = () => {
         <p className="text-gray-600 mt-1">फाइल ट्र्याकिंग प्रणालीको समग्र स्थिति हेर्नुहोस्</p>
       </div>
 
-      {/* Stats Cards - Updated with file types */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard 
           title="कर्मचारीहरू" 
           value={stats.employeeCount} 
-          icon={<FaUsers />} 
+          icon={<FaUsers size={20} />} 
           bgColor="bg-blue-50" 
           textColor="text-blue-600"
           tabName="empdetails" 
@@ -286,7 +339,7 @@ const AdminDashboardHome = () => {
         <StatCard 
           title="कुल फाइलहरू" 
           value={stats.totalFiles} 
-          icon={<FaFileAlt />} 
+          icon={<FaFileAlt size={20} />} 
           bgColor="bg-green-50" 
           textColor="text-green-600"
           tabName="filedetails"
@@ -295,7 +348,7 @@ const AdminDashboardHome = () => {
         <StatCard 
           title="स्थानान्तरण नगरिएका" 
           value={stats.pendingFiles} 
-          icon={<FaExchangeAlt />} 
+          icon={<FaExchangeAlt size={20} />} 
           bgColor="bg-amber-50" 
           textColor="text-amber-600"
           tabName="nontransfer3"
@@ -304,7 +357,7 @@ const AdminDashboardHome = () => {
         <StatCard 
           title="स्थानान्तरण गरिएका" 
           value={stats.transferredFiles} 
-          icon={<FaExchangeAlt />} 
+          icon={<FaExchangeAlt size={20} />} 
           bgColor="bg-indigo-50" 
           textColor="text-indigo-600"
           tabName="transfered"
@@ -313,7 +366,7 @@ const AdminDashboardHome = () => {
         <StatCard 
           title="कार्यालयहरू" 
           value={stats.officesCount} 
-          icon={<FaBuilding />} 
+          icon={<FaBuilding size={20} />} 
           bgColor="bg-pink-50" 
           textColor="text-pink-600"
           tabName="add-office"
@@ -322,7 +375,7 @@ const AdminDashboardHome = () => {
         <StatCard 
           title="विभागहरू" 
           value={stats.departmentsCount} 
-          icon={<FaLayerGroup />} 
+          icon={<FaLayerGroup size={20} />} 
           bgColor="bg-purple-50" 
           textColor="text-purple-600"
           tabName="add-office"
@@ -331,7 +384,7 @@ const AdminDashboardHome = () => {
         <StatCard 
           title="फाइल प्रकारहरू" 
           value={stats.fileTypesCount} 
-          icon={<FaFileAlt />} 
+          icon={<FaFileAlt size={20} />} 
           bgColor="bg-cyan-50" 
           textColor="text-cyan-600"
           tabName="file-types"
@@ -340,7 +393,7 @@ const AdminDashboardHome = () => {
         <StatCard 
           title="मेटिएका फाइलहरू" 
           value={stats.deletedFiles} 
-          icon={<FaTrash />} 
+          icon={<FaTrash size={20} />} 
           bgColor="bg-red-50" 
           textColor="text-red-600"
           tabName="deleted-files"
@@ -355,7 +408,7 @@ const AdminDashboardHome = () => {
             विभाग अनुसार फाइल वितरण
           </h2>
           
-          {stats.filesByDepartment.length > 0 ? (
+          {stats.filesByDepartment && stats.filesByDepartment.length > 0 ? (
             <div className="h-64">
               <Bar data={chartData} options={chartOptions} />
             </div>
@@ -373,15 +426,21 @@ const AdminDashboardHome = () => {
               <FaUserTie className="text-[#E68332]" />
               हालै थपिएका कर्मचारीहरू
             </h2>
-            <Link to="/empdetails" className="text-sm text-[#E68332] hover:underline">
+            <button
+              onClick={() => {
+                localStorage.setItem("adminTab", "empdetails");
+                navigate("/admindashboard");
+              }}
+              className="text-sm text-[#E68332] hover:underline"
+            >
               सबै हेर्नुहोस्
-            </Link>
+            </button>
           </div>
           
-          {stats.recentEmployees.length > 0 ? (
+          {stats.recentEmployees && stats.recentEmployees.length > 0 ? (
             <div className="space-y-3">
               {stats.recentEmployees.map((employee, idx) => (
-                <div key={employee.id} className="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                <div key={idx} className="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
                   <div className="bg-[#E68332] bg-opacity-10 p-2 rounded-full mr-3">
                     <FaUserTie className="text-[#E68332]" />
                   </div>
@@ -412,12 +471,18 @@ const AdminDashboardHome = () => {
             <FaFileAlt className="text-[#E68332]" />
             हालै थपिएका फाइलहरू
           </h2>
-          <Link to="/filedetails" className="text-sm text-[#E68332] hover:underline">
+          <button
+            onClick={() => {
+              localStorage.setItem("adminTab", "filedetails");
+              navigate("/admindashboard");
+            }}
+            className="text-sm text-[#E68332] hover:underline"
+          >
             सबै हेर्नुहोस्
-          </Link>
+          </button>
         </div>
         
-        {stats.recentFiles.length > 0 ? (
+        {stats.recentFiles && stats.recentFiles.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -431,8 +496,10 @@ const AdminDashboardHome = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {stats.recentFiles.map((file, index) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{file.file_name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{file.file_type}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{file.file_name || 'Unnamed File'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {typeof file.file_type === 'object' ? file.file_type?.name : file.file_type || 'N/A'}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(file.created_at)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -461,7 +528,7 @@ const AdminDashboardHome = () => {
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-lg border border-gray-200">
         <h3 className="text-lg font-medium text-gray-700 mb-2">प्रशासन जानकारी</h3>
         <p className="text-gray-600">
-          प्रशासक ड्यासबोर्ड मार्फत, तपाईं सम्पूर्ण फाइल ट्र्याकिंग प्रणाली को व्यवस्थापन गर्न सक्नुहुन्छ।
+          प्रशासक ड्यासबोर्ड मार्फत, तपाईं सम्पूर्ण फाइल ट्र्याकिंग प्रणाली को व्यवस्थापन गर्न सक्नुहुन्छ。
           कर्मचारी, कार्यालय, विभाग र फाइलहरू थप्न, हटाउन र सम्पादन गर्न सक्नुहुन्छ。
         </p>
       </div>
@@ -469,16 +536,13 @@ const AdminDashboardHome = () => {
   );
 };
 
-// Helper component for stat cards - Fixed to update adminTab in localStorage
-const StatCard = ({ title, value, icon, bgColor, textColor, tabName, isAction = false }) => {
+// Helper component for stat cards
+const StatCard = ({ title, value, icon, bgColor, textColor, tabName }) => {
   const navigate = useNavigate();
   
   const handleTabChange = () => {
-    // Just update localStorage with the tab name - don't navigate
-    // The parent AdminDashboard will listen for this change
     localStorage.setItem("adminTab", tabName);
-    // Force a re-render of the parent component by dispatching a custom event
-    window.dispatchEvent(new Event('adminTabChange'));
+    navigate("/admindashboard");
   };
   
   return (
@@ -489,11 +553,7 @@ const StatCard = ({ title, value, icon, bgColor, textColor, tabName, isAction = 
       <div className="flex justify-between items-center">
         <div>
           <h3 className={`${textColor} text-xl font-semibold mb-1`}>{title}</h3>
-          {isAction ? (
-            <p className="text-gray-600 text-sm">थप हेर्नुहोस्...</p>
-          ) : (
-            <p className="text-2xl font-bold text-gray-800">{value}</p>
-          )}
+          <p className="text-2xl font-bold text-gray-800">{value}</p>
         </div>
         <div className={`${textColor} p-3 rounded-full ${bgColor}`}>
           {icon}
@@ -501,20 +561,6 @@ const StatCard = ({ title, value, icon, bgColor, textColor, tabName, isAction = 
       </div>
     </div>
   );
-};
-
-// Helper function for date formatting
-const formatDate = (dateString) => {
-  if (!dateString) return '—';
-  
-  const date = new Date(dateString);
-  const options = { year: 'numeric', month: 'short', day: 'numeric' };
-  try {
-    return date.toLocaleDateString('ne-NP', options);
-  } catch (error) {
-    // Fallback to default locale if Nepali locale is not supported
-    return date.toLocaleDateString(undefined, options);
-  }
 };
 
 export default AdminDashboardHome;

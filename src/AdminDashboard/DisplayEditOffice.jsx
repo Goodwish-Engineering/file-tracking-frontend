@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaRegEdit, FaExclamationCircle, FaBuilding, FaLayerGroup, FaPlus, FaSave } from "react-icons/fa";
-import { MdDelete, MdOutlineInfo } from "react-icons/md";
+import { FaRegEdit, FaExclamationCircle, FaBuilding, FaLayerGroup, FaPlus, FaSave, FaTasks } from "react-icons/fa";
+import { MdDelete, MdOutlineInfo, MdSubdirectoryArrowRight } from "react-icons/md";
 import { useSelector } from "react-redux";
-// import AddDepartOfOffice from "./AddDepartOfOffice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const DisplayEditOffice = ({ dataUpdated }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   const [officeData, setOfficeData] = useState([]);
   const [editingOffice, setEditingOffice] = useState(null);
@@ -18,15 +18,44 @@ const DisplayEditOffice = ({ dataUpdated }) => {
   const [showAddDepartment, setShowAddDepartment] = useState(false);
   const [editingDepartment, setEditingDepartment] = useState(null);
   const [editedDepartmentName, setEditedDepartmentName] = useState("");
+  
+  // Replace expandedDepartment with an object to store faats for all departments
+  const [departmentFaats, setDepartmentFaats] = useState({});
+  const [loadingFaats, setLoadingFaats] = useState({});
+  const [editingFaat, setEditingFaat] = useState(null);
+  const [editedFaatName, setEditedFaatName] = useState("");
 
+  // Modified to fetch all data including faats for each department
   const fetchData = async () => {
     const token = localStorage.getItem("token");
     try {
+      // Fetch offices and departments
       const response = await axios.get(`${baseUrl}/offices/`, {
         headers: { Authorization: `Token ${token}` },
       });
+      
       if (response.data) {
-        setOfficeData(response.data);
+        const offices = response.data;
+        setOfficeData(offices);
+        
+        // For each office, fetch faats for all its departments
+        for (const office of offices) {
+          if (office.departments && office.departments.length > 0) {
+            // Start loading state for all departments
+            const loadingStates = {};
+            office.departments.forEach(dept => {
+              loadingStates[dept.id] = true;
+            });
+            setLoadingFaats(prev => ({ ...prev, ...loadingStates }));
+            
+            // Fetch faats for all departments in parallel
+            const faatPromises = office.departments.map(dept => 
+              fetchFaatsForDepartment(dept.id)
+            );
+            
+            await Promise.all(faatPromises);
+          }
+        }
       }
     } catch (error) {
       console.error("Error fetching Office data:", error);
@@ -37,6 +66,154 @@ const DisplayEditOffice = ({ dataUpdated }) => {
   useEffect(() => {
     fetchData();
   }, [dataUpdated]);
+
+  // Fetch faats for a specific department
+  const fetchFaatsForDepartment = async (departmentId) => {
+    try {
+      const response = await fetch(`${baseUrl}/department/${departmentId}`, {
+        headers: { Authorization: `Token ${token}` },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Update the state with faats for this department
+        setDepartmentFaats(prev => ({
+          ...prev,
+          [departmentId]: data.faats || []
+        }));
+      } else {
+        // Fallback approach
+        try {
+          const fallbackResponse = await fetch(`${baseUrl}/faat/?department=${departmentId}`, {
+            headers: { Authorization: `Token ${token}` },
+          });
+          
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json();
+            setDepartmentFaats(prev => ({
+              ...prev,
+              [departmentId]: Array.isArray(fallbackData) ? fallbackData : []
+            }));
+          } else {
+            throw new Error("Both methods failed");
+          }
+        } catch (innerError) {
+          console.error("Fallback faat fetch error:", innerError);
+          setDepartmentFaats(prev => ({ ...prev, [departmentId]: [] }));
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching faats:", error);
+      setDepartmentFaats(prev => ({ ...prev, [departmentId]: [] }));
+    } finally {
+      // Update loading state
+      setLoadingFaats(prev => ({ ...prev, [departmentId]: false }));
+    }
+  };
+
+  // Handle faat editing
+  const handleStartEditFaat = (faat) => {
+    setEditingFaat(faat.id);
+    setEditedFaatName(faat.name);
+  };
+
+  // Save edited faat
+  const handleSaveEditFaat = async () => {
+    if (!editedFaatName.trim()) {
+      toast.error("फाँटको नाम खाली हुन सक्दैन");
+      return;
+    }
+
+    try {
+      await axios.patch(
+        `${baseUrl}/faat/${editingFaat}/`,
+        { name: editedFaatName },
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      
+      // Update the faats in state
+      const updatedDepartmentFaats = { ...departmentFaats };
+      
+      // Find which department this faat belongs to
+      for (const deptId in updatedDepartmentFaats) {
+        updatedDepartmentFaats[deptId] = updatedDepartmentFaats[deptId].map(faat => 
+          faat.id === editingFaat ? { ...faat, name: editedFaatName } : faat
+        );
+      }
+      
+      setDepartmentFaats(updatedDepartmentFaats);
+      setEditingFaat(null);
+      toast.success("फाँट सफलतापूर्वक अपडेट गरियो");
+    } catch (error) {
+      console.error("Error updating faat:", error);
+      toast.error("फाँट अपडेट गर्न असफल");
+    }
+  };
+
+  // Delete faat
+  const handleDeleteFaat = async (faatId, departmentId) => {
+    if (!window.confirm("के तपाईं साँच्चै यो फाँट मेटाउन चाहनुहुन्छ?")) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${baseUrl}/faat/${faatId}/`, {
+        headers: { Authorization: `Token ${token}` },
+      });
+      
+      // Update faats in state
+      setDepartmentFaats(prev => ({
+        ...prev,
+        [departmentId]: prev[departmentId].filter(faat => faat.id !== faatId)
+      }));
+      
+      toast.success("फाँट सफलतापूर्वक मेटाइयो");
+    } catch (error) {
+      console.error("Error deleting faat:", error);
+      toast.error("फाँट मेटाउन असफल");
+    }
+  };
+
+  // Add new faat to department
+  const handleAddFaat = async (departmentId) => {
+    const faatName = prompt("नयाँ फाँटको नाम प्रविष्ट गर्नुहोस्:");
+    if (!faatName || !faatName.trim()) return;
+
+    try {
+      const response = await axios.post(
+        `${baseUrl}/faat/`,
+        { 
+          name: faatName.trim(),
+          department: departmentId 
+        },
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      
+      if (response.data) {
+        // Update faats in state
+        setDepartmentFaats(prev => ({
+          ...prev,
+          [departmentId]: [...(prev[departmentId] || []), response.data]
+        }));
+        
+        toast.success("फाँट सफलतापूर्वक थपियो");
+      }
+    } catch (error) {
+      console.error("Error adding faat:", error);
+      toast.error("फाँट थप्न असफल");
+    }
+  };
 
   const handleStartEdit = (office) => {
     setEditingOffice(office.id);
@@ -169,12 +346,18 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                   सम्बन्धित विभागहरू
                 </div>
               </th>
+              <th className="px-6 py-3 text-left font-semibold">
+                <div className="flex items-center gap-2">
+                  <FaTasks />
+                  सम्बन्धित फाँटहरू
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {officeData.length === 0 ? (
               <tr>
-                <td colSpan="2" className="p-8 text-center text-gray-500">
+                <td colSpan="3" className="p-8 text-center text-gray-500">
                   <div className="py-8 flex flex-col items-center">
                     <FaBuilding className="text-gray-300 text-4xl mb-3" />
                     <p className="text-lg font-medium mb-2">कुनै कार्यालय फेला परेन</p>
@@ -194,7 +377,7 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                   }}
                 >
                   {/* Office Column */}
-                  <td className="p-4 border-r border-gray-100">
+                  <td className="p-4 border-r border-gray-100 align-top">
                     <div className="flex items-center justify-between">
                       <div className="flex-1 mr-4">
                         {editingOffice === office.id ? (
@@ -270,7 +453,7 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                   </td>
                   
                   {/* Departments Column */}
-                  <td className="bg-gray-50 p-0">
+                  <td className="bg-gray-50 p-0 align-top border-r border-gray-100">
                     <div className="h-full">
                       {office.departments && office.departments.length > 0 ? (
                         <div className="w-full">
@@ -292,67 +475,79 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                             {office.departments.map((dept, index) => (
                               <li
                                 key={dept.id}
-                                className="flex justify-between items-center px-4 py-3 hover:bg-gray-100 transition-colors duration-150"
+                                className="hover:bg-gray-100 transition-colors duration-150"
                                 style={{
                                   animationDelay: `${index * 50}ms`,
                                   animationFillMode: "both",
                                   animation: "fadeIn 0.3s ease-in-out"
                                 }}
                               >
-                                {editingDepartment === dept.id ? (
-                                  <div className="flex-1 mr-4">
-                                    <input
-                                      type="text"
-                                      value={editedDepartmentName}
-                                      onChange={(e) => setEditedDepartmentName(e.target.value)}
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E68332] focus:border-[#E68332]"
-                                      autoFocus
-                                    />
-                                    <div className="flex justify-end mt-2 space-x-2">
-                                      <button
-                                        onClick={handleSaveEditDepartment}
-                                        className="bg-green-500 hover:bg-green-600 px-2 py-1 text-white rounded text-xs transition-colors duration-200"
-                                      >
-                                        सुरक्षित
-                                      </button>
-                                      <button
-                                        onClick={() => setEditingDepartment(null)}
-                                        className="bg-gray-500 hover:bg-gray-600 px-2 py-1 text-white rounded text-xs transition-colors duration-200"
-                                      >
-                                        रद्द
-                                      </button>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <div className="flex items-center flex-1">
-                                      <div className="bg-[#E68332] bg-opacity-10 p-1.5 rounded-full mr-3">
-                                        <FaLayerGroup className="text-[#E68332]" />
-                                      </div>
-                                      <div>
-                                        <p className="text-gray-700 font-medium">{dept.name}</p>
-                                        <p className="text-xs text-gray-500">ID: {dept.id}</p>
+                                <div className="flex justify-between items-center px-4 py-3">
+                                  {editingDepartment === dept.id ? (
+                                    <div className="flex-1 mr-4">
+                                      <input
+                                        type="text"
+                                        value={editedDepartmentName}
+                                        onChange={(e) => setEditedDepartmentName(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E68332] focus:border-[#E68332]"
+                                        autoFocus
+                                      />
+                                      <div className="flex justify-end mt-2 space-x-2">
+                                        <button
+                                          onClick={handleSaveEditDepartment}
+                                          className="bg-green-500 hover:bg-green-600 px-2 py-1 text-white rounded text-xs transition-colors duration-200"
+                                        >
+                                          सुरक्षित
+                                        </button>
+                                        <button
+                                          onClick={() => setEditingDepartment(null)}
+                                          className="bg-gray-500 hover:bg-gray-600 px-2 py-1 text-white rounded text-xs transition-colors duration-200"
+                                        >
+                                          रद्द
+                                        </button>
                                       </div>
                                     </div>
-                                    
-                                    <div className="flex items-center">
-                                      <button
-                                        onClick={() => handleStartEditDepartment(dept)}
-                                        className="text-blue-500 hover:bg-blue-50 p-1.5 rounded-full transition-all duration-200 mx-1"
-                                        title="विभाग सम्पादन गर्नुहोस्"
-                                      >
-                                        <FaRegEdit className="text-lg" />
-                                      </button>
-                                      <button
-                                        onClick={() => handleDeleteDepartment(dept.id)}
-                                        className="text-red-500 hover:bg-red-50 p-1.5 rounded-full transition-all duration-200 mx-1"
-                                        title="विभाग मेटाउनुहोस्"
-                                      >
-                                        <MdDelete className="text-lg" />
-                                      </button>
-                                    </div>
-                                  </>
-                                )}
+                                  ) : (
+                                    <>
+                                      <div className="flex items-center flex-1">
+                                        <div className="bg-[#E68332] bg-opacity-10 p-1.5 rounded-full mr-3">
+                                          <FaLayerGroup className="text-[#E68332]" />
+                                        </div>
+                                        <div>
+                                          <p className="text-gray-700 font-medium">{dept.name}</p>
+                                          <div className="flex items-center text-xs text-gray-500">
+                                            <span>ID: {dept.id}</span>
+                                            {dept.code && <span className="ml-2">कोड: {dept.code}</span>}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="flex items-center space-x-1">
+                                        <button
+                                          onClick={() => handleAddFaat(dept.id)}
+                                          className="text-green-500 hover:bg-green-50 p-1.5 rounded-full transition-all duration-200 mx-1"
+                                          title="फाँट थप्नुहोस्"
+                                        >
+                                          <FaPlus className="text-sm" />
+                                        </button>
+                                        <button
+                                          onClick={() => handleStartEditDepartment(dept)}
+                                          className="text-blue-500 hover:bg-blue-50 p-1.5 rounded-full transition-all duration-200"
+                                          title="विभाग सम्पादन गर्नुहोस्"
+                                        >
+                                          <FaRegEdit className="text-lg" />
+                                        </button>
+                                        <button
+                                          onClick={() => handleDeleteDepartment(dept.id)}
+                                          className="text-red-500 hover:bg-red-50 p-1.5 rounded-full transition-all duration-200"
+                                          title="विभाग मेटाउनुहोस्"
+                                        >
+                                          <MdDelete className="text-lg" />
+                                        </button>
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
                               </li>
                             ))}
                           </ul>
@@ -370,6 +565,105 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                         </div>
                       )}
                     </div>
+                  </td>
+
+                  {/* Faats Column that shows all faats for all departments */}
+                  <td className="bg-gray-50 p-0 align-top">
+                    <div className="p-3 bg-blue-50 border-b border-blue-100">
+                      <h3 className="font-medium text-blue-700 flex items-center gap-1">
+                        <FaTasks className="text-blue-500" /> 
+                        <span>फाँटहरू</span>
+                      </h3>
+                    </div>
+                    
+                    {office.departments && office.departments.length > 0 ? (
+                      <div className="divide-y divide-gray-100">
+                        {office.departments.map((dept) => (
+                          <div key={dept.id} className="p-3">
+                            <div className="mb-2 font-medium text-sm flex items-center text-gray-700">
+                              <FaLayerGroup className="mr-1 text-xs text-[#E68332]" /> {dept.name}:
+                            </div>
+                            
+                            {loadingFaats[dept.id] ? (
+                              <div className="flex justify-center py-2">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                              </div>
+                            ) : departmentFaats[dept.id] && departmentFaats[dept.id].length > 0 ? (
+                              <ul className="space-y-1 pl-4">
+                                {departmentFaats[dept.id].map((faat, faatIndex) => (
+                                  <li 
+                                    key={faat.id || faatIndex} 
+                                    className="py-1"
+                                  >
+                                    {editingFaat === faat.id ? (
+                                      <div className="flex items-center">
+                                        <input
+                                          type="text"
+                                          value={editedFaatName}
+                                          onChange={(e) => setEditedFaatName(e.target.value)}
+                                          className="flex-1 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                          autoFocus
+                                        />
+                                        <div className="flex ml-2">
+                                          <button
+                                            onClick={handleSaveEditFaat}
+                                            className="bg-green-500 hover:bg-green-600 px-2 py-1 rounded text-white text-xs mr-1"
+                                          >
+                                            सुरक्षित
+                                          </button>
+                                          <button
+                                            onClick={() => setEditingFaat(null)}
+                                            className="bg-gray-500 hover:bg-gray-600 px-2 py-1 rounded text-white text-xs"
+                                          >
+                                            रद्द
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center justify-between group hover:bg-gray-100 p-1 rounded-md">
+                                        <div className="flex items-center">
+                                          <MdSubdirectoryArrowRight className="text-gray-400 mr-1" />
+                                          <span className="text-sm">{faat.name}</span>
+                                          {faat.code && (
+                                            <span className="ml-1 bg-blue-100 px-1 py-0.5 rounded text-xs text-blue-700">
+                                              {faat.code}
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <button
+                                            onClick={() => handleStartEditFaat(faat)}
+                                            className="text-blue-500 hover:bg-blue-50 p-1 rounded-full transition-all duration-200 mx-0.5"
+                                            title="फाँट सम्पादन"
+                                          >
+                                            <FaRegEdit className="text-xs" />
+                                          </button>
+                                          <button
+                                            onClick={() => handleDeleteFaat(faat.id, dept.id)}
+                                            className="text-red-500 hover:bg-red-50 p-1 rounded-full transition-all duration-200 mx-0.5"
+                                            title="फाँट मेटाउनुहोस्"
+                                          >
+                                            <MdDelete className="text-xs" />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-sm text-gray-500 pl-4">
+                                <i>यो विभागमा कुनै फाँट छैन</i>
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 text-center text-gray-500">
+                        <p>कुनै विभाग छैन, त्यसैले कुनै फाँट पनि छैन</p>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))
@@ -557,3 +851,4 @@ const DisplayEditOffice = ({ dataUpdated }) => {
 };
 
 export default DisplayEditOffice;
+        
