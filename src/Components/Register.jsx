@@ -8,6 +8,7 @@ import "nepali-datepicker-reactjs/dist/index.css";
 
 const Registration = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
+  const token = localStorage.getItem("token"); // Add this line to get the token
   const [provinces, setProvinces] = useState([]);
   const [district, setDistrict] = useState([]);
   const [tempDistrict, setTemptDistrict] = useState([]);
@@ -15,6 +16,7 @@ const Registration = () => {
   const [tempMunicipalities, setTempMunicipalities] = useState([]);
   const [offices, setOffices] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [faats, setFaats] = useState([]); // Add state for faats
   const [selectedProvince, setSelectedProvince] = useState("");
   const [datePickerKey, setDatePickerKey] = useState(0);
   const loanType = [
@@ -68,6 +70,7 @@ const Registration = () => {
     duration: "",
     office: "",
     department: "",
+    faat: "", // Add faat field
     user_type: "",
     loan_type: "",
     loan_name: "",
@@ -105,6 +108,12 @@ const Registration = () => {
       fetchDepartment(formData.office);
     }
   }, [formData.office]);
+
+  useEffect(() => {
+    if (formData.department) {
+      fetchFaats(formData.department);
+    }
+  }, [formData.department]);
 
   const fetchProvince = async () => {
     try {
@@ -205,6 +214,44 @@ const Registration = () => {
     }
   };
 
+  const fetchFaats = async (departmentId) => {
+    try {
+      // Use the same pattern as fetchDepartment - direct URL path instead of query parameter
+      const response = await fetch(`${baseUrl}/department/${departmentId}`, {
+        headers: { Authorization: `Token ${token}` },
+      });
+      
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      
+      const data = await response.json();
+      console.log("Fetched Department Data:", data);
+
+      // Extract faats from department response, similar to how departments are extracted from office
+      setFaats(data.faats || []); // Ensure it's always an array
+    } catch (error) {
+      console.error("Error fetching faats:", error);
+      setFaats([]); // Prevents UI crashes
+    
+      // Fallback to the old query parameter approach if the direct approach fails
+      try {
+        console.log("Trying fallback approach for faats...");
+        const fallbackResponse = await fetch(`${baseUrl}/faat/?department=${departmentId}`, {
+          headers: { Authorization: `Token ${token}` },
+        });
+        
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json();
+          console.log("Fetched faats (fallback):", fallbackData);
+          setFaats(Array.isArray(fallbackData) ? fallbackData : []);
+        }
+      } catch (fallbackError) {
+        console.error("Fallback approach also failed:", fallbackError);
+      }
+    }
+  };
+
   const handleOfficeChange = (e) => {
     const { value } = e.target;
     setFormData((prevData) => ({
@@ -212,6 +259,22 @@ const Registration = () => {
       office: value,
       department: "",
     }));
+  };
+
+  // Enhance the department change handler to fetch faats
+  const handleDepartmentChange = async (e) => {
+    const { value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      department: value,
+      faat: "", // Reset faat when department changes
+    }));
+
+    if (value) {
+      fetchFaats(value);
+    } else {
+      setFaats([]);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -318,6 +381,11 @@ const Registration = () => {
       onSubmit={handleSubmit}
     >
       <h1 className="text-2xl font-bold text-[#E68332]">कर्मचारी दर्ता फारम</h1>
+      
+      {/* Add explanatory text for required fields */}
+      <div className="text-sm text-gray-600 italic mb-4">
+        <span className="text-red-500">*</span> चिन्ह भएका फिल्डहरू अनिवार्य छन्
+      </div>
 
       {/* Account Information */}
       <fieldset className="border border-orange-400 p-4 rounded">
@@ -326,7 +394,9 @@ const Registration = () => {
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">पहिलो नाम</span>
+            <span className="text-sm font-medium text-gray-900">
+              पहिलो नाम <span className="text-red-500">*</span>
+            </span>
             <input
               type="text"
               name="first_name"
@@ -338,7 +408,7 @@ const Registration = () => {
           </label>
           <label className="flex flex-col">
             <span className="text-sm font-medium text-gray-900">
-              अन्तिम नाम
+              अन्तिम नाम <span className="text-red-500">*</span>
             </span>
             <input
               type="text"
@@ -351,7 +421,7 @@ const Registration = () => {
           </label>
           <label className="flex flex-col">
             <span className="text-sm font-medium text-gray-900">
-              बुबाको नाम
+              बुबाको नाम <span className="text-red-500">*</span>
             </span>
             <input
               type="text"
@@ -363,7 +433,9 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">आमाको नाम</span>
+            <span className="text-sm font-medium text-gray-900">
+              आमाको नाम <span className="text-red-500">*</span>
+            </span>
             <input
               type="text"
               name="mother_name"
@@ -375,7 +447,7 @@ const Registration = () => {
           </label>
           <label className="flex flex-col">
             <span className="text-sm font-medium text-gray-900">
-              हजुरबुबाको नाम
+              हजुरबुबाको नाम <span className="text-red-500">*</span>
             </span>
             <input
               type="text"
@@ -394,7 +466,9 @@ const Registration = () => {
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">युसरनेम</span>
+            <span className="text-sm font-medium text-gray-900">
+              युसरनेम <span className="text-red-500">*</span>
+            </span>
             <input
               type="text"
               name="username"
@@ -405,7 +479,9 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">पासवर्ड</span>
+            <span className="text-sm font-medium text-gray-900">
+              पासवर्ड <span className="text-red-500">*</span>
+            </span>
             <input
               type="password"
               name="password"
@@ -416,7 +492,9 @@ const Registration = () => {
             />
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">इमेल</span>
+            <span className="text-sm font-medium text-gray-900">
+              इमेल <span className="text-red-500">*</span>
+            </span>
             <input
               type="email"
               name="email"
@@ -426,18 +504,110 @@ const Registration = () => {
               required
             />
           </label>
+          
+          {/* Office, Department, Faat, and User Level - Mark as required */}
+          <label className="flex flex-col">
+            <span className="text-sm font-medium text-gray-900">
+              कार्यालय <span className="text-red-500">*</span>
+            </span>
+            <select
+              name="office"
+              value={formData.office}
+              onChange={handleOfficeChange}
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              required
+            >
+              <option value="">Select an Office</option>
+              {offices.map((office, index) => (
+                <option key={index} value={office.id}>
+                  {office.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col">
+            <span className="text-sm font-medium text-gray-900">
+              विभाग <span className="text-red-500">*</span>
+            </span>
+            <select
+              name="department"
+              value={formData.department}
+              onChange={handleDepartmentChange}
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              disabled={!formData.office}
+              required
+            >
+              <option value="">Select a Department</option>
+              {departments.length > 0 ? (
+                departments.map((department) => (
+                  <option key={department.id} value={department.id}>
+                    {department.name}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No departments available</option>
+              )}
+            </select>
+          </label>
+
+          <label className="flex flex-col">
+            <span className="text-sm font-medium text-gray-900">
+              फाँट <span className="text-red-500">*</span>
+            </span>
+            <select
+              name="faat"
+              value={formData.faat}
+              onChange={handleChange}
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              disabled={!formData.department}
+              required
+            >
+              <option value="">फाँट छान्नुहोस्</option>
+              {faats.length > 0 ? (
+                faats.map((faat) => (
+                  <option key={faat.id} value={faat.id}>
+                    {faat.name}
+                  </option>
+                ))
+              ) : (
+                <option disabled>कुनै फाँट उपलब्ध छैन</option>
+              )}
+            </select>
+          </label>
+
+          <label className="flex flex-col">
+            <span className="text-sm font-medium text-gray-900">
+              युसर लेवल <span className="text-red-500">*</span>
+            </span>
+            <select
+              onChange={handleChange}
+              name="user_type"
+              value={formData.user_type}
+              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              required
+            >
+              <option value="">select level </option>
+              <option value={1}>Faat</option>
+              <option value={2}>Branch Head</option>
+              <option value={3}>Branch officer</option>
+              <option value={4}>Division Head</option>
+              <option value={5}>Admin</option>
+            </select>
+          </label>
         </div>
       </fieldset>
 
-      {/* Permanent Address */}
+      {/* Permanent Address - Remove required indicators and attributes */}
       <fieldset className="border border-orange-400 p-4 rounded">
         <legend className="text-lg font-semibold text-[#E68332]">
           स्थायी ठेगाना (Permanent Address)
         </legend>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">प्रोविंस</span>
-
+            <span className="text-sm font-medium text-gray-900">
+              प्रोविंस
+            </span>
             <select
               name="perm_state"
               value={formData.perm_state}
@@ -453,8 +623,9 @@ const Registration = () => {
             </select>
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">जिल्ला</span>
-
+            <span className="text-sm font-medium text-gray-900">
+              जिल्ला
+            </span>
             <select
               name="perm_district"
               value={formData.perm_district}
@@ -470,8 +641,9 @@ const Registration = () => {
             </select>
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">नगरपालिका</span>
-
+            <span className="text-sm font-medium text-gray-900">
+              नगरपालिका
+            </span>
             <select
               name="perm_municipality"
               value={formData.perm_municipality}
@@ -487,14 +659,15 @@ const Registration = () => {
             </select>
           </label>
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">वार्ड नं.</span>
+            <span className="text-sm font-medium text-gray-900">
+              वार्ड नं.
+            </span>
             <input
               type="text"
               name="perm_ward_no"
               value={formData.perm_ward_no}
               onChange={handleChange}
               className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              required
             />
           </label>
         </div>
@@ -742,62 +915,8 @@ const Registration = () => {
             />
           </label>
 
-          <label className="flex flex-col">
-            कार्यालय
-            <select
-              name="office"
-              value={formData.office}
-              onChange={handleOfficeChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              <option value="">Select an Office</option>
-              {offices.map((office, index) => (
-                <option key={index} value={office.id}>
-                  {office.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="flex flex-col">
-            विभाग
-            <select
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              disabled={!formData.office}
-            >
-              <option value="">Select a Department</option>
-              {departments.length > 0 ? (
-                departments.map((department) => (
-                  <option key={department.id} value={department.id}>
-                    {department.name}
-                  </option>
-                ))
-              ) : (
-                <option disabled>No departments available</option>
-              )}
-            </select>
-          </label>
-
-          <label className="flex flex-col">
-            युसर लेवल
-            <select
-              onChange={handleChange}
-              name="user_type"
-              value={formData.user_type}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              <option>select level </option>
-
-              <option value={1}>Faat</option>
-              <option value={2}>Branch Head</option>
-              <option value={3}>Branch officer</option>
-              <option value={4}>Division Head</option>
-              <option value={5}>Admin</option>
-            </select>
-          </label>
+          {/* Removed office, department, faat, and user_type fields from here */}
+          {/* They have been moved to the खाता जानकारी (Account Information) section */}
         </div>
       </fieldset>
 
