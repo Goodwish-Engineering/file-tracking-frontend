@@ -10,7 +10,6 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
   const token = localStorage.getItem("token");
   
   const [formData, setFormData] = useState({
-    chalani_number: "",
     chalani_date: "",
     related_file: "",
     related_office: "",
@@ -145,10 +144,6 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.chalani_number.trim()) {
-      newErrors.chalani_number = "चलानी नम्बर आवश्यक छ";
-    }
-    
     if (!formData.chalani_date) {
       newErrors.chalani_date = "चलानी मिति आवश्यक छ";
     }
@@ -211,7 +206,6 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
 
   const resetForm = () => {
     setFormData({
-      chalani_number: "",
       chalani_date: "",
       related_file: "",
       related_office: "",
@@ -250,26 +244,8 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                चलानी नम्बर *
-              </label>
-              <input
-                type="text"
-                name="chalani_number"
-                value={formData.chalani_number}
-                onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all ${
-                  errors.chalani_number ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder="चलानी नम्बर प्रविष्ट गर्नुहोस्"
-              />
-              {errors.chalani_number && (
-                <p className="text-red-500 text-sm mt-1">{errors.chalani_number}</p>
-              )}
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+            {/* Removed chalani_number field */}
             <div className="mb-0">
               <FormField
                 label="चलानी मिति"
