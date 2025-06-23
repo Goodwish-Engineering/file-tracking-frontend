@@ -81,16 +81,32 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
 
     if (officeId) {
       try {
-        const response = await fetch(`${baseUrl}/department/?office=${officeId}`, {
+        const response = await fetch(`${baseUrl}/offices/${officeId}`, {
           headers: { Authorization: `Token ${token}` },
         });
+        
         if (response.ok) {
           const data = await response.json();
-          setDepartments(Array.isArray(data) ? data : []);
+          console.log("Fetched Office Data:", data);
+
+          // Directly set departments from the response
+          setDepartments(data.departments || []); // Ensure it's always an array
+        } else {
+          // Fallback to the query parameter approach if direct fetch fails
+          const fallbackResponse = await fetch(`${baseUrl}/department/?office=${officeId}`, {
+            headers: { Authorization: `Token ${token}` },
+          });
+          
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json();
+            setDepartments(Array.isArray(fallbackData) ? fallbackData : []);
+          } else {
+            throw new Error("Both department fetching methods failed");
+          }
         }
       } catch (error) {
         console.error("Error fetching departments:", error);
-        setDepartments([]);
+        setDepartments([]); // Prevents UI crashes
       }
     } else {
       setDepartments([]);
@@ -109,16 +125,36 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
 
     if (departmentId) {
       try {
-        const response = await fetch(`${baseUrl}/faat/?department=${departmentId}`, {
+        // Use the same pattern as in Register.jsx - direct URL path
+        const response = await fetch(`${baseUrl}/department/${departmentId}`, {
           headers: { Authorization: `Token ${token}` },
         });
+        
         if (response.ok) {
           const data = await response.json();
-          setFaats(Array.isArray(data) ? data : []);
+          console.log("Fetched Department Data:", data);
+          
+          // Extract faats from department response
+          setFaats(data.faats || []); // Ensure it's always an array
+        } else {
+          // Fallback to the query parameter approach if direct fetch fails
+          console.log("Trying fallback approach for faats...");
+          const fallbackResponse = await fetch(`${baseUrl}/faat/?department=${departmentId}`, {
+            headers: { Authorization: `Token ${token}` },
+          });
+          
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json();
+            console.log("Fetched faats (fallback):", fallbackData);
+            setFaats(Array.isArray(fallbackData) ? fallbackData : []);
+          } else {
+            console.error("Fallback also failed");
+            setFaats([]);
+          }
         }
       } catch (error) {
         console.error("Error fetching faats:", error);
-        setFaats([]);
+        setFaats([]); // Prevents UI crashes
       }
     } else {
       setFaats([]);
@@ -289,7 +325,7 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
               <select
                 name="related_department"
                 value={formData.related_department}
-                onChange={handleDepartmentChange}
+                onChange={handleDepartmentChange} // <-- Changed from handleInputChange to handleDepartmentChange
                 disabled={!formData.related_office}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
