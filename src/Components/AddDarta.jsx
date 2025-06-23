@@ -18,7 +18,6 @@ const AddDarta = ({ isOpen, onClose, onSuccess }) => {
   const token = localStorage.getItem("token");
   
   const [formData, setFormData] = useState({
-    darta_number: "",
     darta_date: "",
     related_file: "",
     related_office: "",
@@ -153,10 +152,6 @@ const AddDarta = ({ isOpen, onClose, onSuccess }) => {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.darta_number.trim()) {
-      newErrors.darta_number = "दर्ता नम्बर आवश्यक छ";
-    }
-    
     if (!formData.darta_date) {
       newErrors.darta_date = "दर्ता मिति आवश्यक छ";
     }
@@ -219,7 +214,6 @@ const AddDarta = ({ isOpen, onClose, onSuccess }) => {
 
   const resetForm = () => {
     setFormData({
-      darta_number: "",
       darta_date: "",
       related_file: "",
       related_office: "",
@@ -263,26 +257,8 @@ const AddDarta = ({ isOpen, onClose, onSuccess }) => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                दर्ता नम्बर *
-              </label>
-              <input
-                type="text"
-                name="darta_number"
-                value={formData.darta_number}
-                onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all ${
-                  errors.darta_number ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder="दर्ता नम्बर प्रविष्ट गर्नुहोस्"
-              />
-              {errors.darta_number && (
-                <p className="text-red-500 text-sm mt-1">{errors.darta_number}</p>
-              )}
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+            {/* Removed darta_number field */}
             <div className="mb-0">
               <FormField
                 label="दर्ता मिति"
