@@ -8,8 +8,7 @@ import {
 } from "react-icons/fa";
 import { MdAdd, MdClose } from "react-icons/md";
 import { toast } from "react-toastify";
-import { NepaliDatePicker } from "nepali-datepicker-reactjs";
-import "nepali-datepicker-reactjs/dist/index.css";
+import DateInputField from "../Common/DateInputField";
 
 const TippaniTab = ({
   editable,
@@ -66,7 +65,6 @@ const TippaniTab = ({
     setAddingNewTippani(true);
     setIsPageCountModalOpen(false);
   };
-
 
   // Handle changes to new tippani rows
   const handleNewTippaniChange = (e, field, index) => {
@@ -315,15 +313,15 @@ const TippaniTab = ({
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <NepaliDatePicker
-                      inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                    <DateInputField
+                      name="submitted_date"
                       value={row.submitted_date}
-                      onSelect={(value) => {
-                        const e = { target: { value: value } };
-                        handleNewTippaniChange(e, "submitted_date", index);
-                      }}
-                      className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "en" }}
+                      onChange={(e) =>
+                        handleNewTippaniChange(e, "submitted_date", index)
+                      }
+                      placeholder="पेश मिति"
+                      primaryColor="orange-500"
+                      className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
@@ -338,15 +336,15 @@ const TippaniTab = ({
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <NepaliDatePicker
-                      inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                    <DateInputField
+                      name="approved_date"
                       value={row.approved_date}
-                      onSelect={(value) => {
-                        const e = { target: { value: value } };
-                        handleNewTippaniChange(e, "approved_date", index);
-                      }}
-                      className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "en" }}
+                      onChange={(e) =>
+                        handleNewTippaniChange(e, "approved_date", index)
+                      }
+                      placeholder="स्वीकृत मिति"
+                      primaryColor="orange-500"
+                      className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
@@ -361,15 +359,15 @@ const TippaniTab = ({
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <NepaliDatePicker
-                      inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                    <DateInputField
+                      name="tippani_date"
                       value={row.tippani_date}
-                      onSelect={(value) => {
-                        const e = { target: { value: value } };
-                        handleNewTippaniChange(e, "tippani_date", index);
-                      }}
-                      className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "en" }}
+                      onChange={(e) =>
+                        handleNewTippaniChange(e, "tippani_date", index)
+                      }
+                      placeholder="टिप्पणी मिति"
+                      primaryColor="orange-500"
+                      className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">

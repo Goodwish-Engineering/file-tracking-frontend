@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaRegFileAlt, FaCalendarAlt, FaCheck, FaTimes } from "react-icons/fa";
 import { MdAdd, MdClose } from "react-icons/md";
 import { toast } from "react-toastify";
-import { NepaliDatePicker } from "nepali-datepicker-reactjs";
-import "nepali-datepicker-reactjs/dist/index.css";
+import DateInputField from "../Common/DateInputField";
+
 const DocumentsTab = ({
   editable,
   fileDetails,
@@ -19,6 +19,7 @@ const DocumentsTab = ({
   const [newDocumentRows, setNewDocumentRows] = useState([]);
   const [isPageCountModalOpen, setIsPageCountModalOpen] = useState(false);
   const [pageCount, setPageCount] = useState(1);
+  const [dateFilter, setDateFilter] = useState(""); // State for date filtering
 
   // Animation variant
   const fadeIn = {
@@ -110,6 +111,27 @@ const DocumentsTab = ({
     }
   };
 
+  // Handle date filter change with proper formatting
+  const handleDateFilterChange = (e) => {
+    const { value } = e.target;
+    setDateFilter(value);
+
+    // Actual filtering will be done in the render section
+  };
+
+  // Get filtered documents based on date filter
+  const getFilteredDocuments = () => {
+    if (!dateFilter) {
+      return fileDetails.letters_and_documents;
+    }
+
+    return fileDetails.letters_and_documents.filter((doc) =>
+      doc.created_at && doc.created_at.includes(dateFilter)
+    );
+  };
+
+  const filteredDocuments = getFilteredDocuments();
+
   return (
     <motion.div
       variants={fadeIn}
@@ -184,9 +206,8 @@ const DocumentsTab = ({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {/* Existing Document Rows */}
-            {Array.isArray(fileDetails.letters_and_documents) &&
-            fileDetails.letters_and_documents.length > 0 ? (
-              fileDetails.letters_and_documents.map((doc, index) => (
+            {Array.isArray(filteredDocuments) && filteredDocuments.length > 0 ? (
+              filteredDocuments.map((doc, index) => (
                 <tr
                   key={`existing-doc-${index}`}
                   className={`${
@@ -278,15 +299,13 @@ const DocumentsTab = ({
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <NepaliDatePicker
-                      inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                    <DateInputField
+                      name="date"
                       value={row.date}
-                      onSelect={(value) => {
-                        const e = { target: { value: value } };
-                        handleNewDocumentChange(e, "date", index);
-                      }}
-                      className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "en" }}
+                      onChange={(e) => handleNewDocumentChange(e, "date", index)}
+                      placeholder="मिति"
+                      primaryColor="blue-500"
+                      className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
@@ -302,15 +321,15 @@ const DocumentsTab = ({
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <NepaliDatePicker
-                      inputClassName="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                    <DateInputField
+                      name="letter_date"
                       value={row.letter_date}
-                      onSelect={(value) => {
-                        const e = { target: { value: value } };
-                        handleNewDocumentChange(e, "letter_date", index);
-                      }}
-                      className="w-full"
-                      options={{ calenderLocale: "ne", valueLocale: "en" }}
+                      onChange={(e) =>
+                        handleNewDocumentChange(e, "letter_date", index)
+                      }
+                      placeholder="पत्र मिति"
+                      primaryColor="blue-500"
+                      className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
