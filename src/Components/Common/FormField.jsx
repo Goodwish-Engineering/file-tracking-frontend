@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { FaCalendarAlt } from "react-icons/fa";
 
 const FormField = ({
@@ -16,8 +16,11 @@ const FormField = ({
   onChange,
   onBlur,
 }) => {
+  // Local state for date input to prevent focus loss
+  const [localDateValue, setLocalDateValue] = useState(value || "");
+
   // Enhanced date formatting with automatic hyphen insertion
-  const formatDateInput = (inputValue) => {
+  const formatDateInput = useCallback((inputValue) => {
     // Remove all non-numeric characters
     const numbers = inputValue.replace(/\D/g, "");
 
@@ -31,10 +34,10 @@ const FormField = ({
     } else {
       return `${numbers.slice(0, 4)}-${numbers.slice(4, 6)}-${numbers.slice(6, 8)}`;
     }
-  };
+  }, []);
 
   // Handle keydown events for better UX
-  const handleDateKeyDown = (e) => {
+  const handleDateKeyDown = useCallback((e) => {
     // Allow: backspace, delete, tab, escape, enter, home, end, left, right, up, down
     const allowedKeys = [8, 9, 27, 13, 35, 36, 37, 38, 39, 40, 46];
 
@@ -60,14 +63,53 @@ const FormField = ({
     ) {
       e.preventDefault();
     }
-  };
+  }, []);
+
+  // Optimized date change handler
+  const handleDateChange = useCallback(
+    (e) => {
+      const rawValue = e.target.value;
+      const formattedValue = formatDateInput(rawValue);
+
+      // Update local state immediately for responsive UI
+      setLocalDateValue(formattedValue);
+
+      // Call parent onChange with formatted value
+      if (onChange) {
+        const syntheticEvent = {
+          target: { name, value: formattedValue },
+        };
+        onChange(syntheticEvent);
+      }
+    },
+    [formatDateInput, name, onChange]
+  );
+
+  // Update local state when prop value changes (but not on every render)
+  React.useEffect(() => {
+    if (value !== localDateValue) {
+      setLocalDateValue(value || "");
+    }
+  }, [value]); // Only depend on value, not localDateValue to prevent infinite loops
+
+  // Memoize select options to prevent unnecessary re-renders
+  const selectOptions = useMemo(() => {
+    return options.map((option) => (
+      <option
+        key={option.id || option.value || option}
+        value={option.id || option.value || option}
+      >
+        {option.name || option.file_name || option.label || option}
+      </option>
+    ));
+  }, [options]);
 
   if (type === "select") {
     return (
       <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md">
         <label
           htmlFor={name}
-          className="block font-medium text-gray-700 mb-2 flex items-center"
+          className="block font-medium text-gray-700 mb-2 items-center"
         >
           {icon && <span className="mr-2 text-[#E68332]">{icon}</span>}
           {label}
@@ -85,14 +127,7 @@ const FormField = ({
           disabled={options.length === 0 && name !== "province"}
         >
           <option value="">{placeholder || `${label} छान्नुहोस्`}</option>
-          {options.map((option) => (
-            <option
-              key={option.id || option.value || option}
-              value={option.id || option.value || option}
-            >
-              {option.name || option.file_name || option.label || option}
-            </option>
-          ))}
+          {selectOptions}
         </select>
         {required && !value && (
           <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
@@ -116,28 +151,21 @@ const FormField = ({
             type="text"
             id={name}
             name={name}
-            value={value || ""}
-            onChange={(e) => {
-              const formattedValue = formatDateInput(e.target.value);
-              if (onChange) {
-                const syntheticEvent = {
-                  target: { name, value: formattedValue },
-                };
-                onChange(syntheticEvent);
-              }
-            }}
+            value={localDateValue}
+            onChange={handleDateChange}
             onKeyDown={handleDateKeyDown}
+            onBlur={onBlur}
             placeholder="YYYY-MM-DD (उदाहरण: 2081-05-15)"
             maxLength="10"
             className={`w-full border ${
-              required && !value ? "border-red-300" : "border-gray-300"
+              required && !localDateValue ? "border-red-300" : "border-gray-300"
             } rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#E68332] focus:border-[#E68332] transition-all duration-200 outline-none text-gray-700 font-mono tracking-wider`}
             required={required}
             autoComplete="off"
           />
 
           {/* Format hint overlay when empty */}
-          {!value && (
+          {!localDateValue && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm pointer-events-none">
               <span className="bg-gray-100 px-2 py-1 rounded text-xs">
                 वर्ष-महिना-दिन
@@ -146,7 +174,7 @@ const FormField = ({
           )}
         </div>
 
-        {required && !value && (
+        {required && !localDateValue && (
           <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
         )}
 

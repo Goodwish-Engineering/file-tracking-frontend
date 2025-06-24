@@ -3,20 +3,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import {
-  FaFileAlt,
-  FaCalendarAlt,
-  FaBuilding,
-  FaUser,
   FaArrowLeft,
   FaSpinner,
   FaEdit,
   FaPrint,
-  FaDownload,
-  FaEye,
-  FaPaperPlane,
+  FaCalendarAlt,
 } from "react-icons/fa";
-import { BsFileEarmark } from "react-icons/bs";
-import { MdSubject } from "react-icons/md";
+import ChalaniViewDetails from "./ChalaniViewDetails";
+import ChalaniEditForm from "./ChalaniEditForm";
+import InfoCard from "./Common/InfoCard";
+import InfoItem from "./Common/InfoItem";
 
 const ChalaniDetails = () => {
   const { id } = useParams();
@@ -27,7 +23,11 @@ const ChalaniDetails = () => {
   const [chalaniRecord, setChalaniRecord] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editFormData, setEditFormData] = useState({});
+  const [updateLoading, setUpdateLoading] = useState(false);
 
+  // Fetch chalani details when component mounts
   useEffect(() => {
     fetchChalaniDetails();
   }, [id]);
@@ -56,29 +56,74 @@ const ChalaniDetails = () => {
     }
   };
 
-  const InfoCard = ({ title, children, icon }) => (
-    <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow duration-300">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-        {icon && <span className="mr-2 text-blue-500">{icon}</span>}
-        {title}
-      </h3>
-      <div className="space-y-3">
-        {children}
-      </div>
-    </div>
-  );
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditFormData({
+      chalani_date: chalaniRecord.chalani_date || '',
+      darta_date: chalaniRecord.darta_date || '',
+      patra_sankhya: chalaniRecord.patra_sankhya || '',
+      subject: chalaniRecord.subject || '',
+      remarks: chalaniRecord.remarks || '',
+      karmachari: chalaniRecord.karmachari || '',
+      pana_sankhya: chalaniRecord.pana_sankhya || '',
+      pathaaune_thau: chalaniRecord.pathaaune_thau || '',
+      prapta_garne_byakti: chalaniRecord.prapta_garne_byakti || '',
+      related_office: chalaniRecord.related_office || '',
+      related_department: chalaniRecord.related_department || '',
+      related_faat: chalaniRecord.related_faat || '',
+      related_file: chalaniRecord.related_file || '',
+      sending_department: chalaniRecord.sending_department || '',
+    });
+  };
 
-  const InfoItem = ({ label, value, icon }) => (
-    <div className="flex items-start">
-      <div className="flex items-center min-w-0 flex-1">
-        {icon && <span className="mr-2 text-gray-400 flex-shrink-0">{icon}</span>}
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-gray-600">{label}</p>
-          <p className="text-sm text-gray-900 break-words">{value || "उपलब्ध छैन"}</p>
-        </div>
-      </div>
-    </div>
-  );
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditFormData({});
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleDateInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSaveEdit = async () => {
+    setUpdateLoading(true);
+    try {
+      const response = await fetch(`${baseUrl}/chalani/${id}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `token ${token}`,
+        },
+        body: JSON.stringify(editFormData),
+      });
+
+      if (!response.ok) {
+        throw new Error('चलानी रेकर्ड अपडेट गर्न असफल भयो');
+      }
+
+      const updatedData = await response.json();
+      setChalaniRecord(updatedData);
+      setIsEditing(false);
+      toast.success('चलानी रेकर्ड सफलतापूर्वक अपडेट भयो!');
+    } catch (error) {
+      console.error('Error updating chalani record:', error);
+      toast.error('चलानी रेकर्ड अपडेट गर्न असफल भयो।');
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -123,14 +168,38 @@ const ChalaniDetails = () => {
           </button>
           
           <div className="flex gap-2">
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              <FaEdit />
-              सम्पादन गर्नुहोस्
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-              <FaPrint />
-              प्रिन्ट गर्नुहोस्
-            </button>
+            {isEditing ? (
+              <>
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={updateLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  {updateLoading ? <FaSpinner className="animate-spin" /> : <FaEdit />}
+                  {updateLoading ? 'सुरक्षित गर्दै...' : 'सुरक्षित गर्नुहोस्'}
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  रद्द गर्नुहोस्
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={handleEdit}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <FaEdit />
+                  सम्पादन गर्नुहोस्
+                </button>
+                <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                  <FaPrint />
+                  प्रिन्ट गर्नुहोस्
+                </button>
+              </>
+            )}
           </div>
         </div>
         
@@ -144,162 +213,20 @@ const ChalaniDetails = () => {
         </div>
       </div>
 
-      {/* Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Basic Information */}
-        <InfoCard title="आधारभूत जानकारी" icon={<FaPaperPlane />}>
-          <InfoItem
-            label="चलानी नम्बर"
-            value={chalaniRecord.chalani_number}
-            icon={<FaFileAlt />}
-          />
-          <InfoItem
-            label="चलानी मिति"
-            value={chalaniRecord.chalani_date}
-            icon={<FaCalendarAlt />}
-          />
-          <InfoItem
-            label="दर्ता नम्बर"
-            value={chalaniRecord.darta_number}
-            icon={<FaFileAlt />}
-          />
-          <InfoItem
-            label="दर्ता मिति"
-            value={chalaniRecord.darta_date}
-            icon={<FaCalendarAlt />}
-          />
-        </InfoCard>
-
-        {/* Office Information */}
-        <InfoCard title="कार्यालय जानकारी" icon={<FaBuilding />}>
-          <InfoItem
-            label="सम्बन्धित विभाग"
-            value={chalaniRecord.related_department_detail?.name}
-            icon={<FaBuilding />}
-          />
-          <InfoItem
-            label="सम्बन्धित कार्यालय"
-            value={chalaniRecord.related_office_detail?.name}
-            icon={<FaBuilding />}
-          />
-          <InfoItem
-            label="सम्बन्धित फाँट"
-            value={chalaniRecord.related_faat_detail?.name}
-            icon={<FaBuilding />}
-          />
-          <InfoItem
-            label="पठाउने विभाग"
-            value={chalaniRecord.sending_department_detail?.name}
-            icon={<FaBuilding />}
-          />
-          <InfoItem
-            label="पठाउने स्थान"
-            value={chalaniRecord.pathaaune_thau}
-            icon={<FaPaperPlane />}
-          />
-          <InfoItem
-            label="प्राप्त गर्ने व्यक्ति"
-            value={chalaniRecord.prapta_garne_byakti}
-            icon={<FaUser />}
-          />
-        </InfoCard>
-
-        {/* Subject and Description */}
-        <InfoCard title="विषय र विवरण" icon={<MdSubject />}>
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-2">विषय</p>
-              <div className="bg-gray-50 p-3 rounded-md">
-                <p className="text-sm text-gray-900 whitespace-pre-wrap">
-                  {chalaniRecord.subject || "विषय उपलब्ध छैन"}
-                </p>
-              </div>
-            </div>
-            
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-2">कैफियत</p>
-              <div className="bg-gray-50 p-3 rounded-md">
-                <p className="text-sm text-gray-900 whitespace-pre-wrap">
-                  {chalaniRecord.remarks || "कैफियत उपलब्ध छैन"}
-                </p>
-              </div>
-            </div>
-          </div>
-        </InfoCard>
-
-        {/* Additional Details */}
-        <InfoCard title="अन्य विवरणहरू" icon={<FaUser />}>
-          <InfoItem
-            label="कर्मचारी"
-            value={chalaniRecord.karmachari}
-            icon={<FaUser />}
-          />
-          <InfoItem
-            label="पाना संख्या"
-            value={chalaniRecord.pana_sankhya}
-            icon={<FaFileAlt />}
-          />
-          <InfoItem
-            label="सम्बन्धित फाँट"
-            value={chalaniRecord.related_faat}
-            icon={<FaBuilding />}
-          />
-        </InfoCard>
-
-        {/* File Information */}
-        {chalaniRecord.related_file_detail && (
-          <div className="lg:col-span-2">
-            <InfoCard title="सम्बन्धित फाइल जानकारी" icon={<FaFileAlt />}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoItem
-                  label="फाइल नाम"
-                  value={chalaniRecord.related_file_detail.file_name}
-                  icon={<FaFileAlt />}
-                />
-                <InfoItem
-                  label="फाइल कोड"
-                  value={chalaniRecord.related_file_detail.file_code}
-                  icon={<FaFileAlt />}
-                />
-                <InfoItem
-                  label="फाइल ID"
-                  value={chalaniRecord.related_file_detail.id}
-                  icon={<FaFileAlt />}
-                />
-                <InfoItem
-                  label="स्थिति"
-                  value={chalaniRecord.related_file_detail.is_disabled ? "असक्षम" : "सक्षम"}
-                  icon={<FaFileAlt />}
-                />
-              </div>
-              
-              {chalaniRecord.related_file_detail.file_url && (
-                <div className="mt-4 flex gap-2">
-                  <button
-                    onClick={() => window.open(chalaniRecord.related_file_detail.file_url, '_blank')}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <FaEye />
-                    फाइल हेर्नुहोस्
-                  </button>
-                  <button
-                    onClick={() => {
-                      const link = document.createElement('a');
-                      link.href = chalaniRecord.related_file_detail.file_url;
-                      link.download = chalaniRecord.related_file_detail.file_name;
-                      link.click();
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    <FaDownload />
-                    डाउनलोड गर्नुहोस्
-                  </button>
-                </div>
-              )}
-            </InfoCard>
-          </div>
-        )}
-      </div>
+      {/* Content Grid - Choose between view or edit mode */}
+      {isEditing ? (
+        <ChalaniEditForm 
+          chalaniRecord={chalaniRecord}
+          editFormData={editFormData}
+          handleInputChange={handleInputChange}
+          handleDateInputChange={handleDateInputChange}
+          handleSaveEdit={handleSaveEdit}
+          handleCancelEdit={handleCancelEdit}
+          updateLoading={updateLoading}
+        />
+      ) : (
+        <ChalaniViewDetails chalaniRecord={chalaniRecord} />
+      )}
 
       {/* Timestamp Information */}
       <div className="mt-6">
