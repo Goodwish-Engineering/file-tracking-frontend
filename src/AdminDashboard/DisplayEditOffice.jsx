@@ -180,40 +180,6 @@ const DisplayEditOffice = ({ dataUpdated }) => {
     }
   };
 
-  // Add new faat to department
-  const handleAddFaat = async (departmentId) => {
-    const faatName = prompt("नयाँ फाँटको नाम प्रविष्ट गर्नुहोस्:");
-    if (!faatName || !faatName.trim()) return;
-
-    try {
-      const response = await axios.post(
-        `${baseUrl}/faat/`,
-        { 
-          name: faatName.trim(),
-          department: departmentId 
-        },
-        {
-          headers: {
-            Authorization: `Token ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      
-      if (response.data) {
-        // Update faats in state
-        setDepartmentFaats(prev => ({
-          ...prev,
-          [departmentId]: [...(prev[departmentId] || []), response.data]
-        }));
-        
-        toast.success("फाँट सफलतापूर्वक थपियो");
-      }
-    } catch (error) {
-      console.error("Error adding faat:", error);
-      toast.error("फाँट थप्न असफल");
-    }
-  };
 
   const handleStartEdit = (office) => {
     setEditingOffice(office.id);
@@ -523,13 +489,6 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                                       </div>
                                       
                                       <div className="flex items-center space-x-1">
-                                        <button
-                                          onClick={() => handleAddFaat(dept.id)}
-                                          className="text-green-500 hover:bg-green-50 p-1.5 rounded-full transition-all duration-200 mx-1"
-                                          title="फाँट थप्नुहोस्"
-                                        >
-                                          <FaPlus className="text-sm" />
-                                        </button>
                                         <button
                                           onClick={() => handleStartEditDepartment(dept)}
                                           className="text-blue-500 hover:bg-blue-50 p-1.5 rounded-full transition-all duration-200"

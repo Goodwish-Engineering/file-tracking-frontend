@@ -20,7 +20,7 @@ const AddOffice = () => {
     {
       name: "",
       code: "",
-      faats: [{ name: "", code: "" }], // Updated to include code for each faat
+      faats: [{ name: "", code: "" }], // Remove belongs_to from faats - they belong to department via department ID
     },
   ]);
   const [officeId, setOfficeId] = useState(null);
@@ -50,14 +50,20 @@ const AddOffice = () => {
 
   const handleFaatNameChange = (departmentIndex, faatIndex, e) => {
     const newDepartments = [...departments];
-    newDepartments[departmentIndex].faats[faatIndex].name = e.target.value;
+    newDepartments[departmentIndex].faats[faatIndex] = {
+      ...newDepartments[departmentIndex].faats[faatIndex],
+      name: e.target.value,
+    };
     setDepartments(newDepartments);
   };
 
   // New handler for faat code changes
   const handleFaatCodeChange = (departmentIndex, faatIndex, e) => {
     const newDepartments = [...departments];
-    newDepartments[departmentIndex].faats[faatIndex].code = e.target.value;
+    newDepartments[departmentIndex].faats[faatIndex] = {
+      ...newDepartments[departmentIndex].faats[faatIndex],
+      code: e.target.value,
+    };
     setDepartments(newDepartments);
   };
 
@@ -74,7 +80,11 @@ const AddOffice = () => {
 
   const addFaatField = (departmentIndex) => {
     const newDepartments = [...departments];
-    newDepartments[departmentIndex].faats.push({ name: "", code: "" }); // Add empty faat with code field
+    newDepartments[departmentIndex].faats.push({
+      name: "",
+      code: "",
+      // Remove belongs_to - faats are linked to departments via the department ID in the API call
+    });
     setDepartments(newDepartments);
   };
 
@@ -143,7 +153,7 @@ const AddOffice = () => {
               if (faat.name.trim() !== "") {
                 await axios.post(
                   `${baseUrl}/faat/`,
-                  { name: faat.name, code: faat.code, department: departmentId },
+                  { name: faat.name, code: faat.code, belongs_to: departmentId }, // Use belongs_to instead of department
                   { headers: { Authorization: `Token ${token}` } }
                 );
               }
@@ -162,7 +172,7 @@ const AddOffice = () => {
 
         // Reset form fields
         setFormData({ name: "", code: "" });
-        setDepartments([{ name: "", code: "", faats: [{ name: "", code: "" }] }]);
+        setDepartments([{ name: "", code: "", faats: [{ name: "", code: "" }] }]); // Remove belongs_to from reset
       }
     } catch (error) {
       console.error("Error saving data:", error);
