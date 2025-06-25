@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { NepaliDatePicker } from "nepali-datepicker-reactjs";
-import "nepali-datepicker-reactjs/dist/index.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -15,6 +13,7 @@ import {
 import { BsFileEarmark } from "react-icons/bs";
 import { GrStatusInfo } from "react-icons/gr";
 import { MdSubject } from "react-icons/md";
+import DateInputField from "./Common/DateInputField";
 
 const FileDetails = ({ setShowButton, clearData }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
@@ -22,9 +21,6 @@ const FileDetails = ({ setShowButton, clearData }) => {
   const empId = localStorage.getItem("userId");
   const userid = localStorage.getItem("userId");
   const [show, setShow] = useState(true);
-
-  // Add missing state variable
-  const [useManualDateInput, setUseManualDateInput] = useState(false);
 
   // This state will be used to track the current values
   const [formData, setFormData] = useState({
@@ -36,10 +32,11 @@ const FileDetails = ({ setShowButton, clearData }) => {
     ward_no: "",
     tole: "",
     present_by: empId,
-    submitted_by: "", // Already exists in state, ensure it's used in the form
+    submitted_by: "",
     present_date: "",
     related_guthi: "",
     related_department: "",
+    related_faat: "", // Add related_faat field
     file_type: "",
   });
 
@@ -49,7 +46,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
     subject: useRef(null),
     ward_no: useRef(null),
     tole: useRef(null),
-    submitted_by: useRef(null), // Reference already exists, ensure it's used properly
+    submitted_by: useRef(null),
   };
 
   const [provinces, setProvinces] = useState([]);
@@ -57,6 +54,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
   const [municipalities, setMunicipalities] = useState([]);
   const [officeData, setOfficeData] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [faats, setFaats] = useState([]); // Add faats state
   const [fileTypes, setFileTypeData] = useState([]);
   const clearFields = () => {
     setFormData({
@@ -68,10 +66,11 @@ const FileDetails = ({ setShowButton, clearData }) => {
       ward_no: "",
       tole: "",
       present_by: empId,
-      submitted_by: "", // Make sure this is cleared
+      submitted_by: "",
       present_date: "",
       related_guthi: "",
       related_department: "",
+      related_faat: "", // Clear related_faat
       file_type: "",
     });
 
@@ -178,6 +177,15 @@ const FileDetails = ({ setShowButton, clearData }) => {
     }));
   };
 
+  // Handle date field changes
+  const handleDateChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   // Handle select inputs (which still use controlled approach)
   const handleSelectChange = (e) => {
     const { name, value } = e.target;
@@ -187,6 +195,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
       [name]: value,
     }));
     console.log("value:", name, value);
+
     if (name === "province") {
       // Reset district and municipality values
       if (inputRefs.district?.current) {
@@ -223,10 +232,11 @@ const FileDetails = ({ setShowButton, clearData }) => {
     }
 
     if (name === "related_guthi") {
-      // Reset department value
+      // Reset department and faat values
       setFormData((prev) => ({
         ...prev,
         related_department: "",
+        related_faat: "",
       }));
 
       // Find departments for the selected office
@@ -238,6 +248,59 @@ const FileDetails = ({ setShowButton, clearData }) => {
       } else {
         setDepartments([]);
       }
+      setFaats([]); // Clear faats when office changes
+    }
+
+    if (name === "related_department") {
+      // Reset faat value
+      setFormData((prev) => ({
+        ...prev,
+        related_faat: "",
+      }));
+
+      // Fetch faats for the selected department
+      fetchFaats(value);
+    }
+  };
+
+  // Add fetchFaats function
+  const fetchFaats = async (departmentId) => {
+    if (!departmentId) {
+      setFaats([]);
+      return;
+    }
+
+    try {
+      // Try direct department fetch first
+      const response = await fetch(`${baseUrl}/department/${departmentId}`, {
+        headers: { Authorization: `Token ${token}` },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Fetched Department Data:", data);
+        
+        // Extract faats from department response
+        setFaats(data.faats || []); // Ensure it's always an array
+      } else {
+        // Fallback to the query parameter approach if direct fetch fails
+        console.log("Trying fallback approach for faats...");
+        const fallbackResponse = await fetch(`${baseUrl}/faat/?department=${departmentId}`, {
+          headers: { Authorization: `Token ${token}` },
+        });
+        
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json();
+          console.log("Fetched faats (fallback):", fallbackData);
+          setFaats(Array.isArray(fallbackData) ? fallbackData : []);
+        } else {
+          console.error("Fallback also failed");
+          setFaats([]);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching faats:", error);
+      setFaats([]); // Prevents UI crashes
     }
   };
 
@@ -329,67 +392,6 @@ const FileDetails = ({ setShowButton, clearData }) => {
               </option>
             ))}
           </select>
-          {required && !formData[name] && (
-            <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
-          )}
-        </div>
-      );
-    } else if (type === "nepali-date" || type === "date") {
-      return (
-        <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md p-2">
-          <div className="flex justify-between items-center mb-2">
-            <label
-              htmlFor={name}
-              className="block font-medium text-gray-700 items-center"
-            >
-              <FaCalendarAlt className="mr-2 text-[#ED772F]" />
-              {label}
-              {required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-
-            {/* Toggle between date picker and manual input */}
-            <button
-              type="button"
-              onClick={() => setUseManualDateInput(!useManualDateInput)}
-              className="text-xs text-blue-600 hover:underline"
-            >
-              {useManualDateInput
-                ? "प्रयोग गर्नुहोस् पिकर"
-                : "म्यानुअल इनपुट प्रयोग गर्नुहोस्"}
-            </button>
-          </div>
-
-          {useManualDateInput ? (
-            // Manual date input option
-            <input
-              type="text"
-              name={name}
-              value={formData[name] || ""}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, [name]: e.target.value }))
-              }
-              placeholder="YYYY-MM-DD वा YYYY/MM/DD"
-              className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#ED772F] text-gray-700"
-              required={required}
-            />
-          ) : (
-            // Nepali Date Picker option
-            <NepaliDatePicker
-              key={datePickerKey + name}
-              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-2 focus:ring-[#ED772F] text-gray-700"
-              className="w-full"
-              name={name}
-              value={formData[name]}
-              onSelect={(value) => {
-                setFormData((prev) => ({ ...prev, [name]: value }));
-              }}
-              options={{
-                calenderLocale: "ne",
-                valueLocale: "en",
-              }}
-            />
-          )}
-
           {required && !formData[name] && (
             <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
           )}
@@ -491,12 +493,25 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 placeholder="जिम्मेवार व्यक्तिको नाम लेख्नुहोस्"
               />
 
-              <FormField
-                label="हालको मिति"
-                name="present_date"
-                type="nepali-date"
-                required={true}
-              />
+              {/* Replace FormField with direct DateInputField usage */}
+              <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md">
+                <label className="block font-medium text-gray-700 mb-2 flex items-center">
+                  <FaCalendarAlt className="mr-2 text-[#ED772F]" />
+                  हालको मिति
+                  <span className="text-red-500 ml-1">*</span>
+                </label>
+                <DateInputField
+                  name="present_date"
+                  value={formData.present_date}
+                  onChange={handleDateChange}
+                  placeholder="YYYY-MM-DD (उदाहरण: 2081-05-15)"
+                  primaryColor="orange-500"
+                  className="w-full"
+                />
+                {!formData.present_date && (
+                  <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
+                )}
+              </div>
             </div>
           </div>
 
@@ -560,7 +575,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
               <FaBuilding className="mr-2 text-[#ED772F]" />
               कार्यालय जानकारी
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <FormField
                 label="कार्यालय"
                 name="related_guthi"
@@ -578,6 +593,16 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 options={departments}
                 placeholder="विभाग छान्नुहोस्"
                 required={true}
+                icon={<FaBuilding />}
+              />
+
+              <FormField
+                label="फाँट"
+                name="related_faat"
+                type="select"
+                options={faats}
+                placeholder="फाँट छान्नुहोस्"
+                required={false}
                 icon={<FaBuilding />}
               />
             </div>
