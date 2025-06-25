@@ -52,7 +52,7 @@ const DocumentsTab = ({
         subject: "",
         letter_date: "",
         office: "",
-        page_no: index + 1,
+        page_no: "1", // Default to 1 for each row
         related_file: id,
       }));
 
@@ -162,6 +162,12 @@ const DocumentsTab = ({
             <tr>
               <th
                 scope="col"
+                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-16"
+              >
+                क्र.सं.
+              </th>
+              <th
+                scope="col"
                 className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider"
               >
                 दर्ता नं/चलानी नं
@@ -196,12 +202,6 @@ const DocumentsTab = ({
               >
                 कार्यालय
               </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider"
-              >
-                पृष्ठ
-              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -214,6 +214,11 @@ const DocumentsTab = ({
                     index % 2 === 0 ? "bg-white" : "bg-gray-50"
                   } hover:bg-yellow-50 transition-all duration-200 cursor-default`}
                 >
+                  <td className="px-4 py-3 text-sm">
+                    <span className="text-gray-900 font-medium">
+                      {index + 1}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-sm">
                     {doc.number_type || (
                       <span className="text-gray-400 italic">N/A</span>
@@ -252,11 +257,6 @@ const DocumentsTab = ({
                       <span className="text-gray-400 italic">N/A</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-sm">
-                    {doc.page_no || (
-                      <span className="text-gray-400 italic">N/A</span>
-                    )}
-                  </td>
                 </tr>
               ))
             ) : !addingNewDocuments ? (
@@ -274,6 +274,11 @@ const DocumentsTab = ({
                   key={`new-doc-${index}`}
                   className="bg-green-50 hover:bg-green-100 border-b border-gray-200"
                 >
+                  <td className="px-4 py-3 text-sm border-l-2 border-green-500">
+                    <span className="text-gray-900 font-medium">
+                      {(filteredDocuments ? filteredDocuments.length : 0) + index + 1}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-sm">
                     <select
                       value={row.number_type || ""}
@@ -342,13 +347,6 @@ const DocumentsTab = ({
                       placeholder="कार्यालय"
                       className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    {row.page_no ? (
-                      row.page_no
-                    ) : (
-                      <span className="text-gray-400 italic">N/A</span>
-                    )}
                   </td>
                 </tr>
               ))}

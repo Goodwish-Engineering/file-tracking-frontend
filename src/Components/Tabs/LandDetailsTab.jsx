@@ -159,13 +159,13 @@ const LandDetailsTab = ({
         <table className="min-w-full divide-y divide-gray-200 table-fixed">
           <thead className="bg-gradient-to-r from-[#E68332] to-[#f0996a] text-white sticky top-0 z-10">
             <tr>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-16">क्र.सं.</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-32">जिल्ला</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">नगरपालिका</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">वार्ड नं</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">किट्टा नं</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-32">गुठी नाम</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">जग्गा प्रकार</th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">सम्बन्धित फाइल</th>
               {editable && showNewRow && (
                 <th scope="col" className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider w-24 md:w-28">कार्य</th>
               )}
@@ -179,6 +179,11 @@ const LandDetailsTab = ({
                   key={`land-detail-${index}`}
                   className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-yellow-50 transition-all duration-200 cursor-default`}
                 >
+                  <td className="px-4 py-3 text-sm">
+                    <span className="text-gray-900 font-medium">
+                      {index + 1}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-sm">
                     {editable ? (
                       <input
@@ -253,9 +258,6 @@ const LandDetailsTab = ({
                       <span className="text-gray-900">{detail.land_type || "N/A"}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className="text-gray-900">{id}</span>
-                  </td>
                 </tr>
               ))
             ) : !showNewRow ? (
@@ -269,6 +271,11 @@ const LandDetailsTab = ({
             {/* New Land Detail Row */}
             {editable && showNewRow && (
               <tr className="bg-green-50 hover:bg-green-100 border-b border-gray-200">
+                <td className="px-4 py-3 text-sm border-l-2 border-green-500">
+                  <span className="text-gray-900 font-medium">
+                    {(landDetails ? landDetails.length : 0) + 1}
+                  </span>
+                </td>
                 <td className="px-4 py-3 text-sm">
                   <input
                     type="text"
@@ -324,9 +331,6 @@ const LandDetailsTab = ({
                     placeholder="जग्गा प्रकार"
                     className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                   />
-                </td>
-                <td className="px-4 py-3 text-sm">
-                  <span className="text-gray-900">{id}</span>
                 </td>
                 <td className="px-4 py-3 text-sm">
                   <div className="flex items-center justify-center gap-2">
