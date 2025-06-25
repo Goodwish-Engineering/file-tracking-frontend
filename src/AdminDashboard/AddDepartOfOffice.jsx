@@ -10,7 +10,7 @@ const AddDepartOfOffice = () => {
   const { officeId } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: "", belongs_to: officeId });
-  const [faatFormData, setFaatFormData] = useState({ name: "", code: "", department: "" }); // Update faatFormData to include the code field
+  const [faatFormData, setFaatFormData] = useState({ name: "", code: "", belongs_to: "" }); // Use belongs_to to match the model
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFaatSubmitting, setIsFaatSubmitting] = useState(false);
   const [departments, setDepartments] = useState([]);
@@ -94,7 +94,7 @@ const AddDepartOfOffice = () => {
   const handleDepartmentChange = (e) => {
     const departmentId = e.target.value;
     setSelectedDepartment(departmentId);
-    setFaatFormData({ ...faatFormData, department: departmentId });
+    setFaatFormData({ ...faatFormData, belongs_to: departmentId }); // Use belongs_to
     fetchFaats(departmentId);
   };
 
@@ -144,7 +144,7 @@ const AddDepartOfOffice = () => {
       return;
     }
     
-    if (!faatFormData.department) {
+    if (!faatFormData.belongs_to) {
       toast.error("कृपया विभाग छनोट गर्नुहोस्");
       return;
     }
@@ -160,7 +160,7 @@ const AddDepartOfOffice = () => {
 
       if (response.data) {
         toast.success("फाँट सफलतापूर्वक थपियो!");
-        setFaatFormData({ name: "", code: "", department: selectedDepartment });
+        setFaatFormData({ name: "", code: "", belongs_to: selectedDepartment }); // Use belongs_to
         fetchFaats(selectedDepartment); // Refresh the faats list
       }
     } catch (error) {
@@ -327,7 +327,7 @@ const AddDepartOfOffice = () => {
                     </label>
                     <select
                       id="department"
-                      name="department"
+                      name="belongs_to"
                       value={selectedDepartment}
                       onChange={handleDepartmentChange}
                       className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
