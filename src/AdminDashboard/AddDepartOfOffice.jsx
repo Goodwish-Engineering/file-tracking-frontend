@@ -9,7 +9,7 @@ const AddDepartOfOffice = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const { officeId } = useParams();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ name: "", belongs_to: officeId });
+  const [formData, setFormData] = useState({ name: "", code: "", belongs_to: officeId }); // Add code field
   const [faatFormData, setFaatFormData] = useState({ name: "", code: "", belongs_to: "" }); // Use belongs_to to match the model
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFaatSubmitting, setIsFaatSubmitting] = useState(false);
@@ -106,6 +106,11 @@ const AddDepartOfOffice = () => {
       return;
     }
     
+    if (!formData.code.trim()) {
+      toast.error("कृपया विभागको कोड प्रविष्ट गर्नुहोस्");
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
@@ -119,7 +124,7 @@ const AddDepartOfOffice = () => {
 
       if (response.data) {
         toast.success("विभाग सफलतापूर्वक थपियो!");
-        setFormData({ name: "", belongs_to: officeId });
+        setFormData({ name: "", code: "", belongs_to: officeId }); // Reset both name and code
         fetchDepartments(); // Refresh the departments list
       }
     } catch (error) {
@@ -214,26 +219,47 @@ const AddDepartOfOffice = () => {
                 </div>
                 
                 <form onSubmit={handleSubmit} className="p-6">
-                  <div className="mb-6">
-                    <label htmlFor="name" className="text-gray-800 font-medium mb-2 flex items-center">
-                      <FaBuilding className="mr-2 text-[#E68332]" />
-                      विभागको नाम
-                      <span className="text-red-500 ml-1">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
-                      placeholder="विभागको नाम यहाँ लेख्नुहोस्"
-                      required
-                    />
-                    <p className="text-sm text-gray-500 mt-1 italic">
-                      यो विभाग "{officeName}" कार्यालय अन्तर्गत थपिनेछ
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <label htmlFor="code" className="text-gray-800 font-medium mb-2 flex items-center">
+                        <FaBuilding className="mr-2 text-[#E68332]" />
+                        विभागको कोड
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="code"
+                        name="code"
+                        value={formData.code}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
+                        placeholder="विभागको कोड यहाँ लेख्नुहोस्"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="name" className="text-gray-800 font-medium mb-2 flex items-center">
+                        <FaBuilding className="mr-2 text-[#E68332]" />
+                        विभागको नाम
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
+                        placeholder="विभागको नाम यहाँ लेख्नुहोस्"
+                        required
+                      />
+                    </div>
                   </div>
+                  
+                  <p className="text-sm text-gray-500 mt-1 italic">
+                    यो विभाग "{officeName}" कार्यालय अन्तर्गत थपिनेछ
+                  </p>
 
                   <div className="flex justify-center mt-8">
                     <button 
@@ -287,7 +313,14 @@ const AddDepartOfOffice = () => {
                           <FaBuilding className="text-[#E68332] mr-3 text-lg" />
                           <div>
                             <p className="font-medium">{dept.name}</p>
-                            <p className="text-xs text-gray-500">ID: {dept.id}</p>
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <span>ID: {dept.id}</span>
+                              {dept.code && (
+                                <span className="bg-blue-100 px-2 py-0.5 rounded text-blue-700">
+                                  कोड: {dept.code}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}

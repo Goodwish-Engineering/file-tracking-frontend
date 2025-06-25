@@ -384,7 +384,14 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                             </div>
                             <div>
                               <p className="font-medium text-gray-800 text-lg">{office.name}</p>
-                              <p className="text-xs text-gray-500">ID: {office.id}</p>
+                              <div className="flex items-center gap-2 text-xs text-gray-500">
+                                <span>ID: {office.id}</span>
+                                {office.code && (
+                                  <span className="bg-orange-100 px-2 py-0.5 rounded text-orange-700">
+                                    कोड: {office.code}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         )}
@@ -481,9 +488,13 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                                         </div>
                                         <div>
                                           <p className="text-gray-700 font-medium">{dept.name}</p>
-                                          <div className="flex items-center text-xs text-gray-500">
+                                          <div className="flex items-center gap-2 text-xs text-gray-500">
                                             <span>ID: {dept.id}</span>
-                                            {dept.code && <span className="ml-2">कोड: {dept.code}</span>}
+                                            {dept.code && (
+                                              <span className="bg-blue-100 px-2 py-0.5 rounded text-blue-700">
+                                                कोड: {dept.code}
+                                              </span>
+                                            )}
                                           </div>
                                         </div>
                                       </div>
@@ -657,7 +668,14 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                   </div>
                   <div>
                     <h3 className="font-bold text-xl text-gray-800">{showInfoOffice.name}</h3>
-                    <p className="text-sm text-gray-500">कार्यालय ID: {showInfoOffice.id}</p>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <span>कार्यालय ID: {showInfoOffice.id}</span>
+                      {showInfoOffice.code && (
+                        <span className="bg-orange-100 px-2 py-1 rounded text-orange-700">
+                          कोड: {showInfoOffice.code}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -707,7 +725,17 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                               autoFocus
                             />
                           ) : (
-                            <p className="text-gray-700 font-medium">{dept.name}</p>
+                            <div>
+                              <p className="text-gray-700 font-medium">{dept.name}</p>
+                              <div className="flex items-center gap-2 text-xs text-gray-500">
+                                <span>ID: {dept.id}</span>
+                                {dept.code && (
+                                  <span className="bg-blue-100 px-2 py-0.5 rounded text-blue-700">
+                                    कोड: {dept.code}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           )}
                           
                           <div className="flex items-center gap-3">
@@ -810,4 +838,4 @@ const DisplayEditOffice = ({ dataUpdated }) => {
 };
 
 export default DisplayEditOffice;
-        
+
