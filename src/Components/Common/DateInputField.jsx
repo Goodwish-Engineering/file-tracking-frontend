@@ -6,7 +6,8 @@ const DateInputField = ({
   value, 
   onChange, 
   placeholder = "YYYY-MM-DD (उदाहरण: 2081-05-15)",
-  primaryColor = "blue-500" 
+  primaryColor = "orange-500",
+  className = ""
 }) => {
   // Local state to handle formatted value during typing
   const [localValue, setLocalValue] = useState(value || '');
@@ -80,11 +81,19 @@ const DateInputField = ({
     }
   };
 
+  // Determine focus ring color based on primaryColor prop
+  const getFocusClasses = () => {
+    if (primaryColor === "orange-500") {
+      return "focus:ring-2 focus:ring-[#ED772F] focus:border-[#ED772F]";
+    } else if (primaryColor === "green-500") {
+      return "focus:ring-2 focus:ring-green-500 focus:border-green-500";
+    } else {
+      return `focus:ring-2 focus:ring-${primaryColor} focus:border-${primaryColor}`;
+    }
+  };
+
   return (
-    <div className="relative">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <FaCalendarAlt className="text-gray-400" />
-      </div>
+    <div className={`relative ${className}`}>
       <input
         type="text"
         name={name}
@@ -93,7 +102,7 @@ const DateInputField = ({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         maxLength="10"
-        className={`pl-10 w-full py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-${primaryColor} focus:border-${primaryColor} font-mono tracking-wider`}
+        className={`w-full border border-gray-300 rounded-md shadow-sm p-3 ${getFocusClasses()} transition-all duration-200 outline-none text-gray-700 font-mono tracking-wider`}
         autoComplete="off"
       />
       {!localValue && (
