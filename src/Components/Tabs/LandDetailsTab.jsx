@@ -1,7 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaMapMarkerAlt, FaCheck, FaPlus, FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+
+const LAND_TYPE_CHOICES = [
+  { value: "अधिनस्थ", label: "अधिनस्थ" },
+  { value: "रैतानी", label: "रैतानी" },
+  { value: "तैनाथी", label: "तैनाथी" },
+];
 
 const LandDetailsTab = ({ 
   editable, 
@@ -12,6 +19,7 @@ const LandDetailsTab = ({
   id, 
   fetchLandDetails 
 }) => {
+  const [offices, setOffices] = useState([]);
   // State for showing the new land detail row
   const [showNewRow, setShowNewRow] = useState(false);
   // State for new land detail
@@ -29,6 +37,28 @@ const LandDetailsTab = ({
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
+
+  // Fetch offices data for dropdown
+  useEffect(() => {
+    const fetchOfficeData = async () => {
+      try {
+        const response = await fetch(`${baseUrl}/offices/`, {
+          headers: { Authorization: `Token ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setOffices(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error("Error fetching Office data:", error);
+        setOffices([]);
+      }
+    };
+
+    if (editable) {
+      fetchOfficeData();
+    }
+  }, [baseUrl, token, editable]);
 
   // Handle changes to existing land details
   const handleLandDetailChange = (e, field, index) => {
@@ -89,6 +119,18 @@ const LandDetailsTab = ({
   const handleSaveLandDetails = async () => {
     try {
       for (const detail of landDetails) {
+        // Find office name for guthi_name field
+        const officeObj = offices.find(office => office.id.toString() === detail.guthi_name);
+        const guthiName = officeObj ? officeObj.name : detail.guthi_name;
+        
+        // Prepare payload with proper data types
+        const payload = {
+          ...detail,
+          ward_no: detail.ward_no ? parseInt(detail.ward_no) : null,
+          guthi_name: guthiName, // Send office name as string
+          related_file: parseInt(id),
+        };
+
         if (detail.id) {
           // Update existing record
           await fetch(`${baseUrl}/land-details/${detail.id}/`, {
@@ -97,7 +139,7 @@ const LandDetailsTab = ({
               "Content-Type": "application/json",
               Authorization: `token ${token}`,
             },
-            body: JSON.stringify(detail),
+            body: JSON.stringify(payload),
           });
         } else {
           // Create new record
@@ -107,7 +149,7 @@ const LandDetailsTab = ({
               "Content-Type": "application/json",
               Authorization: `token ${token}`,
             },
-            body: JSON.stringify({ ...detail, related_file: id }),
+            body: JSON.stringify(payload),
           });
         }
       }
@@ -117,6 +159,18 @@ const LandDetailsTab = ({
       console.error("Error updating land details:", error);
       toast.error("जग्गा विवरण अद्यावधिक गर्न असफल");
     }
+  };
+
+  // Helper function to get office name by ID
+  const getOfficeName = (officeId) => {
+    const office = offices.find(o => o.id === parseInt(officeId));
+    return office ? office.name : officeId || "N/A"; // Return the value itself if not found (in case it's already a name)
+  };
+
+  // Add helper function to get office ID by name (for dropdown selection)
+  const getOfficeIdByName = (officeName) => {
+    const office = offices.find(o => o.name === officeName);
+    return office ? office.id.toString() : "";
   };
 
   return (
@@ -213,10 +267,11 @@ const LandDetailsTab = ({
                   <td className="px-4 py-3 text-sm">
                     {editable ? (
                       <input
-                        type="text"
+                        type="number"
                         value={detail.ward_no || ""}
                         onChange={(e) => handleLandDetailChange(e, "ward_no", index)}
                         className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                        min="1"
                       />
                     ) : (
                       <span className="text-gray-900">{detail.ward_no || "N/A"}</span>
@@ -236,24 +291,54 @@ const LandDetailsTab = ({
                   </td>
                   <td className="px-4 py-3 text-sm">
                     {editable ? (
-                      <input
-                        type="text"
-                        value={detail.guthi_name || ""}
-                        onChange={(e) => handleLandDetailChange(e, "guthi_name", index)}
-                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      />
+                      <div className="relative">
+                        <select
+                          value={getOfficeIdByName(detail.guthi_name) || ""}
+                          onChange={(e) => {
+                            const selectedOffice = offices.find(office => office.id.toString() === e.target.value);
+                            const officeName = selectedOffice ? selectedOffice.name : "";
+                            handleLandDetailChange({target: {value: officeName}}, "guthi_name", index);
+                          }}
+                          className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent appearance-none bg-white pr-6"
+                        >
+                          <option value="">गुठी छान्नुहोस्</option>
+                          {offices.map((office) => (
+                            <option key={office.id} value={office.id}>
+                              {office.name}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                          <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
                     ) : (
                       <span className="text-gray-900">{detail.guthi_name || "N/A"}</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-sm">
                     {editable ? (
-                      <input
-                        type="text"
-                        value={detail.land_type || ""}
-                        onChange={(e) => handleLandDetailChange(e, "land_type", index)}
-                        className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                      />
+                      <div className="relative">
+                        <select
+                          value={detail.land_type || ""}
+                          onChange={(e) => handleLandDetailChange(e, "land_type", index)}
+                          className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent appearance-none bg-white pr-6"
+                        >
+                          <option value="">जग्गा प्रकार छान्नुहोस्</option>
+                          {LAND_TYPE_CHOICES.map((choice) => (
+                            <option key={choice.value} value={choice.value}>
+                              {choice.label}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                          <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
                     ) : (
                       <span className="text-gray-900">{detail.land_type || "N/A"}</span>
                     )}
@@ -297,11 +382,12 @@ const LandDetailsTab = ({
                 </td>
                 <td className="px-4 py-3 text-sm">
                   <input
-                    type="text"
+                    type="number"
                     value={newLandDetail.ward_no}
                     onChange={(e) => handleNewLandDetailChange(e, "ward_no")}
                     placeholder="वार्ड नं"
                     className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                    min="1"
                   />
                 </td>
                 <td className="px-4 py-3 text-sm">
@@ -315,22 +401,50 @@ const LandDetailsTab = ({
                   />
                 </td>
                 <td className="px-4 py-3 text-sm">
-                  <input
-                    type="text"
-                    value={newLandDetail.guthi_name}
-                    onChange={(e) => handleNewLandDetailChange(e, "guthi_name")}
-                    placeholder="गुठी नाम"
-                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                  />
+                  <div className="relative">
+                    <select
+                      value={getOfficeIdByName(newLandDetail.guthi_name) || ""}
+                      onChange={(e) => {
+                        const selectedOffice = offices.find(office => office.id.toString() === e.target.value);
+                        const officeName = selectedOffice ? selectedOffice.name : "";
+                        handleNewLandDetailChange({target: {value: officeName}}, "guthi_name");
+                      }}
+                      className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent appearance-none bg-white pr-6"
+                    >
+                      <option value="">गुठी छान्नुहोस्</option>
+                      {offices.map((office) => (
+                        <option key={office.id} value={office.id}>
+                          {office.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                      <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-sm">
-                  <input
-                    type="text"
-                    value={newLandDetail.land_type}
-                    onChange={(e) => handleNewLandDetailChange(e, "land_type")}
-                    placeholder="जग्गा प्रकार"
-                    className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                  />
+                  <div className="relative">
+                    <select
+                      value={newLandDetail.land_type}
+                      onChange={(e) => handleNewLandDetailChange(e, "land_type")}
+                      className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent appearance-none bg-white pr-6"
+                    >
+                      <option value="">जग्गा प्रकार छान्नुहोस्</option>
+                      {LAND_TYPE_CHOICES.map((choice) => (
+                        <option key={choice.value} value={choice.value}>
+                          {choice.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                      <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-sm">
                   <div className="flex items-center justify-center gap-2">
