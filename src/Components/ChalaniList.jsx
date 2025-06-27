@@ -24,16 +24,42 @@ const ChalaniList = () => {
   const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [showFilters, setShowFilters] = useState(false);
-  const [filterDate, setFilterDate] = useState("");
   const [filterUrgency, setFilterUrgency] = useState("");
   const [isAddChalaniOpen, setIsAddChalaniOpen] = useState(false);
-  const navigate = useNavigate();
+  
+  // Pagination state
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 0,
+    currentPage: 1,
+    pageSize: 10,
+    next: null,
+    previous: null,
+  });
 
+  // Filter state
+  const [filters, setFilters] = useState({
+    related_file_id: "",
+    related_department_id: "",
+    related_office_id: "",
+    related_faat_id: "",
+  });
+
+  // Dropdown data for filters
+  const [filterOptions, setFilterOptions] = useState({
+    files: [],
+    offices: [],
+    departments: [],
+    faats: [],
+  });
+
+  const navigate = useNavigate();
   const [animateList, setAnimateList] = useState(false);
 
   useEffect(() => {
     fetchChalaniData();
-  }, []);
+    fetchFilterOptions();
+  }, [pagination.currentPage, filters]);
 
   useEffect(() => {
     if (!loading && chalaniRecords.length > 0) {
@@ -44,7 +70,20 @@ const ChalaniList = () => {
   const fetchChalaniData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${baseUrl}/chalani/`, {
+      // Build query parameters
+      const params = new URLSearchParams({
+        page: pagination.currentPage.toString(),
+        page_size: pagination.pageSize.toString(),
+      });
+
+      // Add filters to params
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) {
+          params.append(key, value);
+        }
+      });
+
+      const response = await fetch(`${baseUrl}/chalani/?${params.toString()}`, {
         headers: {
           Authorization: `token ${token}`,
         },
@@ -55,7 +94,19 @@ const ChalaniList = () => {
       }
       
       const data = await response.json();
-      setChalaniRecords(data);
+      
+      // Update pagination state
+      setPagination({
+        totalItems: data.total_items,
+        totalPages: data.total_pages,
+        currentPage: data.current_page,
+        pageSize: data.page_size,
+        next: data.next,
+        previous: data.previous,
+      });
+
+      // Set records from data array
+      setChalaniRecords(data.data || []);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching chalani data:", error);
@@ -63,17 +114,71 @@ const ChalaniList = () => {
     }
   };
 
-  const requestSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
+  const fetchFilterOptions = async () => {
+    try {
+      const [filesRes, officesRes] = await Promise.all([
+        fetch(`${baseUrl}/file/`, {
+          headers: { Authorization: `token ${token}` },
+        }),
+        fetch(`${baseUrl}/offices/`, {
+          headers: { Authorization: `token ${token}` },
+        }),
+      ]);
+
+      if (filesRes.ok) {
+        const filesData = await filesRes.json();
+        const actualFiles = filesData.data || filesData;
+        setFilterOptions(prev => ({
+          ...prev,
+          files: Array.isArray(actualFiles) ? actualFiles : [],
+        }));
+      }
+
+      if (officesRes.ok) {
+        const officesData = await officesRes.json();
+        setFilterOptions(prev => ({
+          ...prev,
+          offices: Array.isArray(officesData) ? officesData : [],
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching filter options:", error);
     }
-    setSortConfig({ key, direction });
   };
 
+  // Handle pagination
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, currentPage: newPage }));
+  };
+
+  // Handle filter changes
+  const handleFilterChange = (filterKey, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterKey]: value,
+    }));
+    // Reset to first page when filters change
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
+  };
+
+  // Reset filters
+  const resetFilters = () => {
+    setFilters({
+      related_file_id: "",
+      related_department_id: "",
+      related_office_id: "",
+      related_faat_id: "",
+    });
+    setSearchQuery("");
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
+  };
+
+  // Client-side search functionality
   const getFilteredRecords = () => {
-    let filteredRecords = chalaniRecords.filter((record) =>
-      searchQuery
+    if (!searchQuery) return chalaniRecords;
+
+    return chalaniRecords.filter((record) => {
+      const matchesSearch = !searchQuery || searchQuery
         .toLowerCase()
         .split(" ")
         .every((query) =>
@@ -87,34 +192,21 @@ const ChalaniList = () => {
             record.sending_department?.name?.toLowerCase() || "",
             record.remarks?.toLowerCase() || "",
           ].some((field) => field.includes(query))
-        )
-    );
+        );
 
-    if (filterDate) {
-      filteredRecords = filteredRecords.filter(
-        (record) => record.chalani_date && record.chalani_date.includes(filterDate)
-      );
-    }
-
-    if (sortConfig.key) {
-      filteredRecords.sort((a, b) => {
-        const aValue = a[sortConfig.key] || "";
-        const bValue = b[sortConfig.key] || "";
-
-        if (aValue < bValue) {
-          return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-
-    return filteredRecords;
+      return matchesSearch;
+    });
   };
 
   const filteredRecords = getFilteredRecords();
+
+  const requestSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
 
   const getSortDirectionIndicator = (key) => {
     if (sortConfig.key === key) {
@@ -187,6 +279,57 @@ const ChalaniList = () => {
     fetchChalaniData();
   };
 
+  // Pagination component (same as DartaList)
+  const PaginationComponent = () => (
+    <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
+      <div className="flex items-center">
+        <p className="text-sm text-gray-700">
+          देखाइएको <span className="font-medium">{((pagination.currentPage - 1) * pagination.pageSize) + 1}</span> देखि{" "}
+          <span className="font-medium">
+            {Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems)}
+          </span>{" "}
+          कुल <span className="font-medium">{pagination.totalItems}</span> मध्ये
+        </p>
+      </div>
+      <div className="flex items-center space-x-2">
+        <button
+          onClick={() => handlePageChange(pagination.currentPage - 1)}
+          disabled={!pagination.previous}
+          className="px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          अघिल्लो
+        </button>
+        
+        <div className="flex space-x-1">
+          {[...Array(Math.min(pagination.totalPages, 5))].map((_, index) => {
+            const pageNum = index + 1;
+            return (
+              <button
+                key={pageNum}
+                onClick={() => handlePageChange(pageNum)}
+                className={`px-3 py-1 text-sm rounded-md ${
+                  pagination.currentPage === pageNum
+                    ? "bg-[#E68332] text-white"
+                    : "bg-white border border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+        </div>
+
+        <button
+          onClick={() => handlePageChange(pagination.currentPage + 1)}
+          disabled={!pagination.next}
+          className="px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          अर्को
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="p-6 min-h-screen bg-gray-50">
       {/* Page header */}
@@ -242,7 +385,7 @@ const ChalaniList = () => {
 
           <div className="text-right text-gray-600 flex items-center justify-end">
             <FaPaperPlane className="text-[#E68332] mr-2" />
-            <span className="font-medium">{filteredRecords.length}</span> चलानी रेकर्डहरू फेला परे
+            <span className="font-medium">{pagination.totalItems}</span> चलानी रेकर्डहरू फेला परे
           </div>
         </div>
 
@@ -251,28 +394,43 @@ const ChalaniList = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  मितिद्वारा फिल्टर गर्नुहोस्
+                  फाइलद्वारा फिल्टर गर्नुहोस्
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaCalendarAlt className="text-gray-400" />
-                  </div>
-                  <input
-                    type="date"
-                    value={filterDate}
-                    onChange={(e) => setFilterDate(e.target.value)}
-                    className="pl-10 w-full py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                  />
-                </div>
+                <select
+                  value={filters.related_file_id}
+                  onChange={(e) => handleFilterChange("related_file_id", e.target.value)}
+                  className="w-full py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                >
+                  <option value="">सबै फाइलहरू</option>
+                  {filterOptions.files.map((file) => (
+                    <option key={file.id} value={file.id}>
+                      {file.file_name} (#{file.file_number})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  कार्यालयद्वारा फिल्टर गर्नुहोस्
+                </label>
+                <select
+                  value={filters.related_office_id}
+                  onChange={(e) => handleFilterChange("related_office_id", e.target.value)}
+                  className="w-full py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
+                >
+                  <option value="">सबै कार्यालयहरू</option>
+                  {filterOptions.offices.map((office) => (
+                    <option key={office.id} value={office.id}>
+                      {office.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="flex items-end">
                 <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setFilterDate("");
-                    setSortConfig({ key: null, direction: "asc" });
-                  }}
+                  onClick={resetFilters}
                   className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md transition-colors"
                 >
                   फिल्टरहरू रिसेट गर्नुहोस्
@@ -293,114 +451,119 @@ const ChalaniList = () => {
         /* Records table */
         <div className="bg-white rounded-lg shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl">
           {filteredRecords.length > 0 ? (
-            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-              <table className="w-full table-fixed border-collapse">
-                {/* Table header */}
-                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 sticky top-0">
-                  <tr>
-                    <th
-                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[12%]"
-                      onClick={() => requestSort("chalani_number")}
-                    >
-                      <div className="flex items-center">
-                        <span>चलानी नम्बर</span>
-                        {getSortDirectionIndicator("chalani_number")}
-                      </div>
-                    </th>
-                    <th
-                      className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[12%]"
-                      onClick={() => requestSort("chalani_date")}
-                    >
-                      <div className="flex items-center">
-                        <span>चलानी मिति</span>
-                        {getSortDirectionIndicator("chalani_date")}
-                      </div>
-                    </th>
-                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[20%]">
-                      <div className="flex items-center">
-                        <span>विषय</span>
-                      </div>
-                    </th>
-                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[12%]">
-                      <div className="flex items-center">
-                        <span>पत्र संख्या</span>
-                      </div>
-                    </th>
-                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[12%]">
-                      <div className="flex items-center">
-                        <span>पृष्ठ संख्या</span>
-                      </div>
-                    </th>
-                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[15%]">
-                      <div className="flex items-center">
-                        <span>सम्बन्धित फाइल</span>
-                      </div>
-                    </th>
-                    <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[17%]">
-                      <div className="flex items-center">
-                        <span>कैफियत</span>
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-
-                {/* Table body */}
-                <tbody className="divide-y divide-gray-200">
-                  {filteredRecords.map((record, index) => (
-                    <tr
-                      key={record.id}
-                      onClick={() => navigate(`/chalani-details/${record.id}`)}
-                      className="group hover:bg-[#FFF8F3] transition-all duration-200 cursor-pointer"
-                      style={{
-                        animationDelay: `${index * 50}ms`,
-                        animationFillMode: "both",
-                        animation: "fadeIn 0.5s ease-in-out",
-                      }}
-                    >
-                      <td className="p-4 text-sm text-gray-900 font-medium">
+            <>
+              <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <table className="w-full table-fixed border-collapse">
+                  {/* Table header */}
+                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 sticky top-0">
+                    <tr>
+                      <th
+                        className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[12%]"
+                        onClick={() => requestSort("chalani_number")}
+                      >
                         <div className="flex items-center">
-                          <FaPaperPlane className="text-[#E68332] mr-2 opacity-70" />
-                          {record.chalani_number || "N/A"}
+                          <span>चलानी नम्बर</span>
+                          {getSortDirectionIndicator("chalani_number")}
                         </div>
-                      </td>
-                      <td className="p-4 text-sm text-gray-900">
+                      </th>
+                      <th
+                        className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider cursor-pointer transition-colors duration-200 hover:bg-gray-100 w-[12%]"
+                        onClick={() => requestSort("chalani_date")}
+                      >
                         <div className="flex items-center">
-                          <FaCalendarAlt className="text-gray-400 mr-2" />
-                          {record.chalani_date || "N/A"}
+                          <span>चलानी मिति</span>
+                          {getSortDirectionIndicator("chalani_date")}
                         </div>
-                      </td>
-                      <td className="p-4 font-medium text-gray-900">
+                      </th>
+                      <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[20%]">
                         <div className="flex items-center">
-                          <MdSubject className="text-gray-400 mr-2 flex-shrink-0" />
-                          <TextWithTooltip text={record.subject} maxLength={22} />
+                          <span>विषय</span>
                         </div>
-                      </td>
-                      <td className="p-4 text-sm text-gray-600">
-                        {record.patra_sankhya || "N/A"}
-                      </td>
-                      <td className="p-4 text-sm text-gray-600">
-                        {record.pana_sankhya || "N/A"}
-                      </td>
-                      <td className="p-4 text-sm text-gray-600">
+                      </th>
+                      <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[12%]">
                         <div className="flex items-center">
-                          <FaFileAlt className="text-gray-400 mr-2" />
-                          <TextWithTooltip 
-                            text={record.related_file?.file_name || "कुनै फाइल छैन"} 
-                            maxLength={15} 
-                          />
+                          <span>पत्र संख्या</span>
                         </div>
-                      </td>
-                      <td className="p-4 text-sm text-gray-600">
+                      </th>
+                      <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[12%]">
                         <div className="flex items-center">
-                          <FaExternalLinkAlt className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-2" />
-                          <TextWithTooltip text={record.remarks} maxLength={20} />
+                          <span>पृष्ठ संख्या</span>
                         </div>
-                      </td>
+                      </th>
+                      <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[15%]">
+                        <div className="flex items-center">
+                          <span>सम्बन्धित फाइल</span>
+                        </div>
+                      </th>
+                      <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[17%]">
+                        <div className="flex items-center">
+                          <span>कैफियत</span>
+                        </div>
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+
+                  {/* Table body */}
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredRecords.map((record, index) => (
+                      <tr
+                        key={record.id}
+                        onClick={() => navigate(`/chalani-details/${record.id}`)}
+                        className="group hover:bg-[#FFF8F3] transition-all duration-200 cursor-pointer"
+                        style={{
+                          animationDelay: `${index * 50}ms`,
+                          animationFillMode: "both",
+                          animation: "fadeIn 0.5s ease-in-out",
+                        }}
+                      >
+                        <td className="p-4 text-sm text-gray-900 font-medium">
+                          <div className="flex items-center">
+                            <FaPaperPlane className="text-[#E68332] mr-2 opacity-70" />
+                            {record.chalani_number || "N/A"}
+                          </div>
+                        </td>
+                        <td className="p-4 text-sm text-gray-900">
+                          <div className="flex items-center">
+                            <FaCalendarAlt className="text-gray-400 mr-2" />
+                            {record.chalani_date || "N/A"}
+                          </div>
+                        </td>
+                        <td className="p-4 font-medium text-gray-900">
+                          <div className="flex items-center">
+                            <MdSubject className="text-gray-400 mr-2 flex-shrink-0" />
+                            <TextWithTooltip text={record.subject} maxLength={22} />
+                          </div>
+                        </td>
+                        <td className="p-4 text-sm text-gray-600">
+                          {record.patra_sankhya || "N/A"}
+                        </td>
+                        <td className="p-4 text-sm text-gray-600">
+                          {record.pana_sankhya || "N/A"}
+                        </td>
+                        <td className="p-4 text-sm text-gray-600">
+                          <div className="flex items-center">
+                            <FaFileAlt className="text-gray-400 mr-2" />
+                            <TextWithTooltip 
+                              text={record.related_file?.file_name || "कुनै फाइल छैन"} 
+                              maxLength={15} 
+                            />
+                          </div>
+                        </td>
+                        <td className="p-4 text-sm text-gray-600">
+                          <div className="flex items-center">
+                            <FaExternalLinkAlt className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-2" />
+                            <TextWithTooltip text={record.remarks} maxLength={20} />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Pagination */}
+              <PaginationComponent />
+            </>
           ) : (
             <div className="py-12 text-center text-gray-500">
               <div className="flex flex-col items-center">
@@ -408,14 +571,10 @@ const ChalaniList = () => {
                 <p className="text-xl font-medium mb-2">कुनै चलानी रेकर्ड फेला परेन</p>
                 <p className="text-gray-500 max-w-md mx-auto">
                   तपाईंको खोज मापदण्ड अनुसार कुनै चलानी रेकर्ड फेला परेन। कृपया
-                  फिल्टरहरू परिवर्तन गर्नुहोस् वा अर्को खोज प्रयास गर्नुहोस्।
+                  फिल्टरहरू परिवर्तन गर्नुहोस् वा अर्को खोज प्रयास गर्नुहोस्。
                 </p>
                 <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setFilterDate("");
-                    setSortConfig({ key: null, direction: "asc" });
-                  }}
+                  onClick={resetFilters}
                   className="mt-4 px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-md text-gray-700 transition-colors duration-200"
                 >
                   फिल्टरहरू रिसेट गर्नुहोस्
