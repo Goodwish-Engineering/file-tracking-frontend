@@ -6,7 +6,6 @@ import {
   FaFilter,
   FaFileAlt,
   FaSpinner,
-  FaCalendarAlt,
   FaExternalLinkAlt,
   FaChevronLeft,
   FaChevronRight,
@@ -38,7 +37,6 @@ const FileStatus = () => {
   const [animateList, setAnimateList] = useState(false);
 
   // Add filter date state
-  const [filterDate, setFilterDate] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [fileTypes, setFileTypeData] = useState([]);
   const [fileTypesWithIds, setFileTypesWithIds] = useState([]);
@@ -167,7 +165,7 @@ const FileStatus = () => {
     setSortConfig({ key, direction });
   };
 
-  // Enhanced filter function for client-side filtering (search and date)
+  // Enhanced filter function for client-side filtering (search only)
   const getFilteredFiles = () => {
     let filteredFiles = fileStatuses;
 
@@ -185,13 +183,6 @@ const FileStatus = () => {
               String(file.file_number),
             ].some((field) => field.includes(query))
           )
-      );
-    }
-
-    // Apply date filter
-    if (filterDate) {
-      filteredFiles = filteredFiles.filter(
-        (file) => file.present_date && file.present_date.includes(filterDate)
       );
     }
 
@@ -310,7 +301,6 @@ const FileStatus = () => {
       <button
         onClick={() => {
           setSearchQuery("");
-          setFilterDate("");
           setActiveTab("all");
           setSortConfig({ key: null, direction: "asc" });
         }}
@@ -482,29 +472,11 @@ const FileStatus = () => {
 
         {showFilters && (
           <div className="mt-4 p-4 bg-gray-50 rounded-md border border-gray-200 animate-fadeIn">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  मितिद्वारा फिल्टर गर्नुहोस्
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaCalendarAlt className="text-gray-400" />
-                  </div>
-                  <input
-                    type="date"
-                    value={filterDate}
-                    onChange={(e) => setFilterDate(e.target.value)}
-                    className="pl-10 w-full py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
-                  />
-                </div>
-              </div>
-
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-end">
                 <button
                   onClick={() => {
                     setSearchQuery("");
-                    setFilterDate("");
                     setActiveTab("सबै फाइलहरू");
                     setSortConfig({ key: null, direction: "asc" });
                     setPagination(prev => ({ ...prev, currentPage: 1 }));
@@ -678,7 +650,6 @@ const FileStatus = () => {
                 <button
                   onClick={() => {
                     setSearchQuery("");
-                    setFilterDate("");
                     setActiveTab("सबै फाइलहरू");
                     setSortConfig({ key: null, direction: "asc" });
                     setPagination(prev => ({ ...prev, currentPage: 1 }));
@@ -732,3 +703,4 @@ const FileStatus = () => {
 };
 
 export default FileStatus;
+

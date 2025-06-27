@@ -17,7 +17,8 @@ const LandDetailsTab = ({
   baseUrl, 
   token, 
   id, 
-  fetchLandDetails 
+  fetchLandDetails,
+  fileData // Add fileData prop to get land_details from file response
 }) => {
   const [offices, setOffices] = useState([]);
   // State for showing the new land detail row
@@ -37,6 +38,25 @@ const LandDetailsTab = ({
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   };
+
+  // Use land_details from fileData and filter by current file ID
+  const currentLandDetails = React.useMemo(() => {
+    if (fileData?.land_details && Array.isArray(fileData.land_details)) {
+      // Filter land details to only show those related to current file
+      return fileData.land_details.filter(detail => 
+        detail.related_file === parseInt(id)
+      );
+    }
+    
+    // Fallback to landDetails prop if fileData is not available
+    if (landDetails && Array.isArray(landDetails)) {
+      return landDetails.filter(detail => 
+        detail.related_file === parseInt(id)
+      );
+    }
+    
+    return [];
+  }, [fileData, landDetails, id]);
 
   // Fetch offices data for dropdown
   useEffect(() => {
@@ -60,65 +80,36 @@ const LandDetailsTab = ({
     }
   }, [baseUrl, token, editable]);
 
-  // Handle changes to existing land details
-  const handleLandDetailChange = (e, field, index) => {
-    const value = e.target.value;
-    const updatedLandDetails = [...landDetails];
-    updatedLandDetails[index][field] = value;
-    setLandDetails(updatedLandDetails);
-  };
-
-  // Handle changes to new land detail form
-  const handleNewLandDetailChange = (e, field) => {
-    const value = e.target.value;
-    setNewLandDetail(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  // Add a new land detail
-  const addLandDetail = () => {
-    // Basic validation
-    if (!newLandDetail.district || !newLandDetail.kitta_no) {
-      toast.error("जिल्ला र किट्टा नं. आवश्यक छ");
-      return;
+  // Fetch land details specifically for this file if fileData is not available
+  useEffect(() => {
+    if (!fileData?.land_details && id) {
+      fetchLandDetailsForFile();
     }
+  }, [id, fileData]);
 
-    setLandDetails(prev => [...prev, {...newLandDetail}]);
-    
-    // Reset the form
-    setNewLandDetail({
-      district: "",
-      municipality: "",
-      ward_no: "",
-      kitta_no: "",
-      guthi_name: "",
-      land_type: "",
-      related_file: id,
-    });
-    
-    setShowNewRow(false);
-  };
-
-  // Cancel adding new land detail
-  const cancelAddNewLand = () => {
-    setShowNewRow(false);
-    setNewLandDetail({
-      district: "",
-      municipality: "",
-      ward_no: "",
-      kitta_no: "",
-      guthi_name: "",
-      land_type: "",
-      related_file: id,
-    });
+  const fetchLandDetailsForFile = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/land-details/?related_file=${id}`, {
+        headers: { Authorization: `Token ${token}` },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Fetched land details for file:", data);
+        // Update landDetails state if setLandDetails is available
+        if (setLandDetails) {
+          setLandDetails(Array.isArray(data) ? data : []);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching land details for file:", error);
+    }
   };
 
   // Save all land details
   const handleSaveLandDetails = async () => {
     try {
-      for (const detail of landDetails) {
+      for (const detail of currentLandDetails) {
         // Find office name for guthi_name field
         const officeObj = offices.find(office => office.id.toString() === detail.guthi_name);
         const guthiName = officeObj ? officeObj.name : detail.guthi_name;
@@ -128,7 +119,7 @@ const LandDetailsTab = ({
           ...detail,
           ward_no: detail.ward_no ? parseInt(detail.ward_no) : null,
           guthi_name: guthiName, // Send office name as string
-          related_file: parseInt(id),
+          related_file: parseInt(id), // Ensure correct file ID
         };
 
         if (detail.id) {
@@ -154,11 +145,97 @@ const LandDetailsTab = ({
         }
       }
       toast.success("जग्गा विवरण सफलतापूर्वक अद्यावधिक गरियो");
-      fetchLandDetails();
+      // Refresh the file data instead of just land details
+      if (fetchLandDetails) {
+        fetchLandDetails();
+      } else {
+        // Fallback to re-fetch land details for this file
+        fetchLandDetailsForFile();
+      }
     } catch (error) {
       console.error("Error updating land details:", error);
       toast.error("जग्गा विवरण अद्यावधिक गर्न असफल");
     }
+  };
+
+  // Handle changes to existing land details
+  const handleLandDetailChange = (e, field, index) => {
+    const value = e.target.value;
+    const updatedLandDetails = [...currentLandDetails];
+    updatedLandDetails[index][field] = value;
+    
+    // Update landDetails state if setLandDetails is available
+    if (setLandDetails) {
+      // Filter the complete landDetails array and update only the relevant items
+      const allLandDetails = landDetails || [];
+      const otherFileDetails = allLandDetails.filter(detail => 
+        detail.related_file !== parseInt(id)
+      );
+      setLandDetails([...otherFileDetails, ...updatedLandDetails]);
+    }
+  };
+
+  // Handle changes to new land detail form
+  const handleNewLandDetailChange = (e, field) => {
+    const value = e.target.value;
+    setNewLandDetail(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Add a new land detail
+  const addLandDetail = () => {
+    // Basic validation
+    if (!newLandDetail.district || !newLandDetail.kitta_no) {
+      toast.error("जिल्ला र किट्टा नं. आवश्यक छ");
+      return;
+    }
+
+    // Ensure the new detail is related to current file
+    const newDetailWithFileId = {
+      ...newLandDetail,
+      related_file: parseInt(id)
+    };
+
+    const updatedLandDetails = [...currentLandDetails, newDetailWithFileId];
+    
+    // Update landDetails state if setLandDetails is available
+    if (setLandDetails) {
+      // Filter the complete landDetails array and add the new detail
+      const allLandDetails = landDetails || [];
+      const otherFileDetails = allLandDetails.filter(detail => 
+        detail.related_file !== parseInt(id)
+      );
+      setLandDetails([...otherFileDetails, ...updatedLandDetails]);
+    }
+    
+    // Reset the form
+    setNewLandDetail({
+      district: "",
+      municipality: "",
+      ward_no: "",
+      kitta_no: "",
+      guthi_name: "",
+      land_type: "",
+      related_file: parseInt(id),
+    });
+    
+    setShowNewRow(false);
+  };
+
+  // Cancel adding new land detail
+  const cancelAddNewLand = () => {
+    setShowNewRow(false);
+    setNewLandDetail({
+      district: "",
+      municipality: "",
+      ward_no: "",
+      kitta_no: "",
+      guthi_name: "",
+      land_type: "",
+      related_file: id,
+    });
   };
 
   // Helper function to get office name by ID
@@ -227,8 +304,8 @@ const LandDetailsTab = ({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {/* Existing Land Detail Rows */}
-            {Array.isArray(landDetails) && landDetails.length > 0 ? (
-              landDetails.map((detail, index) => (
+            {Array.isArray(currentLandDetails) && currentLandDetails.length > 0 ? (
+              currentLandDetails.map((detail, index) => (
                 <tr
                   key={`land-detail-${index}`}
                   className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-yellow-50 transition-all duration-200 cursor-default`}
@@ -358,7 +435,7 @@ const LandDetailsTab = ({
               <tr className="bg-green-50 hover:bg-green-100 border-b border-gray-200">
                 <td className="px-4 py-3 text-sm border-l-2 border-green-500">
                   <span className="text-gray-900 font-medium">
-                    {(landDetails ? landDetails.length : 0) + 1}
+                    {(currentLandDetails ? currentLandDetails.length : 0) + 1}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-sm">
