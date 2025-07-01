@@ -103,41 +103,41 @@ const TippaniTab = ({
         return;
       }
 
-      // Create the request payload with the parent tippani data and new sub_tippani
-      const requestPayload = [
+      // Create the updated sub_tippani array with the new sub-tippani
+      const updatedSubTippani = [
+        ...(parentTippani.sub_tippani || []),
         {
-          related_file: parentTippani.related_file || id,
-          subject: parentTippani.subject,
-          submitted_by: parentTippani.submitted_by,
-          submitted_date: parentTippani.submitted_date,
-          approved_by: parentTippani.approved_by,
-          approved_date: parentTippani.approved_date,
-          remarks: parentTippani.remarks,
-          tippani_date: parentTippani.tippani_date,
-          page_no: parentTippani.page_no || "1",
-          sub_tippani: [
-            ...(parentTippani.sub_tippani || []),
-            {
-              approved_by: subTippaniData.approved_by,
-              approved_date: subTippaniData.approved_date,
-              remarks: subTippaniData.remarks,
-            },
-          ],
+          approved_by: subTippaniData.approved_by,
+          approved_date: subTippaniData.approved_date,
+          remarks: subTippaniData.remarks,
         },
       ];
 
-      const response = await fetch(`${baseUrl}/tippani/`, {
-        method: "POST", // Using PUT to update existing tippani
+      // Create the PATCH payload with only the sub_tippani field
+      const patchPayload = {
+        sub_tippani: updatedSubTippani,
+      };
+
+      console.log("PATCH payload for sub-tippani:", patchPayload);
+
+      // Use PATCH request to update the existing tippani
+      const response = await fetch(`${baseUrl}/tippani/${tippaniId}/`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `token ${token}`,
         },
-        body: JSON.stringify(requestPayload),
+        body: JSON.stringify(patchPayload),
       });
 
       if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Server error:", errorData);
         throw new Error(`Server responded with status: ${response.status}`);
       }
+
+      const responseData = await response.json();
+      console.log("Sub-tippani updated successfully:", responseData);
 
       await fetchFileDetails();
       cancelAddingSubTippani(tippaniId);
