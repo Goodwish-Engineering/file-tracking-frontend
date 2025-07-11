@@ -17,6 +17,7 @@ const AddDepartOfOffice = () => {
   const [faats, setFaats] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [officeName, setOfficeName] = useState(""); 
+  const [isHeadOffice, setIsHeadOffice] = useState(false);
   const token = localStorage.getItem("token");
   
   const fetchOfficeDetails = async () => {
@@ -30,6 +31,7 @@ const AddDepartOfOffice = () => {
       
       if (response.data) {
         setOfficeName(response.data.name);
+        setIsHeadOffice(response.data.is_head_office || false);
       }
     } catch (error) {
       console.error("Error fetching office details:", error);
@@ -337,185 +339,200 @@ const AddDepartOfOffice = () => {
             </div>
           </div>
 
-          {/* New Faat Form Section */}
-          <div className="flex flex-col md:flex-row gap-6 mt-8">
-            <div className="w-full md:w-1/2">
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 transition-all hover:shadow-xl">
-                <div className="bg-gradient-to-r from-[#f0f9ff] to-[#e6f7ff] p-4 border-l-4 border-blue-500">
-                  <h2 className="text-center font-bold text-xl text-blue-600 flex items-center justify-center gap-2">
-                    <FaLayerGroup className="text-blue-600" />
-                    {officeName ? `${officeName} - फाँट थप्नुहोस्` : "नयाँ फाँट थप्नुहोस्"}
-                  </h2>
-                  <p className="text-center text-gray-600 mt-1">
-                    विभागहरुमा नयाँ फाँट थप्नुहोस्
-                  </p>
-                </div>
-                
-                <form onSubmit={handleFaatSubmit} className="p-6">
-                  <div className="mb-6">
-                    <label htmlFor="department" className="text-gray-800 font-medium mb-2 flex items-center">
-                      <FaBuilding className="mr-2 text-blue-500" />
-                      विभाग छान्नुहोस्
-                      <span className="text-red-500 ml-1">*</span>
-                    </label>
-                    <select
-                      id="department"
-                      name="belongs_to"
-                      value={selectedDepartment}
-                      onChange={handleDepartmentChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      required
-                    >
-                      <option value="">-- विभाग छान्नुहोस् --</option>
-                      {departments.map((dept) => (
-                        <option key={dept.id} value={dept.id}>
-                          {dept.name}
-                        </option>
-                      ))}
-                    </select>
-                    {departments.length === 0 && (
-                      <p className="text-sm text-orange-500 mt-1">
-                        फाँट थप्नको लागि पहिले विभाग थप्नुहोस्
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    {/* Add code field */}
-                    <div>
-                      <label htmlFor="faatCode" className="text-gray-800 font-medium mb-2 flex items-center">
-                        <FaLayerGroup className="mr-2 text-blue-500" />
-                        फाँटको कोड
-                        <span className="text-red-500 ml-1">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="faatCode"
-                        name="code"
-                        value={faatFormData.code}
-                        onChange={handleFaatChange}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        placeholder="फाँटको कोड"
-                        required
-                        disabled={!selectedDepartment}
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="faatName" className="text-gray-800 font-medium mb-2 flex items-center">
-                        <FaLayerGroup className="mr-2 text-blue-500" />
-                        फाँटको नाम
-                        <span className="text-red-500 ml-1">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="faatName"
-                        name="name"
-                        value={faatFormData.name}
-                        onChange={handleFaatChange}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        placeholder="फाँटको नाम"
-                        required
-                        disabled={!selectedDepartment}
-                      />
-                    </div>
+          {/* New Faat Form Section - only show for head offices */}
+          {isHeadOffice ? (
+            <div className="flex flex-col md:flex-row gap-6 mt-8">
+              <div className="w-full md:w-1/2">
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 transition-all hover:shadow-xl">
+                  <div className="bg-gradient-to-r from-[#f0f9ff] to-[#e6f7ff] p-4 border-l-4 border-blue-500">
+                    <h2 className="text-center font-bold text-xl text-blue-600 flex items-center justify-center gap-2">
+                      <FaLayerGroup className="text-blue-600" />
+                      {officeName ? `${officeName} - फाँट थप्नुहोस्` : "नयाँ फाँट थप्नुहोस्"}
+                    </h2>
+                    <p className="text-center text-gray-600 mt-1">
+                      विभागहरुमा नयाँ फाँट थप्नुहोस्
+                    </p>
                   </div>
                   
-                  {selectedDepartment && (
-                    <p className="text-sm text-gray-500 mt-1 italic">
-                      यो फाँट चयन गरिएको विभाग अन्तर्गत थपिनेछ
-                    </p>
-                  )}
-
-                  <div className="flex justify-center mt-8">
-                    <button 
-                      type="submit" 
-                      className={`px-6 py-3 text-white font-medium rounded-lg flex items-center gap-2 transition-all ${
-                        isFaatSubmitting || !selectedDepartment ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-                      }`}
-                      disabled={isFaatSubmitting || !selectedDepartment}
-                    >
-                      {isFaatSubmitting ? (
-                        <>
-                          <FaSpinner className="animate-spin" />
-                          प्रतिक्रिया पर्खँदै...
-                        </>
-                      ) : (
-                        <>
-                          <FaPlus />
-                          फाँट थप्नुहोस्
-                        </>
+                  <form onSubmit={handleFaatSubmit} className="p-6">
+                    <div className="mb-6">
+                      <label htmlFor="department" className="text-gray-800 font-medium mb-2 flex items-center">
+                        <FaBuilding className="mr-2 text-blue-500" />
+                        विभाग छान्नुहोस्
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <select
+                        id="department"
+                        name="belongs_to"
+                        value={selectedDepartment}
+                        onChange={handleDepartmentChange}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        required
+                      >
+                        <option value="">-- विभाग छान्नुहोस् --</option>
+                        {departments.map((dept) => (
+                          <option key={dept.id} value={dept.id}>
+                            {dept.name}
+                          </option>
+                        ))}
+                      </select>
+                      {departments.length === 0 && (
+                        <p className="text-sm text-orange-500 mt-1">
+                          फाँट थप्नको लागि पहिले विभाग थप्नुहोस्
+                        </p>
                       )}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-            
-            {/* Faats List Section */}
-            <div className="w-full md:w-1/2">
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden h-full">
-                <div className="bg-gradient-to-r from-[#f0f9ff] to-[#e6f7ff] p-4 border-l-4 border-blue-500">
-                  <h2 className="text-center font-bold text-xl text-blue-600 flex items-center justify-center gap-2">
-                    <FaLayerGroup className="text-blue-600" />
-                    मौजुदा फाँटहरू
-                  </h2>
-                  <p className="text-center text-gray-600 mt-1">
-                    {selectedDepartment ? 
-                      `चयन गरिएको विभागका सबै फाँटहरू` : 
-                      "फाँटहरू हेर्न कृपया विभाग छान्नुहोस्"}
-                  </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      {/* Add code field */}
+                      <div>
+                        <label htmlFor="faatCode" className="text-gray-800 font-medium mb-2 flex items-center">
+                          <FaLayerGroup className="mr-2 text-blue-500" />
+                          फाँटको कोड
+                          <span className="text-red-500 ml-1">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="faatCode"
+                          name="code"
+                          value={faatFormData.code}
+                          onChange={handleFaatChange}
+                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="फाँटको कोड"
+                          required
+                          disabled={!selectedDepartment}
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="faatName" className="text-gray-800 font-medium mb-2 flex items-center">
+                          <FaLayerGroup className="mr-2 text-blue-500" />
+                          फाँटको नाम
+                          <span className="text-red-500 ml-1">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="faatName"
+                          name="name"
+                          value={faatFormData.name}
+                          onChange={handleFaatChange}
+                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="फाँटको नाम"
+                          required
+                          disabled={!selectedDepartment}
+                        />
+                      </div>
+                    </div>
+                    
+                    {selectedDepartment && (
+                      <p className="text-sm text-gray-500 mt-1 italic">
+                        यो फाँट चयन गरिएको विभाग अन्तर्गत थपिनेछ
+                      </p>
+                    )}
+
+                    <div className="flex justify-center mt-8">
+                      <button 
+                        type="submit" 
+                        className={`px-6 py-3 text-white font-medium rounded-lg flex items-center gap-2 transition-all ${
+                          isFaatSubmitting || !selectedDepartment ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                        }`}
+                        disabled={isFaatSubmitting || !selectedDepartment}
+                      >
+                        {isFaatSubmitting ? (
+                          <>
+                            <FaSpinner className="animate-spin" />
+                            प्रतिक्रिया पर्खँदै...
+                          </>
+                        ) : (
+                          <>
+                            <FaPlus />
+                            फाँट थप्नुहोस्
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </form>
                 </div>
-                
-                <div className="p-6">
-                  {selectedDepartment ? (
-                    faats.length > 0 ? (
-                      <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin">
-                        {faats.map((faat, index) => (
-                          <div 
-                            key={faat.id} 
-                            className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all bg-gray-50"
-                            style={{
-                              animationDelay: `${index * 50}ms`,
-                              animationFillMode: "both",
-                              animation: "fadeIn 0.5s ease-in-out"
-                            }}
-                          >
-                            <div className="flex items-center">
-                              <FaLayerGroup className="text-blue-500 mr-3 text-lg" />
-                              <div>
-                                <p className="font-medium">{faat.name}</p>
-                                <div className="flex items-center gap-3">
-                                  <p className="text-xs text-gray-500">ID: {faat.id}</p>
-                                  {faat.code && (
-                                    <p className="text-xs bg-blue-100 px-2 py-0.5 rounded text-blue-700">
-                                      कोड: {faat.code}
-                                    </p>
-                                  )}
+              </div>
+              
+              {/* Faats List Section */}
+              <div className="w-full md:w-1/2">
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden h-full">
+                  <div className="bg-gradient-to-r from-[#f0f9ff] to-[#e6f7ff] p-4 border-l-4 border-blue-500">
+                    <h2 className="text-center font-bold text-xl text-blue-600 flex items-center justify-center gap-2">
+                      <FaLayerGroup className="text-blue-600" />
+                      मौजुदा फाँटहरू
+                    </h2>
+                    <p className="text-center text-gray-600 mt-1">
+                      {selectedDepartment ? 
+                        `चयन गरिएको विभागका सबै फाँटहरू` : 
+                        "फाँटहरू हेर्न कृपया विभाग छान्नुहोस्"}
+                    </p>
+                  </div>
+                  
+                  <div className="p-6">
+                    {selectedDepartment ? (
+                      faats.length > 0 ? (
+                        <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin">
+                          {faats.map((faat, index) => (
+                            <div 
+                              key={faat.id} 
+                              className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all bg-gray-50"
+                              style={{
+                                animationDelay: `${index * 50}ms`,
+                                animationFillMode: "both",
+                                animation: "fadeIn 0.5s ease-in-out"
+                              }}
+                            >
+                              <div className="flex items-center">
+                                <FaLayerGroup className="text-blue-500 mr-3 text-lg" />
+                                <div>
+                                  <p className="font-medium">{faat.name}</p>
+                                  <div className="flex items-center gap-3">
+                                    <p className="text-xs text-gray-500">ID: {faat.id}</p>
+                                    {faat.code && (
+                                      <p className="text-xs bg-blue-100 px-2 py-0.5 rounded text-blue-700">
+                                        कोड: {faat.code}
+                                      </p>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="py-12 text-center text-gray-500">
+                          <FaLayerGroup className="mx-auto text-gray-300 text-4xl mb-3" />
+                          <p>कुनै फाँटहरू भेटिएन</p>
+                          <p className="text-sm mt-2">यो विभागमा अहिलेसम्म कुनै पनि फाँट थपिएको छैन।</p>
+                        </div>
+                      )
                     ) : (
                       <div className="py-12 text-center text-gray-500">
-                        <FaLayerGroup className="mx-auto text-gray-300 text-4xl mb-3" />
-                        <p>कुनै फाँटहरू भेटिएन</p>
-                        <p className="text-sm mt-2">यो विभागमा अहिलेसम्म कुनै पनि फाँट थपिएको छैन।</p>
+                        <FaBuilding className="mx-auto text-gray-300 text-4xl mb-3" />
+                        <p>कृपया पहिले विभाग छान्नुहोस्</p>
+                        <p className="text-sm mt-2">फाँटहरू हेर्नको लागि बायाँ फारममा विभाग छान्नुहोस्</p>
                       </div>
-                    )
-                  ) : (
-                    <div className="py-12 text-center text-gray-500">
-                      <FaBuilding className="mx-auto text-gray-300 text-4xl mb-3" />
-                      <p>कृपया पहिले विभाग छान्नुहोस्</p>
-                      <p className="text-sm mt-2">फाँटहरू हेर्नको लागि बायाँ फारममा विभाग छान्नुहोस्</p>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="mt-8 p-6 bg-yellow-50 border border-yellow-200 rounded-xl">
+              <div className="text-center">
+                <FaLayerGroup className="mx-auto text-yellow-400 text-4xl mb-3" />
+                <h3 className="font-bold text-xl text-yellow-800 mb-2">शाखा कार्यालय - फाँट सीमा</h3>
+                <p className="text-yellow-700 mb-4">
+                  यो "{officeName}" शाखा कार्यालय भएकोले यहाँ फाँटहरू थप्न सकिदैन。
+                </p>
+                <p className="text-sm text-yellow-600">
+                  फाँटहरू केवल मुख्य कार्यालयमा मात्र व्यवस्थापन गर्न सकिन्छ。
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       

@@ -14,9 +14,11 @@ const EmployeeDetails = () => {
   const [editOffice, setEditOffice] = useState(null);
   const [offices, setOffices] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [faats, setFaats] = useState([]); // Add faats state
   const [selectedOfficeId, setSelectedOfficeId] = useState('');
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('');
-  const [selectedUserId, setSelectedUserId] = useState(null); // Added missing state variable
+  const [selectedFaatId, setSelectedFaatId] = useState(''); // Add faat selection state
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const [newRole, setNewRole] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState("employee_id");
@@ -124,6 +126,7 @@ const EmployeeDetails = () => {
     const officeId = e.target.value;
     setSelectedOfficeId(officeId);
     setSelectedDepartmentId('');
+    setSelectedFaatId(''); // Reset faat selection
     
     if (officeId) {
       // Find the selected office from the offices array
@@ -136,20 +139,57 @@ const EmployeeDetails = () => {
     } else {
       setDepartments([]);
     }
+    setFaats([]); // Clear faats when office changes
   };
 
-  const handleEditOfficeClick = (user) => {
-    setEditOffice(true);
-    setSelectedUserId(user.id); // Now using the properly defined state
+  const handleDepartmentChange = async (e) => {
+    const departmentId = e.target.value;
+    setSelectedDepartmentId(departmentId);
+    setSelectedFaatId(''); // Reset faat selection
+    
+    // Check if selected office is head office
+    const selectedOffice = offices.find(office => office.id.toString() === selectedOfficeId);
+    const isHeadOffice = selectedOffice?.is_head_office;
+    
+    if (departmentId && isHeadOffice) {
+      // Fetch faats for this department only if it's a head office
+      try {
+        const response = await fetch(`${baseUrl}/department/${departmentId}`, {
+          headers: { Authorization: `token ${token}` },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setFaats(data.faats || []);
+        } else {
+          // Fallback approach
+          const fallbackResponse = await fetch(`${baseUrl}/faat/?department=${departmentId}`, {
+            headers: { Authorization: `token ${token}` },
+          });
+          
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json();
+            setFaats(Array.isArray(fallbackData) ? fallbackData : []);
+          } else {
+            setFaats([]);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching faats:", error);
+        setFaats([]);
+      }
+    } else {
+      setFaats([]);
+    }
   };
 
-  const handleDepartmentChange = (e) => {
-    setSelectedDepartmentId(e.target.value);
+  const handleFaatChange = (e) => {
+    setSelectedFaatId(e.target.value);
   };
 
   const openEditOfficeModal = (employee) => {
     setEditOffice(employee);
-    setSelectedUserId(employee.id); // Set the user ID when opening the modal
+    setSelectedUserId(employee.id);
     
     // Set initial office and department values if employee has them
     if (employee.office && employee.office.id) {
@@ -163,18 +203,62 @@ const EmployeeDetails = () => {
         // Set department if employee has one
         if (employee.department && employee.department.id) {
           setSelectedDepartmentId(employee.department.id.toString());
+          
+          // If it's a head office and employee has a faat, fetch faats and set faat
+          if (selectedOffice.is_head_office && employee.faat) {
+            fetchFaatsForDepartment(employee.department.id).then(() => {
+              if (employee.faat && employee.faat.id) {
+                setSelectedFaatId(employee.faat.id.toString());
+              }
+            });
+          }
         } else {
           setSelectedDepartmentId('');
+          setSelectedFaatId('');
         }
       } else {
         setDepartments([]);
         setSelectedDepartmentId('');
+        setSelectedFaatId('');
       }
     } else {
       setSelectedOfficeId('');
       setDepartments([]);
       setSelectedDepartmentId('');
+      setSelectedFaatId('');
     }
+    setFaats([]);
+  };
+
+  // Helper function to fetch faats for a department
+  const fetchFaatsForDepartment = async (departmentId) => {
+    try {
+      const response = await fetch(`${baseUrl}/department/${departmentId}`, {
+        headers: { Authorization: `token ${token}` },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setFaats(data.faats || []);
+        return data.faats || [];
+      } else {
+        // Fallback approach
+        const fallbackResponse = await fetch(`${baseUrl}/faat/?department=${departmentId}`, {
+          headers: { Authorization: `token ${token}` },
+        });
+        
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json();
+          const faatsList = Array.isArray(fallbackData) ? fallbackData : [];
+          setFaats(faatsList);
+          return faatsList;
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching faats:", error);
+    }
+    setFaats([]);
+    return [];
   };
 
   const updateEmployeeOfficeAndDepartment = async () => {
@@ -186,6 +270,12 @@ const EmployeeDetails = () => {
     const payload = {};
     if (selectedOfficeId) payload.office = selectedOfficeId;
     if (selectedDepartmentId) payload.department = selectedDepartmentId;
+    
+    // Only include faat if it's a head office and faat is selected
+    const selectedOffice = offices.find(office => office.id.toString() === selectedOfficeId);
+    if (selectedOffice?.is_head_office && selectedFaatId) {
+      payload.faat = selectedFaatId;
+    }
   
     if (Object.keys(payload).length === 0) {
       console.log("No changes to update");
@@ -206,10 +296,12 @@ const EmployeeDetails = () => {
       if (!response.ok) throw new Error("Failed to update user");
   
       console.log(`User ${selectedUserId} updated successfully`);
+      toast.success("कर्मचारी सफलतापूर्वक अपडेट गरियो");
       setEditOffice(null);
       fetchdata(); // Refresh data after update
     } catch (error) {
       console.error("Error updating user:", error);
+      toast.error("कर्मचारी अपडेट गर्न असफल");
     }
   };
 
@@ -683,12 +775,12 @@ const EmployeeDetails = () => {
         <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center backdrop-blur-sm backdrop-filter transition-opacity duration-300">
           <div 
             ref={modalRef}
-            className="bg-white w-[90%] p-6 rounded-lg shadow-xl md:w-1/3 animate-scaleIn"
+            className="bg-white w-[90%] p-6 rounded-lg shadow-xl md:w-1/2 max-h-[90vh] overflow-y-auto animate-scaleIn"
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-[#E68332] flex items-center gap-2">
                 <FaBuilding className="text-[#E68332]" />
-                कार्यालय र विभाग परिवर्तन
+                कार्यालय, विभाग र फाँट परिवर्तन
               </h2>
               <button 
                 onClick={() => setEditOffice(null)} 
@@ -700,15 +792,23 @@ const EmployeeDetails = () => {
             
             <div className="mb-6">
               <p className="text-gray-700 mb-2">
-                <span className="font-medium">{typeof editOffice === 'object' && editOffice.first_name} {typeof editOffice === 'object' && editOffice.last_name}</span> को कार्यालय र विभाग परिवर्तन गर्नुहोस्
+                <span className="font-medium">{typeof editOffice === 'object' && editOffice.first_name} {typeof editOffice === 'object' && editOffice.last_name}</span> को कार्यालय, विभाग र फाँट परिवर्तन गर्नुहोस्
               </p>
               <div className="bg-gray-100 p-3 rounded-md text-sm mb-4">
                 <p className="text-gray-600">
                   वर्तमान कार्यालय: <span className="font-medium">{typeof editOffice === 'object' && editOffice.office ? editOffice.office.name : "अनौपचारिक"}</span>
+                  {typeof editOffice === 'object' && editOffice.office?.is_head_office && (
+                    <span className="ml-2 bg-green-100 px-2 py-0.5 rounded text-green-700 text-xs">मुख्य कार्यालय</span>
+                  )}
                 </p>
                 <p className="text-gray-600">
                   वर्तमान विभाग: <span className="font-medium">{typeof editOffice === 'object' && editOffice.department ? editOffice.department.name : "अनौपचारिक"}</span>
                 </p>
+                {typeof editOffice === 'object' && editOffice.faat && (
+                  <p className="text-gray-600">
+                    वर्तमान फाँट: <span className="font-medium">{editOffice.faat.name}</span>
+                  </p>
+                )}
               </div>
             </div>
             
@@ -723,7 +823,7 @@ const EmployeeDetails = () => {
                   <option value="">कार्यालय चयन गर्नुहोस्...</option>
                   {offices.map((office) => (
                     <option key={office.id} value={office.id}>
-                      {office.name}
+                      {office.name} {office.is_head_office ? "(मुख्य)" : "(शाखा)"}
                     </option>
                   ))}
                 </select>
@@ -752,6 +852,54 @@ const EmployeeDetails = () => {
                   <p className="mt-2 text-sm text-orange-500">यस कार्यालयमा कुनै विभाग छैन। कृपया पहिले विभाग थप्नुहोस्।</p>
                 )}
               </div>
+
+              {/* Faat selection - only show for head offices */}
+              {(() => {
+                const selectedOffice = offices.find(office => office.id.toString() === selectedOfficeId);
+                return selectedOffice?.is_head_office && selectedDepartmentId && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      फाँट चयन गर्नुहोस्
+                      <span className="text-xs text-gray-500 ml-1">(मुख्य कार्यालयमा मात्र)</span>
+                    </label>
+                    <select
+                      value={selectedFaatId}
+                      onChange={handleFaatChange}
+                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all disabled:bg-gray-100 disabled:text-gray-400"
+                      disabled={faats.length === 0}
+                    >
+                      <option value="">फाँट चयन गर्नुहोस्...</option>
+                      {faats.length > 0 ? (
+                        faats.map((faat) => (
+                          <option key={faat.id} value={faat.id}>
+                            {faat.name} {faat.code && `(${faat.code})`}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>कुनै फाँट उपलब्ध छैन</option>
+                      )}
+                    </select>
+                    {selectedDepartmentId && faats.length === 0 && (
+                      <p className="mt-2 text-sm text-orange-500">यस विभागमा कुनै फाँट छैन। कृपया पहिले फाँट थप्नुहोस्।</p>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Notice for branch offices */}
+              {(() => {
+                const selectedOffice = offices.find(office => office.id.toString() === selectedOfficeId);
+                return selectedOffice && !selectedOffice.is_head_office && (
+                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-yellow-800 text-sm flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path>
+                      </svg>
+                      यो शाखा कार्यालय भएकोले फाँट असाइन गर्न सकिदैन। केवल मुख्य कार्यालयमा मात्र फाँट व्यवस्थापन गर्न सकिन्छ。
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
             
             <div className="mt-8 flex justify-end gap-2">

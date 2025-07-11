@@ -24,6 +24,7 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
   
   const [files, setFiles] = useState([]);
   const [offices, setOffices] = useState([]);
+  const [headOffices, setHeadOffices] = useState([]); // Store head offices separately
   const [departments, setDepartments] = useState([]);
   const [faats, setFaats] = useState([]);
   const [allDepartments, setAllDepartments] = useState([]);
@@ -59,12 +60,20 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
       }
 
       setFiles(filesData);
-      setOffices(Array.isArray(officesRes.data) ? officesRes.data : []);
+      
+      const allOffices = Array.isArray(officesRes.data) ? officesRes.data : [];
+      setOffices(allOffices);
+      
+      // Filter head offices for faat selection
+      const headOfficesData = allOffices.filter(office => office.is_head_office);
+      setHeadOffices(headOfficesData);
+      
       setAllDepartments(Array.isArray(departmentsRes.data) ? departmentsRes.data : []);
     } catch (error) {
       console.error("Error fetching dropdown data:", error);
       setFiles([]);
       setOffices([]);
+      setHeadOffices([]);
       setAllDepartments([]);
     }
   };
@@ -312,7 +321,7 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                 <option value="">कार्यालय छान्नुहोस्</option>
                 {offices.map((office) => (
                   <option key={office.id} value={office.id}>
-                    {office.name}
+                    {office.name} {office.is_head_office ? "(मुख्य)" : "(शाखा)"}
                   </option>
                 ))}
               </select>
@@ -325,7 +334,7 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
               <select
                 name="related_department"
                 value={formData.related_department}
-                onChange={handleDepartmentChange} // <-- Changed from handleInputChange to handleDepartmentChange
+                onChange={handleDepartmentChange}
                 disabled={!formData.related_office}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
@@ -356,6 +365,11 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                   </option>
                 ))}
               </select>
+              {formData.related_office && !headOffices.find(office => office.id == formData.related_office) && (
+                <p className="text-sm text-yellow-600 mt-1">
+                  यो शाखा कार्यालय भएकोले फाँट उपलब्ध छैन
+                </p>
+              )}
             </div>
           </div>
 
