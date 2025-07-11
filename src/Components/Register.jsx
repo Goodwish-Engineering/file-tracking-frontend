@@ -8,7 +8,7 @@ import "nepali-datepicker-reactjs/dist/index.css";
 
 const Registration = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
-  const token = localStorage.getItem("token"); // Add this line to get the token
+  const token = localStorage.getItem("token");
   const [provinces, setProvinces] = useState([]);
   const [district, setDistrict] = useState([]);
   const [tempDistrict, setTemptDistrict] = useState([]);
@@ -16,7 +16,8 @@ const Registration = () => {
   const [tempMunicipalities, setTempMunicipalities] = useState([]);
   const [offices, setOffices] = useState([]);
   const [departments, setDepartments] = useState([]);
-  const [faats, setFaats] = useState([]); // Add state for faats
+  const [faats, setFaats] = useState([]);
+  const [selectedOffice, setSelectedOffice] = useState(null); // Add state to track selected office
   const [selectedProvince, setSelectedProvince] = useState("");
   const [datePickerKey, setDatePickerKey] = useState(0);
   const loanType = [
@@ -254,11 +255,21 @@ const Registration = () => {
 
   const handleOfficeChange = (e) => {
     const { value } = e.target;
+    
+    // Find the selected office object
+    const officeObj = offices.find(office => office.id.toString() === value);
+    setSelectedOffice(officeObj);
+    
     setFormData((prevData) => ({
       ...prevData,
       office: value,
       department: "",
+      faat: "", // Reset faat when office changes
     }));
+    
+    // Clear departments and faats when office changes
+    setDepartments([]);
+    setFaats([]);
   };
 
   // Enhance the department change handler to fetch faats
@@ -267,10 +278,11 @@ const Registration = () => {
     setFormData((prevData) => ({
       ...prevData,
       department: value,
-      faat: "", // Reset faat when department changes
+      faat: "",
     }));
 
-    if (value) {
+    // Only fetch faats if it's a head office and department is selected
+    if (value && selectedOffice?.is_head_office) {
       fetchFaats(value);
     } else {
       setFaats([]);
@@ -517,10 +529,10 @@ const Registration = () => {
               className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
               required
             >
-              <option value="">Select an Office</option>
+              <option value="">कार्यालय छान्नुहोस्</option>
               {offices.map((office, index) => (
                 <option key={index} value={office.id}>
-                  {office.name}
+                  {office.name} {office.is_head_office ? "(मुख्य)" : "(शाखा)"}
                 </option>
               ))}
             </select>
@@ -528,7 +540,7 @@ const Registration = () => {
 
           <label className="flex flex-col">
             <span className="text-sm font-medium text-gray-900">
-              विभाग <span className="text-red-500">*</span>
+              विभाग {selectedOffice?.is_head_office && <span className="text-red-500">*</span>}
             </span>
             <select
               name="department"
@@ -536,9 +548,9 @@ const Registration = () => {
               onChange={handleDepartmentChange}
               className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
               disabled={!formData.office}
-              required
+              required={selectedOffice?.is_head_office} // Only required for head offices
             >
-              <option value="">Select a Department</option>
+              <option value="">विभाग छान्नुहोस्</option>
               {departments.length > 0 ? (
                 departments.map((department) => (
                   <option key={department.id} value={department.id}>
@@ -546,35 +558,61 @@ const Registration = () => {
                   </option>
                 ))
               ) : (
-                <option disabled>No departments available</option>
+                <option disabled>कुनै विभाग उपलब्ध छैन</option>
               )}
             </select>
+            {formData.office && !selectedOffice?.is_head_office && (
+              <p className="text-sm text-yellow-600 mt-1">
+                यो शाखा कार्यालय भएकोले विभाग छनोट वैकल्पिक छ
+              </p>
+            )}
           </label>
 
-          <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">
-              फाँट <span className="text-red-500">*</span>
-            </span>
-            <select
-              name="faat"
-              value={formData.faat}
-              onChange={handleChange}
-              className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              disabled={!formData.department}
-              required
-            >
-              <option value="">फाँट छान्नुहोस्</option>
-              {faats.length > 0 ? (
-                faats.map((faat) => (
-                  <option key={faat.id} value={faat.id}>
-                    {faat.name}
-                  </option>
-                ))
-              ) : (
-                <option disabled>कुनै फाँट उपलब्ध छैन</option>
+          {/* Only show faat selection for head offices */}
+          {selectedOffice?.is_head_office && (
+            <label className="flex flex-col">
+              <span className="text-sm font-medium text-gray-900">
+                फाँट <span className="text-red-500">*</span>
+                <span className="text-xs text-gray-500 ml-1">(मुख्य कार्यालयमा मात्र)</span>
+              </span>
+              <select
+                name="faat"
+                value={formData.faat}
+                onChange={handleChange}
+                className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                disabled={!formData.department}
+                required
+              >
+                <option value="">फाँट छान्नुहोस्</option>
+                {faats.length > 0 ? (
+                  faats.map((faat) => (
+                    <option key={faat.id} value={faat.id}>
+                      {faat.name}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>कुनै फाँट उपलब्ध छैन</option>
+                )}
+              </select>
+              {formData.department && faats.length === 0 && (
+                <p className="text-sm text-orange-500 mt-1">
+                  यस विभागमा कुनै फाँट छैन। कृपया पहिले फाँट थप्नुहोस्。
+                </p>
               )}
-            </select>
-          </label>
+            </label>
+          )}
+
+          {/* Show notice for branch offices */}
+          {selectedOffice && !selectedOffice.is_head_office && (
+            <div className="col-span-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-yellow-800 text-sm flex items-center">
+                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path>
+                </svg>
+                यो शाखा कार्यालय भएकोले फाँट असाइन गर्न सकिदैन। केवल मुख्य कार्यालयमा मात्र फाँट व्यवस्थापन गर्न सकिन्छ。
+              </p>
+            </div>
+          )}
 
           <label className="flex flex-col">
             <span className="text-sm font-medium text-gray-900">
@@ -587,12 +625,12 @@ const Registration = () => {
               className="border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
               required
             >
-              <option value="">select level </option>
-              <option value={1}>Faat</option>
-              <option value={2}>Branch Head</option>
-              <option value={3}>Branch officer</option>
-              <option value={4}>Division Head</option>
-              <option value={5}>Admin</option>
+              <option value="">लेवल छान्नुहोस्</option>
+              <option value={1}>फाँट</option>
+              <option value={2}>शाखा प्रमुख</option>
+              <option value={3}>शाखा अधिकारी</option>
+              <option value={4}>विभाग प्रमुख</option>
+              <option value={5}>प्रशासक</option>
             </select>
           </label>
         </div>
