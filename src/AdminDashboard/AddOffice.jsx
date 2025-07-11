@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 
 const AddOffice = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
-  const [formData, setFormData] = useState({ name: "", code: "" });
+  const [formData, setFormData] = useState({ name: "", code: "", is_head_office: false });
   const [departments, setDepartments] = useState([
     {
       name: "",
@@ -113,17 +113,19 @@ const AddOffice = () => {
       return;
     }
 
-    // Check for empty faats
-    let hasEmptyFaats = false;
-    departments.forEach((dept) => {
-      if (dept.faats.some((faat) => !faat.name.trim() || !faat.code.trim())) {
-        hasEmptyFaats = true;
-      }
-    });
+    // Check for empty faats only if it's a head office
+    if (formData.is_head_office) {
+      let hasEmptyFaats = false;
+      departments.forEach((dept) => {
+        if (dept.faats.some((faat) => !faat.name.trim() || !faat.code.trim())) {
+          hasEmptyFaats = true;
+        }
+      });
 
-    if (hasEmptyFaats) {
-      toast.error("कृपया सबै फाँटको नाम र कोड हाल्नुहोस् वा हटाउनुहोस्");
-      return;
+      if (hasEmptyFaats) {
+        toast.error("कृपया सबै फाँटको नाम र कोड हाल्नुहोस् वा हटाउनुहोस्");
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -147,15 +149,17 @@ const AddOffice = () => {
               { headers: { Authorization: `Token ${token}` } }
             );
 
-            // 3. Create faats for this department
-            const departmentId = deptResponse.data.id;
-            for (const faat of department.faats) {
-              if (faat.name.trim() !== "") {
-                await axios.post(
-                  `${baseUrl}/faat/`,
-                  { name: faat.name, code: faat.code, belongs_to: departmentId }, // Use belongs_to instead of department
-                  { headers: { Authorization: `Token ${token}` } }
-                );
+            // 3. Create faats for this department only if it's a head office
+            if (formData.is_head_office) {
+              const departmentId = deptResponse.data.id;
+              for (const faat of department.faats) {
+                if (faat.name.trim() !== "") {
+                  await axios.post(
+                    `${baseUrl}/faat/`,
+                    { name: faat.name, code: faat.code, belongs_to: departmentId },
+                    { headers: { Authorization: `Token ${token}` } }
+                  );
+                }
               }
             }
           }
@@ -171,8 +175,8 @@ const AddOffice = () => {
         }, 3000);
 
         // Reset form fields
-        setFormData({ name: "", code: "" });
-        setDepartments([{ name: "", code: "", faats: [{ name: "", code: "" }] }]); // Remove belongs_to from reset
+        setFormData({ name: "", code: "", is_head_office: false });
+        setDepartments([{ name: "", code: "", faats: [{ name: "", code: "" }] }]);
       }
     } catch (error) {
       console.error("Error saving data:", error);
@@ -237,6 +241,25 @@ const AddOffice = () => {
                   />
                 </div>
               </div>
+
+              {/* Add head office checkbox */}
+              <div className="mb-4">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="is_head_office"
+                    checked={formData.is_head_office}
+                    onChange={(e) => setFormData({ ...formData, is_head_office: e.target.checked })}
+                    className="mr-3 h-4 w-4 text-[#E68332] focus:ring-[#E68332] border-gray-300 rounded"
+                  />
+                  <span className="text-gray-800 font-medium">यो मुख्य कार्यालय हो</span>
+                </label>
+                <p className="text-sm text-gray-500 mt-1 ml-7">
+                  {formData.is_head_office 
+                    ? "मुख्य कार्यालयमा मात्र फाँटहरू थप्न सकिन्छ" 
+                    : "शाखा कार्यालयमा फाँटहरू थप्न सकिदैन"}
+                </p>
+              </div>
             </div>
 
             {/* Departments and Faats section */}
@@ -244,17 +267,27 @@ const AddOffice = () => {
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-medium text-lg text-gray-800 flex items-center">
                   <FaLayerGroup className="mr-2 text-[#E68332]" />
-                  विभाग र फाँटहरू
+                  विभाग {formData.is_head_office ? "र फाँटहरू" : ""}
                 </h3>
                 <button
                   type="button"
-                  onClick={() => setDepartments([...departments, { name: "", code: "", faats: [{ name: "", code: "" }] }])}
+                  onClick={() => setDepartments([...departments, { name: "", code: "", faats: formData.is_head_office ? [{ name: "", code: "" }] : [] }])}
                   className="bg-green-500 text-white py-1 px-3 rounded-md hover:bg-green-600 flex items-center gap-1 text-sm transition-colors"
                 >
                   <FaPlus size={12} />
                   <span>नयाँ विभाग</span>
                 </button>
               </div>
+
+              {/* Show notice for non-head offices */}
+              {!formData.is_head_office && (
+                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-yellow-800 text-sm flex items-center">
+                    <FaLayerGroup className="mr-2" />
+                    यो शाखा कार्यालय भएकोले फाँटहरू थप्न सकिदैन। केवल मुख्य कार्यालयमा मात्र फाँटहरू व्यवस्थापन गर्न सकिन्छ。
+                  </p>
+                </div>
+              )}
 
               {/* Map through departments and their faats */}
               {departments.map((department, departmentIndex) => (
@@ -307,59 +340,60 @@ const AddOffice = () => {
                     />
                   </div>
 
-                  {/* Faats section */}
-                  <div className="ml-6 border-l-2 border-blue-300 pl-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <h5 className="text-sm font-medium text-gray-700 flex items-center">
-                        <FaLayerGroup className="mr-2 text-blue-500" />
-                        फाँटहरू
-                      </h5>
-                      <button
-                        type="button"
-                        onClick={() => addFaatField(departmentIndex)}
-                        className="bg-blue-500 text-white py-1 px-2 rounded-md hover:bg-blue-600 flex items-center gap-1 text-xs transition-colors"
-                      >
-                        <FaPlus size={10} />
-                        <span>फाँट थप्नुहोस्</span>
-                      </button>
-                    </div>
-
-                    {/* Map through faats for this department */}
-                    {department.faats.map((faat, faatIndex) => (
-                      <div key={faatIndex} className="flex items-center gap-2 mb-2 group">
-                        {/* Add code input for faat */}
-                        <input
-                          type="text"
-                          value={faat.code}
-                          onChange={(e) => handleFaatCodeChange(departmentIndex, faatIndex, e)}
-                          className="w-1/3 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          placeholder={`फाँट #${faatIndex + 1} कोड`}
-                          required
-                        />
-                        <input
-                          type="text"
-                          value={faat.name}
-                          onChange={(e) => handleFaatNameChange(departmentIndex, faatIndex, e)}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          placeholder={`फाँट #${faatIndex + 1} नाम`}
-                          required
-                        />
-                        {department.faats.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeFaatField(departmentIndex, faatIndex)}
-                            className="text-red-500 p-1 rounded-md hover:bg-red-100 transition-colors"
-                          >
-                            <FaTrash size={12} />
-                          </button>
-                        )}
+                  {/* Faats section - only show for head offices */}
+                  {formData.is_head_office && (
+                    <div className="ml-6 border-l-2 border-blue-300 pl-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <h5 className="text-sm font-medium text-gray-700 flex items-center">
+                          <FaLayerGroup className="mr-2 text-blue-500" />
+                          फाँटहरू
+                        </h5>
+                        <button
+                          type="button"
+                          onClick={() => addFaatField(departmentIndex)}
+                          className="bg-blue-500 text-white py-1 px-2 rounded-md hover:bg-blue-600 flex items-center gap-1 text-xs transition-colors"
+                        >
+                          <FaPlus size={10} />
+                          <span>फाँट थप्नुहोस्</span>
+                        </button>
                       </div>
-                    ))}
 
-                    <p className="text-xs text-gray-500 italic mt-1">
-                      प्रत्येक विभागमा कम्तिमा एउटा फाँट हुनुपर्छ
-                    </p>
-                  </div>
+                      {/* Map through faats for this department */}
+                      {department.faats && department.faats.map((faat, faatIndex) => (
+                        <div key={faatIndex} className="flex items-center gap-2 mb-2 group">
+                          <input
+                            type="text"
+                            value={faat.code}
+                            onChange={(e) => handleFaatCodeChange(departmentIndex, faatIndex, e)}
+                            className="w-1/3 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            placeholder={`फाँट #${faatIndex + 1} कोड`}
+                            required
+                          />
+                          <input
+                            type="text"
+                            value={faat.name}
+                            onChange={(e) => handleFaatNameChange(departmentIndex, faatIndex, e)}
+                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            placeholder={`फाँट #${faatIndex + 1} नाम`}
+                            required
+                          />
+                          {department.faats.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeFaatField(departmentIndex, faatIndex)}
+                              className="text-red-500 p-1 rounded-md hover:bg-red-100 transition-colors"
+                            >
+                              <FaTrash size={12} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+
+                      <p className="text-xs text-gray-500 italic mt-1">
+                        मुख्य कार्यालयमा प्रत्येक विभागमा कम्तिमा एउटा फाँट हुनुपर्छ
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

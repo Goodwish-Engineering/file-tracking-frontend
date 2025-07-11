@@ -391,6 +391,11 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                                     कोड: {office.code}
                                   </span>
                                 )}
+                                {office.is_head_office && (
+                                  <span className="bg-green-100 px-2 py-0.5 rounded text-green-700 font-medium">
+                                    मुख्य कार्यालय
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -543,10 +548,19 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                       <h3 className="font-medium text-blue-700 flex items-center gap-1">
                         <FaTasks className="text-blue-500" /> 
                         <span>फाँटहरू</span>
+                        {!office.is_head_office && (
+                          <span className="text-xs text-yellow-600 ml-2">(शाखा कार्यालय - फाँट अनुमति छैन)</span>
+                        )}
                       </h3>
                     </div>
                     
-                    {office.departments && office.departments.length > 0 ? (
+                    {!office.is_head_office ? (
+                      <div className="p-4 text-center text-gray-500">
+                        <FaTasks className="mx-auto text-gray-300 text-4xl mb-3" />
+                        <p className="font-medium">शाखा कार्यालय</p>
+                        <p className="text-sm mt-2">यो शाखा कार्यालय भएकोले फाँटहरू व्यवस्थापन गर्न सकिदैन। केवल मुख्य कार्यालयमा मात्र फाँटहरू थप्न सकिन्छ।</p>
+                      </div>
+                    ) : office.departments && office.departments.length > 0 ? (
                       <div className="divide-y divide-gray-100">
                         {office.departments.map((dept) => (
                           <div key={dept.id} className="p-3">
