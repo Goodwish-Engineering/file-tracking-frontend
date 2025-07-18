@@ -213,10 +213,10 @@ const AddDepartOfOffice = () => {
                 <div className="bg-gradient-to-r from-[#f9f1ea] to-[#fcf8f5] p-4 border-l-4 border-[#E68332]">
                   <h2 className="text-center font-bold text-xl text-[#E68332] flex items-center justify-center gap-2">
                     <FaBuilding className="text-[#E68332]" />
-                    {officeName ? `${officeName} - विभाग थप्नुहोस्` : "नयाँ विभाग थप्नुहोस्"}
+                    {officeName ? `${officeName} - ${isHeadOffice ? "महाशाखा" : "शाखा"} थप्नुहोस्` : `नयाँ ${isHeadOffice ? "महाशाखा" : "शाखा"} थप्नुहोस्`}
                   </h2>
                   <p className="text-center text-gray-600 mt-1">
-                    कार्यालय संरचनामा नयाँ विभाग थप्नुहोस्
+                    कार्यालय संरचनामा नयाँ {isHeadOffice ? "महाशाखा" : "शाखा"} थप्नुहोस्
                   </p>
                 </div>
                 
@@ -225,7 +225,7 @@ const AddDepartOfOffice = () => {
                     <div>
                       <label htmlFor="code" className="text-gray-800 font-medium mb-2 flex items-center">
                         <FaBuilding className="mr-2 text-[#E68332]" />
-                        विभागको कोड
+                        {isHeadOffice ? "महाशाखाको" : "शाखाको"} कोड
                         <span className="text-red-500 ml-1">*</span>
                       </label>
                       <input
@@ -235,7 +235,7 @@ const AddDepartOfOffice = () => {
                         value={formData.code}
                         onChange={handleChange}
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
-                        placeholder="विभागको कोड यहाँ लेख्नुहोस्"
+                        placeholder={`${isHeadOffice ? "महाशाखाको" : "शाखाको"} कोड यहाँ लेख्नुहोस्`}
                         required
                       />
                     </div>
@@ -243,7 +243,7 @@ const AddDepartOfOffice = () => {
                     <div>
                       <label htmlFor="name" className="text-gray-800 font-medium mb-2 flex items-center">
                         <FaBuilding className="mr-2 text-[#E68332]" />
-                        विभागको नाम
+                        {isHeadOffice ? "महाशाखाको" : "शाखाको"} नाम
                         <span className="text-red-500 ml-1">*</span>
                       </label>
                       <input
@@ -253,14 +253,14 @@ const AddDepartOfOffice = () => {
                         value={formData.name}
                         onChange={handleChange}
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
-                        placeholder="विभागको नाम यहाँ लेख्नुहोस्"
+                        placeholder={`${isHeadOffice ? "महाशाखाको" : "शाखाको"} नाम यहाँ लेख्नुहोस्`}
                         required
                       />
                     </div>
                   </div>
                   
                   <p className="text-sm text-gray-500 mt-1 italic">
-                    यो विभाग "{officeName}" कार्यालय अन्तर्गत थपिनेछ
+                    यो {isHeadOffice ? "महाशाखा" : "शाखा"} "{officeName}" कार्यालय अन्तर्गत थपिनेछ
                   </p>
 
                   <div className="flex justify-center mt-8">
@@ -277,7 +277,7 @@ const AddDepartOfOffice = () => {
                       ) : (
                         <>
                           <FaPlus />
-                          विभाग थप्नुहोस्
+                          {isHeadOffice ? "महाशाखा" : "शाखा"} थप्नुहोस्
                         </>
                       )}
                     </button>
@@ -292,10 +292,10 @@ const AddDepartOfOffice = () => {
                 <div className="bg-gradient-to-r from-[#f9f1ea] to-[#fcf8f5] p-4 border-l-4 border-[#E68332]">
                   <h2 className="text-center font-bold text-xl text-[#E68332] flex items-center justify-center gap-2">
                     <FaBuilding className="text-[#E68332]" />
-                    मौजुदा विभागहरू
+                    मौजुदा {isHeadOffice ? "महाशाखाहरू" : "शाखाहरू"}
                   </h2>
                   <p className="text-center text-gray-600 mt-1">
-                    {officeName} कार्यालयका सबै विभागहरू
+                    {officeName} कार्यालयका सबै {isHeadOffice ? "महाशाखाहरू" : "शाखाहरू"}
                   </p>
                 </div>
                 
@@ -330,8 +330,8 @@ const AddDepartOfOffice = () => {
                   ) : (
                     <div className="py-12 text-center text-gray-500">
                       <FaBuilding className="mx-auto text-gray-300 text-4xl mb-3" />
-                      <p>कुनै विभागहरू भेटिएन</p>
-                      <p className="text-sm mt-2">यो कार्यालयमा अहिलेसम्म कुनै पनि विभाग थपिएको छैन।</p>
+                      <p>कुनै {isHeadOffice ? "महाशाखाहरू" : "शाखाहरू"} भेटिएन</p>
+                      <p className="text-sm mt-2">यो कार्यालयमा अहिलेसम्म कुनै पनि {isHeadOffice ? "महाशाखा" : "शाखा"} थपिएको छैन।</p>
                     </div>
                   )}
                 </div>
@@ -347,10 +347,10 @@ const AddDepartOfOffice = () => {
                   <div className="bg-gradient-to-r from-[#f0f9ff] to-[#e6f7ff] p-4 border-l-4 border-blue-500">
                     <h2 className="text-center font-bold text-xl text-blue-600 flex items-center justify-center gap-2">
                       <FaLayerGroup className="text-blue-600" />
-                      {officeName ? `${officeName} - फाँट थप्नुहोस्` : "नयाँ फाँट थप्नुहोस्"}
+                      {officeName ? `${officeName} - शाखा थप्नुहोस्` : "नयाँ शाखा थप्नुहोस्"}
                     </h2>
                     <p className="text-center text-gray-600 mt-1">
-                      विभागहरुमा नयाँ फाँट थप्नुहोस्
+                      महाशाखाहरुमा नयाँ शाखा थप्नुहोस्
                     </p>
                   </div>
                   
@@ -358,7 +358,7 @@ const AddDepartOfOffice = () => {
                     <div className="mb-6">
                       <label htmlFor="department" className="text-gray-800 font-medium mb-2 flex items-center">
                         <FaBuilding className="mr-2 text-blue-500" />
-                        विभाग छान्नुहोस्
+                        महाशाखा छान्नुहोस्
                         <span className="text-red-500 ml-1">*</span>
                       </label>
                       <select
@@ -369,7 +369,7 @@ const AddDepartOfOffice = () => {
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         required
                       >
-                        <option value="">-- विभाग छान्नुहोस् --</option>
+                        <option value="">-- महाशाखा छान्नुहोस् --</option>
                         {departments.map((dept) => (
                           <option key={dept.id} value={dept.id}>
                             {dept.name}
@@ -378,7 +378,7 @@ const AddDepartOfOffice = () => {
                       </select>
                       {departments.length === 0 && (
                         <p className="text-sm text-orange-500 mt-1">
-                          फाँट थप्नको लागि पहिले विभाग थप्नुहोस्
+                          शाखा थप्नको लागि पहिले महाशाखा थप्नुहोस्
                         </p>
                       )}
                     </div>
@@ -388,7 +388,7 @@ const AddDepartOfOffice = () => {
                       <div>
                         <label htmlFor="faatCode" className="text-gray-800 font-medium mb-2 flex items-center">
                           <FaLayerGroup className="mr-2 text-blue-500" />
-                          फाँटको कोड
+                          शाखाको कोड
                           <span className="text-red-500 ml-1">*</span>
                         </label>
                         <input
@@ -398,7 +398,7 @@ const AddDepartOfOffice = () => {
                           value={faatFormData.code}
                           onChange={handleFaatChange}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          placeholder="फाँटको कोड"
+                          placeholder="शाखाको कोड"
                           required
                           disabled={!selectedDepartment}
                         />
@@ -407,7 +407,7 @@ const AddDepartOfOffice = () => {
                       <div>
                         <label htmlFor="faatName" className="text-gray-800 font-medium mb-2 flex items-center">
                           <FaLayerGroup className="mr-2 text-blue-500" />
-                          फाँटको नाम
+                          शाखाको नाम
                           <span className="text-red-500 ml-1">*</span>
                         </label>
                         <input
@@ -417,7 +417,7 @@ const AddDepartOfOffice = () => {
                           value={faatFormData.name}
                           onChange={handleFaatChange}
                           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          placeholder="फाँटको नाम"
+                          placeholder="शाखाको नाम"
                           required
                           disabled={!selectedDepartment}
                         />
@@ -426,7 +426,7 @@ const AddDepartOfOffice = () => {
                     
                     {selectedDepartment && (
                       <p className="text-sm text-gray-500 mt-1 italic">
-                        यो फाँट चयन गरिएको विभाग अन्तर्गत थपिनेछ
+                        यो शाखा चयन गरिएको महाशाखा अन्तर्गत थपिनेछ
                       </p>
                     )}
 
@@ -446,7 +446,7 @@ const AddDepartOfOffice = () => {
                         ) : (
                           <>
                             <FaPlus />
-                            फाँट थप्नुहोस्
+                            शाखा थप्नुहोस्
                           </>
                         )}
                       </button>
@@ -461,12 +461,12 @@ const AddDepartOfOffice = () => {
                   <div className="bg-gradient-to-r from-[#f0f9ff] to-[#e6f7ff] p-4 border-l-4 border-blue-500">
                     <h2 className="text-center font-bold text-xl text-blue-600 flex items-center justify-center gap-2">
                       <FaLayerGroup className="text-blue-600" />
-                      मौजुदा फाँटहरू
+                      मौजुदा शाखाहरू
                     </h2>
                     <p className="text-center text-gray-600 mt-1">
                       {selectedDepartment ? 
-                        `चयन गरिएको विभागका सबै फाँटहरू` : 
-                        "फाँटहरू हेर्न कृपया विभाग छान्नुहोस्"}
+                        `चयन गरिएको महाशाखाका सबै शाखाहरू` : 
+                        "शाखाहरू हेर्न कृपया महाशाखा छान्नुहोस्"}
                     </p>
                   </div>
                   
@@ -504,15 +504,15 @@ const AddDepartOfOffice = () => {
                       ) : (
                         <div className="py-12 text-center text-gray-500">
                           <FaLayerGroup className="mx-auto text-gray-300 text-4xl mb-3" />
-                          <p>कुनै फाँटहरू भेटिएन</p>
-                          <p className="text-sm mt-2">यो विभागमा अहिलेसम्म कुनै पनि फाँट थपिएको छैन।</p>
+                          <p>कुनै शाखाहरू भेटिएन</p>
+                          <p className="text-sm mt-2">यो महाशाखामा अहिलेसम्म कुनै पनि शाखा थपिएको छैन।</p>
                         </div>
                       )
                     ) : (
                       <div className="py-12 text-center text-gray-500">
                         <FaBuilding className="mx-auto text-gray-300 text-4xl mb-3" />
-                        <p>कृपया पहिले विभाग छान्नुहोस्</p>
-                        <p className="text-sm mt-2">फाँटहरू हेर्नको लागि बायाँ फारममा विभाग छान्नुहोस्</p>
+                        <p>कृपया पहिले महाशाखा छान्नुहोस्</p>
+                        <p className="text-sm mt-2">शाखाहरू हेर्नको लागि बायाँ फारममा महाशाखा छान्नुहोस्</p>
                       </div>
                     )}
                   </div>
@@ -523,12 +523,12 @@ const AddDepartOfOffice = () => {
             <div className="mt-8 p-6 bg-yellow-50 border border-yellow-200 rounded-xl">
               <div className="text-center">
                 <FaLayerGroup className="mx-auto text-yellow-400 text-4xl mb-3" />
-                <h3 className="font-bold text-xl text-yellow-800 mb-2">शाखा कार्यालय - फाँट सीमा</h3>
+                <h3 className="font-bold text-xl text-yellow-800 mb-2">सामान्य कार्यालय - शाखा सीमा</h3>
                 <p className="text-yellow-700 mb-4">
-                  यो "{officeName}" शाखा कार्यालय भएकोले यहाँ फाँटहरू थप्न सकिदैन。
+                  यो "{officeName}" सामान्य कार्यालय भएकोले यहाँ शाखाहरू थप्न सकिदैन。
                 </p>
                 <p className="text-sm text-yellow-600">
-                  फाँटहरू केवल मुख्य कार्यालयमा मात्र व्यवस्थापन गर्न सकिन्छ。
+                  शाखाहरू केवल मुख्य कार्यालयमा मात्र व्यवस्थापन गर्न सकिन्छ。
                 </p>
               </div>
             </div>

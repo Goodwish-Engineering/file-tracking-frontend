@@ -1,104 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import {
-  FaPlus,
-  FaBuilding,
-  FaLayerGroup,
-  FaCheck,
-  FaSpinner,
-  FaTrash,
-} from "react-icons/fa";
-import AddDepartOfOffice from "./AddDepartOfOffice";
+import React, { useState } from "react";
+import { FaPlus, FaBuilding, FaLayerGroup, FaCheck, FaTrash } from "react-icons/fa";
+import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
 import DisplayEditOffice from "./DisplayEditOffice";
-import axios from "axios";
+import { useApi } from "../hooks/useApi";
+import { useForm } from "../hooks/useForm";
 import { toast } from "react-toastify";
 
 const AddOffice = () => {
-  const baseUrl = useSelector((state) => state.login?.baseUrl);
-  const [formData, setFormData] = useState({ name: "", code: "", is_head_office: false });
-  const [departments, setDepartments] = useState([
-    {
-      name: "",
-      code: "",
-      faats: [{ name: "", code: "" }], // Remove belongs_to from faats - they belong to department via department ID
-    },
-  ]);
-  const [officeId, setOfficeId] = useState(null);
-  const [buttonSubmitted, setButtonSubmitted] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const { post, loading } = useApi();
   const [dataUpdated, setDataUpdated] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [departments, setDepartments] = useState([
+    { name: "", code: "", faats: [{ name: "", code: "" }] },
+  ]);
 
-  const handleNameChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-  const handleCodeChange = (e) => {
-    console.log(e.target.value);
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleDepartmentNameChange = (index, e) => {
-    const newDepartments = [...departments];
-    newDepartments[index].name = e.target.value;
-    setDepartments(newDepartments);
-  };
-  const handleDepartmentCodeChange = (index, e) => {
-    const newDepartments = [...departments];
-    newDepartments[index].code = e.target.value;
-    setDepartments(newDepartments);
-  };
-
-  const handleFaatNameChange = (departmentIndex, faatIndex, e) => {
-    const newDepartments = [...departments];
-    newDepartments[departmentIndex].faats[faatIndex] = {
-      ...newDepartments[departmentIndex].faats[faatIndex],
-      name: e.target.value,
-    };
-    setDepartments(newDepartments);
-  };
-
-  // New handler for faat code changes
-  const handleFaatCodeChange = (departmentIndex, faatIndex, e) => {
-    const newDepartments = [...departments];
-    newDepartments[departmentIndex].faats[faatIndex] = {
-      ...newDepartments[departmentIndex].faats[faatIndex],
-      code: e.target.value,
-    };
-    setDepartments(newDepartments);
-  };
-
-  const addDepartmentField = () => {
-    setDepartments([...departments, { name: "" }]);
-  };
-
-  const removeDepartmentField = (indexToRemove) => {
-    // Prevent removing the last department field
-    if (departments.length > 1) {
-      setDepartments(departments.filter((_, index) => index !== indexToRemove));
-    }
-  };
-
-  const addFaatField = (departmentIndex) => {
-    const newDepartments = [...departments];
-    newDepartments[departmentIndex].faats.push({
-      name: "",
-      code: "",
-      // Remove belongs_to - faats are linked to departments via the department ID in the API call
-    });
-    setDepartments(newDepartments);
-  };
-
-  const removeFaatField = (departmentIndex, faatIndex) => {
-    if (departments[departmentIndex].faats.length <= 1) return; // Keep at least one faat field
-
-    const newDepartments = [...departments];
-    newDepartments[departmentIndex].faats.splice(faatIndex, 1);
-    setDepartments(newDepartments);
-  };
+  const { values: formData, handleChange, reset } = useForm({
+    name: "",
+    code: "",
+    is_head_office: false
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
 
     // Validation
     if (!formData.name.trim()) {
@@ -106,14 +30,12 @@ const AddOffice = () => {
       return;
     }
 
-    // Check for empty departments
     const emptyDepartments = departments.filter((dept) => !dept.name.trim());
     if (emptyDepartments.length > 0) {
       toast.error("कृपया सबै विभागको नाम हाल्नुहोस् वा हटाउनुहोस्");
       return;
     }
 
-    // Check for empty faats only if it's a head office
     if (formData.is_head_office) {
       let hasEmptyFaats = false;
       departments.forEach((dept) => {
@@ -128,37 +50,28 @@ const AddOffice = () => {
       }
     }
 
-    setIsSubmitting(true);
-
     try {
-      // 1. First create the office
-      const response = await axios.post(`${baseUrl}/offices/`, formData, {
-        headers: { Authorization: `Token ${token}` },
-      });
+      const response = await post('/offices/', formData);
+      
+      if (response) {
+        const newOfficeId = response.id;
 
-      if (response.data) {
-        const newOfficeId = response.data.id;
-        setOfficeId(newOfficeId);
-
-        // 2. Then create departments for this office
         for (const department of departments) {
           if (department.name.trim() !== "") {
-            const deptResponse = await axios.post(
-              `${baseUrl}/department/`,
-              { ...department, belongs_to: newOfficeId },
-              { headers: { Authorization: `Token ${token}` } }
-            );
+            const deptResponse = await post('/department/', {
+              ...department,
+              belongs_to: newOfficeId
+            });
 
-            // 3. Create faats for this department only if it's a head office
             if (formData.is_head_office) {
-              const departmentId = deptResponse.data.id;
+              const departmentId = deptResponse.id;
               for (const faat of department.faats) {
                 if (faat.name.trim() !== "") {
-                  await axios.post(
-                    `${baseUrl}/faat/`,
-                    { name: faat.name, code: faat.code, belongs_to: departmentId },
-                    { headers: { Authorization: `Token ${token}` } }
-                  );
+                  await post('/faat/', {
+                    name: faat.name,
+                    code: faat.code,
+                    belongs_to: departmentId
+                  });
                 }
               }
             }
@@ -166,42 +79,74 @@ const AddOffice = () => {
         }
 
         setDataUpdated(true);
-        setButtonSubmitted(true);
         toast.success("कार्यालय, विभाग र फाँट सफलतापूर्वक थपिए!");
-        setSuccessMessage("Office, departments and faats added successfully!");
+        
         setTimeout(() => {
-          setSuccessMessage("");
           setDataUpdated(false);
         }, 3000);
 
-        // Reset form fields
-        setFormData({ name: "", code: "", is_head_office: false });
+        reset();
         setDepartments([{ name: "", code: "", faats: [{ name: "", code: "" }] }]);
       }
     } catch (error) {
       console.error("Error saving data:", error);
       toast.error("डाटा थप्न असफल भयो। कृपया फेरि प्रयास गर्नुहोस्।");
-    } finally {
-      setIsSubmitting(false);
     }
+  };
+
+  const addDepartment = () => {
+    setDepartments([
+      ...departments,
+      { 
+        name: "", 
+        code: "", 
+        faats: formData.is_head_office ? [{ name: "", code: "" }] : [] 
+      }
+    ]);
+  };
+
+  const removeDepartment = (indexToRemove) => {
+    if (departments.length > 1) {
+      setDepartments(departments.filter((_, index) => index !== indexToRemove));
+    }
+  };
+
+  const addFaat = (departmentIndex) => {
+    const newDepartments = [...departments];
+    newDepartments[departmentIndex].faats.push({ name: "", code: "" });
+    setDepartments(newDepartments);
+  };
+
+  const removeFaat = (departmentIndex, faatIndex) => {
+    if (departments[departmentIndex].faats.length <= 1) return;
+    
+    const newDepartments = [...departments];
+    newDepartments[departmentIndex].faats.splice(faatIndex, 1);
+    setDepartments(newDepartments);
+  };
+
+  const updateDepartment = (index, field, value) => {
+    const newDepartments = [...departments];
+    newDepartments[index][field] = value;
+    setDepartments(newDepartments);
+  };
+
+  const updateFaat = (deptIndex, faatIndex, field, value) => {
+    const newDepartments = [...departments];
+    newDepartments[deptIndex].faats[faatIndex][field] = value;
+    setDepartments(newDepartments);
   };
 
   return (
     <div className="flex flex-col w-full mx-auto gap-6 p-4 min-h-screen bg-gray-50">
-      {/* Add Office Form Section */}
       <div className="w-full max-w-3xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 transition-all hover:shadow-xl">
-          <div className="bg-gradient-to-r from-[#f9f1ea] to-[#fcf8f5] p-4 border-l-4 border-[#E68332]">
-            <h2 className="text-center font-bold text-2xl text-[#E68332] flex items-center justify-center gap-3">
-              <FaBuilding className="text-[#E68332]" />
-              कार्यालय, विभाग र फाँट व्यवस्थापन
-            </h2>
-            <p className="text-center text-gray-600 mt-1">
-              नयाँ कार्यालय, सम्बन्धित विभागहरू र फाँटहरू थप्नुहोस्
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="p-6">
+        <Card
+          title="कार्यालय, विभाग र फाँट व्यवस्थापन"
+          subtitle="नयाँ कार्यालय, सम्बन्धित विभागहरू र फाँटहरू थप्नुहोस्"
+          icon={<FaBuilding />}
+          variant="gradient"
+        >
+          <form onSubmit={handleSubmit}>
             {/* Office section */}
             <div className="mb-6 border-b border-gray-200 pb-6">
               <h3 className="font-medium text-lg text-gray-800 mb-3 flex items-center">
@@ -209,55 +154,40 @@ const AddOffice = () => {
                 कार्यालय विवरण
               </h3>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div className="mb-4">
-                  <label className="text-gray-800 font-medium mb-2 flex items-center">
-                    <span className="mr-1">कोड</span>
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="code"
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
-                    placeholder="कार्यालयको कोड यहाँ लेख्नुहोस्"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="text-gray-800 font-medium mb-2 flex items-center">
-                    <span className="mr-1">कार्यालयको नाम</span>
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
-                    placeholder="कार्यालयको नाम यहाँ लेख्नुहोस्"
-                    required
-                  />
-                </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="कोड"
+                  name="code"
+                  value={formData.code}
+                  onChange={handleChange}
+                  placeholder="कार्यालयको कोड यहाँ लेख्नुहोस्"
+                  required
+                />
+                <Input
+                  label="कार्यालयको नाम"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="कार्यालयको नाम यहाँ लेख्नुहोस्"
+                  required
+                />
               </div>
 
-              {/* Add head office checkbox */}
               <div className="mb-4">
                 <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     name="is_head_office"
                     checked={formData.is_head_office}
-                    onChange={(e) => setFormData({ ...formData, is_head_office: e.target.checked })}
+                    onChange={handleChange}
                     className="mr-3 h-4 w-4 text-[#E68332] focus:ring-[#E68332] border-gray-300 rounded"
                   />
                   <span className="text-gray-800 font-medium">यो मुख्य कार्यालय हो</span>
                 </label>
                 <p className="text-sm text-gray-500 mt-1 ml-7">
                   {formData.is_head_office 
-                    ? "मुख्य कार्यालयमा मात्र फाँटहरू थप्न सकिन्छ" 
-                    : "शाखा कार्यालयमा फाँटहरू थप्न सकिदैन"}
+                    ? "मुख्य कार्यालयमा मात्र शाखाहरू थप्न सकिन्छ" 
+                    : "सामान्य कार्यालयमा शाखाहरू थप्न सकिदैन"}
                 </p>
               </div>
             </div>
@@ -267,75 +197,147 @@ const AddOffice = () => {
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-medium text-lg text-gray-800 flex items-center">
                   <FaLayerGroup className="mr-2 text-[#E68332]" />
-                  विभाग {formData.is_head_office ? "र फाँटहरू" : ""}
+                  महाशाखा/शाखा {formData.is_head_office ? "र शाखाहरू" : ""}
                 </h3>
-                <button
+                <Button
                   type="button"
-                  onClick={() => setDepartments([...departments, { name: "", code: "", faats: formData.is_head_office ? [{ name: "", code: "" }] : [] }])}
-                  className="bg-green-500 text-white py-1 px-3 rounded-md hover:bg-green-600 flex items-center gap-1 text-sm transition-colors"
+                  onClick={addDepartment}
+                  variant="success"
+                  size="sm"
+                  icon={<FaPlus />}
                 >
-                  <FaPlus size={12} />
-                  <span>नयाँ विभाग</span>
-                </button>
+                  {formData.is_head_office ? "नयाँ महाशाखा" : "नयाँ शाखा"}
+                </Button>
               </div>
 
-              {/* Show notice for non-head offices */}
               {!formData.is_head_office && (
                 <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-yellow-800 text-sm flex items-center">
                     <FaLayerGroup className="mr-2" />
-                    यो शाखा कार्यालय भएकोले फाँटहरू थप्न सकिदैन। केवल मुख्य कार्यालयमा मात्र फाँटहरू व्यवस्थापन गर्न सकिन्छ。
+                    यो सामान्य कार्यालय भएकोले शाखाहरू थप्न सकिदैन। केवल मुख्य कार्यालयमा मात्र शाखाहरू व्यवस्थापन गर्न सकिन्छ。
                   </p>
                 </div>
               )}
 
-              {/* Map through departments and their faats */}
               {departments.map((department, departmentIndex) => (
-                <div
-                  key={departmentIndex}
-                  className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50"
-                >
+                <div key={departmentIndex} className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium">विभाग #{departmentIndex + 1}</h4>
+                    <h4 className="font-medium">
+                      {formData.is_head_office ? "महाशाखा" : "शाखा"} #{departmentIndex + 1}
+                    </h4>
                     {departments.length > 1 && (
-                      <button
+                      <Button
                         type="button"
-                        onClick={() => {
-                          const newDepartments = [...departments];
-                          newDepartments.splice(departmentIndex, 1);
-                          setDepartments(newDepartments);
-                        }}
-                        className="text-red-500 hover:bg-red-100 p-1 rounded-md"
-                      >
-                        <FaTrash />
-                      </button>
+                        onClick={() => removeDepartment(departmentIndex)}
+                        variant="danger"
+                        size="sm"
+                        icon={<FaTrash />}
+                      />
                     )}
                   </div>
 
-                  {/* Department fields */}
                   <div className="grid grid-cols-2 gap-2 mb-4">
-                    <input
-                      type="text"
+                    <Input
+                      name={`dept_code_${departmentIndex}`}
                       value={department.code}
-                      onChange={(e) => {
-                        const newDepartments = [...departments];
-                        newDepartments[departmentIndex].code = e.target.value;
-                        setDepartments(newDepartments);
-                      }}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
-                      placeholder={`विभाग कोड`}
+                      onChange={(e) => updateDepartment(departmentIndex, 'code', e.target.value)}
+                      placeholder={formData.is_head_office ? "महाशाखा कोड" : "शाखा कोड"}
                       required
+                      className="mb-0"
                     />
-                    <input
-                      type="text"
+                    <Input
+                      name={`dept_name_${departmentIndex}`}
                       value={department.name}
-                      onChange={(e) => {
-                        const newDepartments = [...departments];
-                        newDepartments[departmentIndex].name = e.target.value;
-                        setDepartments(newDepartments);
-                      }}
+                      onChange={(e) => updateDepartment(departmentIndex, 'name', e.target.value)}
+                      placeholder={formData.is_head_office ? "महाशाखाको नाम" : "शाखाको नाम"}
+                      required
+                      className="mb-0"
+                    />
+                  </div>
+
+                  {formData.is_head_office && (
+                    <div className="ml-6 border-l-2 border-blue-300 pl-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <h5 className="text-sm font-medium text-gray-700 flex items-center">
+                          <FaLayerGroup className="mr-2 text-blue-500" />
+                          शाखाहरू
+                        </h5>
+                        <Button
+                          type="button"
+                          onClick={() => addFaat(departmentIndex)}
+                          variant="outline"
+                          size="sm"
+                          icon={<FaPlus />}
+                        >
+                          शाखा थप्नुहोस्
+                        </Button>
+                      </div>
+
+                      {department.faats && department.faats.map((faat, faatIndex) => (
+                        <div key={faatIndex} className="flex items-center gap-2 mb-2">
+                          <Input
+                            name={`faat_code_${departmentIndex}_${faatIndex}`}
+                            value={faat.code}
+                            onChange={(e) => updateFaat(departmentIndex, faatIndex, 'code', e.target.value)}
+                            placeholder={`शाखा #${faatIndex + 1} कोड`}
+                            required
+                            className="mb-0 w-1/3"
+                          />
+                          <Input
+                            name={`faat_name_${departmentIndex}_${faatIndex}`}
+                            value={faat.name}
+                            onChange={(e) => updateFaat(departmentIndex, faatIndex, 'name', e.target.value)}
+                            placeholder={`शाखा #${faatIndex + 1} नाम`}
+                            required
+                            className="mb-0 flex-1"
+                          />
+                          {department.faats.length > 1 && (
+                            <Button
+                              type="button"
+                              onClick={() => removeFaat(departmentIndex, faatIndex)}
+                              variant="danger"
+                              size="sm"
+                              icon={<FaTrash />}
+                            />
+                          )}
+                        </div>
+                      ))}
+
+                      <p className="text-xs text-gray-500 italic mt-1">
+                        मुख्य कार्यालयमा प्रत्येक महाशाखामा कम्तिमा एउटा शाखा हुनुपर्छ
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-center mt-8">
+              <Button
+                type="submit"
+                isLoading={loading}
+                icon={<FaCheck />}
+                size="lg"
+              >
+                सुरक्षित गर्नुहोस्
+              </Button>
+            </div>
+          </form>
+        </Card>
+      </div>
+
+      <div className="w-full">
+        <Card>
+          <DisplayEditOffice dataUpdated={dataUpdated} />
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default AddOffice;
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
-                      placeholder={`विभागको नाम`}
+                      placeholder={formData.is_head_office ? "महाशाखाको नाम" : "शाखाको नाम"}
                       required
                     />
                   </div>
@@ -346,7 +348,7 @@ const AddOffice = () => {
                       <div className="flex justify-between items-center mb-2">
                         <h5 className="text-sm font-medium text-gray-700 flex items-center">
                           <FaLayerGroup className="mr-2 text-blue-500" />
-                          फाँटहरू
+                          शाखाहरू
                         </h5>
                         <button
                           type="button"
@@ -354,7 +356,7 @@ const AddOffice = () => {
                           className="bg-blue-500 text-white py-1 px-2 rounded-md hover:bg-blue-600 flex items-center gap-1 text-xs transition-colors"
                         >
                           <FaPlus size={10} />
-                          <span>फाँट थप्नुहोस्</span>
+                          <span>शाखा थप्नुहोस्</span>
                         </button>
                       </div>
 
@@ -366,7 +368,7 @@ const AddOffice = () => {
                             value={faat.code}
                             onChange={(e) => handleFaatCodeChange(departmentIndex, faatIndex, e)}
                             className="w-1/3 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                            placeholder={`फाँट #${faatIndex + 1} कोड`}
+                            placeholder={`शाखा #${faatIndex + 1} कोड`}
                             required
                           />
                           <input
@@ -374,7 +376,7 @@ const AddOffice = () => {
                             value={faat.name}
                             onChange={(e) => handleFaatNameChange(departmentIndex, faatIndex, e)}
                             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                            placeholder={`फाँट #${faatIndex + 1} नाम`}
+                            placeholder={`शाखा #${faatIndex + 1} नाम`}
                             required
                           />
                           {department.faats.length > 1 && (
@@ -390,7 +392,7 @@ const AddOffice = () => {
                       ))}
 
                       <p className="text-xs text-gray-500 italic mt-1">
-                        मुख्य कार्यालयमा प्रत्येक विभागमा कम्तिमा एउटा फाँट हुनुपर्छ
+                        मुख्य कार्यालयमा प्रत्येक महाशाखामा कम्तिमा एउटा शाखा हुनुपर्छ
                       </p>
                     </div>
                   )}

@@ -309,13 +309,13 @@ const DisplayEditOffice = ({ dataUpdated }) => {
               <th className="px-6 py-3 text-left font-semibold">
                 <div className="flex items-center gap-2">
                   <FaLayerGroup />
-                  सम्बन्धित विभागहरू
+                  महाशाखा/शाखा
                 </div>
               </th>
               <th className="px-6 py-3 text-left font-semibold">
                 <div className="flex items-center gap-2">
                   <FaTasks />
-                  सम्बन्धित फाँटहरू
+                  शाखा (मुख्य कार्यालयमा मात्र)
                 </div>
               </th>
             </tr>
@@ -438,14 +438,14 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                           <div className="flex justify-between items-center p-3 bg-gray-100">
                             <h3 className="font-medium text-gray-700 flex items-center gap-1">
                               <FaLayerGroup className="text-[#E68332]" /> 
-                              <span>विभागहरू ({office.departments.length})</span>
+                              <span>{office.is_head_office ? "महाशाखाहरू" : "शाखाहरू"} ({office.departments.length})</span>
                             </h3>
                             <button
                               onClick={() => navigate(`/addDepartment/${office.id}`)}
                               className="text-green-600 hover:text-white hover:bg-green-600 bg-green-50 p-2 rounded-md transition-all duration-200 flex items-center gap-1 text-sm"
-                              title="विभाग थप्नुहोस्"
+                              title={office.is_head_office ? "महाशाखा थप्नुहोस्" : "शाखा थप्नुहोस्"}
                             >
-                              <FaPlus className="text-sm" /> विभाग थप्नुहोस्
+                              <FaPlus className="text-sm" /> {office.is_head_office ? "महाशाखा थप्नुहोस्" : "शाखा थप्नुहोस्"}
                             </button>
                           </div>
                           
@@ -530,12 +530,14 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                       ) : (
                         <div className="h-full flex flex-col items-center justify-center p-8">
                           <FaLayerGroup className="text-gray-300 text-4xl mb-3" />
-                          <p className="text-gray-500 font-medium mb-3">कुनै विभाग फेला परेन</p>
+                          <p className="text-gray-500 font-medium mb-3">
+                            {office.is_head_office ? "कुनै महाशाखा फेला परेन" : "कुनै शाखा फेला परेन"}
+                          </p>
                           <button
                             onClick={() => navigate(`/addDepartment/${office.id}`)}
                             className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center gap-2"
                           >
-                            <FaPlus /> पहिलो विभाग थप्नुहोस्
+                            <FaPlus /> {office.is_head_office ? "पहिलो महाशाखा थप्नुहोस्" : "पहिलो शाखा थप्नुहोस्"}
                           </button>
                         </div>
                       )}
@@ -547,9 +549,9 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                     <div className="p-3 bg-blue-50 border-b border-blue-100">
                       <h3 className="font-medium text-blue-700 flex items-center gap-1">
                         <FaTasks className="text-blue-500" /> 
-                        <span>फाँटहरू</span>
+                        <span>शाखाहरू</span>
                         {!office.is_head_office && (
-                          <span className="text-xs text-yellow-600 ml-2">(शाखा कार्यालय - फाँट अनुमति छैन)</span>
+                          <span className="text-xs text-yellow-600 ml-2">(सामान्य कार्यालय - शाखा अनुमति छैन)</span>
                         )}
                       </h3>
                     </div>
@@ -557,8 +559,8 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                     {!office.is_head_office ? (
                       <div className="p-4 text-center text-gray-500">
                         <FaTasks className="mx-auto text-gray-300 text-4xl mb-3" />
-                        <p className="font-medium">शाखा कार्यालय</p>
-                        <p className="text-sm mt-2">यो शाखा कार्यालय भएकोले फाँटहरू व्यवस्थापन गर्न सकिदैन। केवल मुख्य कार्यालयमा मात्र फाँटहरू थप्न सकिन्छ।</p>
+                        <p className="font-medium">सामान्य कार्यालय</p>
+                        <p className="text-sm mt-2">यो सामान्य कार्यालय भएकोले शाखाहरू व्यवस्थापन गर्न सकिदैन। केवल मुख्य कार्यालयमा मात्र शाखाहरू थप्न सकिन्छ।</p>
                       </div>
                     ) : office.departments && office.departments.length > 0 ? (
                       <div className="divide-y divide-gray-100">
@@ -645,7 +647,7 @@ const DisplayEditOffice = ({ dataUpdated }) => {
                       </div>
                     ) : (
                       <div className="p-4 text-center text-gray-500">
-                        <p>कुनै विभाग छैन, त्यसैले कुनै फाँट पनि छैन</p>
+                        <p>कुनै महाशाखा छैन, त्यसैले कुनै शाखा पनि छैन</p>
                       </div>
                     )}
                   </td>
