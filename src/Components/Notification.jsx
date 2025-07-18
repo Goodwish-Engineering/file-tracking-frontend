@@ -10,7 +10,6 @@ import { PiPaperPlaneRightFill } from "react-icons/pi";
 
 import NotificationsTab from "./NotificationsTab";
 import StarredTab from "./StarredTab";
-import SentTab from "./SentTab";
 
 const Notification = ({ onNotificationRead }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
@@ -88,7 +87,7 @@ const Notification = ({ onNotificationRead }) => {
       case "starred":
         return <StarredTab onToggleStarred={toggleStarredStatus} />;
       case "sent":
-        return <SentTab />;
+        return <div className="p-4 text-center text-gray-500">पठाइएका सूचनाहरू शीघ्र उपलब्ध हुनेछन्</div>;
       default:
         return <NotificationsTab onToggleStarred={toggleStarredStatus} onNotificationRead={fetchNotifications} />;
     }
