@@ -508,7 +508,7 @@ const Registration = () => {
               इमेल <span className="text-red-500">*</span>
             </span>
             <input
-              type="email"
+            type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
@@ -540,7 +540,7 @@ const Registration = () => {
 
           <label className="flex flex-col">
             <span className="text-sm font-medium text-gray-900">
-              विभाग {selectedOffice?.is_head_office && <span className="text-red-500">*</span>}
+              {selectedOffice?.is_head_office ? "महाशाखा" : "शाखा"} {selectedOffice?.is_head_office && <span className="text-red-500">*</span>}
             </span>
             <select
               name="department"
@@ -550,7 +550,7 @@ const Registration = () => {
               disabled={!formData.office}
               required={selectedOffice?.is_head_office} // Only required for head offices
             >
-              <option value="">विभाग छान्नुहोस्</option>
+              <option value="">{selectedOffice?.is_head_office ? "महाशाखा छान्नुहोस्" : "शाखा छान्नुहोस्"}</option>
               {departments.length > 0 ? (
                 departments.map((department) => (
                   <option key={department.id} value={department.id}>
@@ -558,12 +558,12 @@ const Registration = () => {
                   </option>
                 ))
               ) : (
-                <option disabled>कुनै विभाग उपलब्ध छैन</option>
+                <option disabled>{selectedOffice?.is_head_office ? "कुनै महाशाखा उपलब्ध छैन" : "कुनै शाखा उपलब्ध छैन"}</option>
               )}
             </select>
             {formData.office && !selectedOffice?.is_head_office && (
               <p className="text-sm text-yellow-600 mt-1">
-                यो शाखा कार्यालय भएकोले विभाग छनोट वैकल्पिक छ
+                यो सामान्य कार्यालय भएकोले शाखा छनोट वैकल्पिक छ
               </p>
             )}
           </label>
@@ -572,7 +572,7 @@ const Registration = () => {
           {selectedOffice?.is_head_office && (
             <label className="flex flex-col">
               <span className="text-sm font-medium text-gray-900">
-                फाँट <span className="text-red-500">*</span>
+                शाखा <span className="text-red-500">*</span>
                 <span className="text-xs text-gray-500 ml-1">(मुख्य कार्यालयमा मात्र)</span>
               </span>
               <select
@@ -583,7 +583,7 @@ const Registration = () => {
                 disabled={!formData.department}
                 required
               >
-                <option value="">फाँट छान्नुहोस्</option>
+                <option value="">शाखा छान्नुहोस्</option>
                 {faats.length > 0 ? (
                   faats.map((faat) => (
                     <option key={faat.id} value={faat.id}>
@@ -591,12 +591,12 @@ const Registration = () => {
                     </option>
                   ))
                 ) : (
-                  <option disabled>कुनै फाँट उपलब्ध छैन</option>
+                  <option disabled>कुनै शाखा उपलब्ध छैन</option>
                 )}
               </select>
               {formData.department && faats.length === 0 && (
                 <p className="text-sm text-orange-500 mt-1">
-                  यस विभागमा कुनै फाँट छैन। कृपया पहिले फाँट थप्नुहोस्。
+                  यस महाशाखामा कुनै शाखा छैन। कृपया पहिले शाखा थप्नुहोस्。
                 </p>
               )}
             </label>
@@ -609,7 +609,7 @@ const Registration = () => {
                 <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path>
                 </svg>
-                यो शाखा कार्यालय भएकोले फाँट असाइन गर्न सकिदैन। केवल मुख्य कार्यालयमा मात्र फाँट व्यवस्थापन गर्न सकिन्छ。
+                यो सामान्य कार्यालय भएकोले शाखा असाइन गर्न सकिदैन। केवल मुख्य कार्यालयमा मात्र शाखा व्यवस्थापन गर्न सकिन्छ。
               </p>
             </div>
           )}
