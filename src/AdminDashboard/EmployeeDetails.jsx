@@ -830,14 +830,24 @@ const EmployeeDetails = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">विभाग चयन गर्नुहोस्</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {(() => {
+                    const selectedOffice = offices.find(office => office.id.toString() === selectedOfficeId);
+                    return selectedOffice?.is_head_office ? "महाशाखा चयन गर्नुहोस्" : "शाखा चयन गर्नुहोस्";
+                  })()}
+                </label>
                 <select
                   value={selectedDepartmentId}
                   onChange={handleDepartmentChange}
                   className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all disabled:bg-gray-100 disabled:text-gray-400"
                   disabled={!selectedOfficeId || departments.length === 0}
                 >
-                  <option value="">विभाग चयन गर्नुहोस्...</option>
+                  <option value="">
+                    {(() => {
+                      const selectedOffice = offices.find(office => office.id.toString() === selectedOfficeId);
+                      return selectedOffice?.is_head_office ? "महाशाखा चयन गर्नुहोस्..." : "शाखा चयन गर्नुहोस्...";
+                    })()}
+                  </option>
                   {departments.length > 0 ? (
                     departments.map((department) => (
                       <option key={department.id} value={department.id}>
@@ -845,11 +855,23 @@ const EmployeeDetails = () => {
                       </option>
                     ))
                   ) : (
-                    <option disabled>कुनै विभाग उपलब्ध छैन</option>
+                    <option disabled>
+                      {(() => {
+                        const selectedOffice = offices.find(office => office.id.toString() === selectedOfficeId);
+                        return selectedOffice?.is_head_office ? "कुनै महाशाखा उपलब्ध छैन" : "कुनै शाखा उपलब्ध छैन";
+                      })()}
+                    </option>
                   )}
                 </select>
                 {selectedOfficeId && departments.length === 0 && (
-                  <p className="mt-2 text-sm text-orange-500">यस कार्यालयमा कुनै विभाग छैन। कृपया पहिले विभाग थप्नुहोस्।</p>
+                  <p className="mt-2 text-sm text-orange-500">
+                    {(() => {
+                      const selectedOffice = offices.find(office => office.id.toString() === selectedOfficeId);
+                      return selectedOffice?.is_head_office 
+                        ? "यस कार्यालयमा कुनै महाशाखा छैन। कृपया पहिले महाशाखा थप्नुहोस्।"
+                        : "यस कार्यालयमा कुनै शाखा छैन। कृपया पहिले शाखा थप्नुहोस्।";
+                    })()}
+                  </p>
                 )}
               </div>
 
@@ -859,7 +881,7 @@ const EmployeeDetails = () => {
                 return selectedOffice?.is_head_office && selectedDepartmentId && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      फाँट चयन गर्नुहोस्
+                      शाखा चयन गर्नुहोस्
                       <span className="text-xs text-gray-500 ml-1">(मुख्य कार्यालयमा मात्र)</span>
                     </label>
                     <select
@@ -868,7 +890,7 @@ const EmployeeDetails = () => {
                       className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all disabled:bg-gray-100 disabled:text-gray-400"
                       disabled={faats.length === 0}
                     >
-                      <option value="">फाँट चयन गर्नुहोस्...</option>
+                      <option value="">शाखा चयन गर्नुहोस्...</option>
                       {faats.length > 0 ? (
                         faats.map((faat) => (
                           <option key={faat.id} value={faat.id}>
@@ -876,11 +898,11 @@ const EmployeeDetails = () => {
                           </option>
                         ))
                       ) : (
-                        <option disabled>कुनै फाँट उपलब्ध छैन</option>
+                        <option disabled>कुनै शाखा उपलब्ध छैन</option>
                       )}
                     </select>
                     {selectedDepartmentId && faats.length === 0 && (
-                      <p className="mt-2 text-sm text-orange-500">यस विभागमा कुनै फाँट छैन। कृपया पहिले फाँट थप्नुहोस्।</p>
+                      <p className="mt-2 text-sm text-orange-500">यस महाशाखामा कुनै शाखा छैन। कृपया पहिले शाखा थप्नुहोस्।</p>
                     )}
                   </div>
                 );
@@ -895,7 +917,7 @@ const EmployeeDetails = () => {
                       <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path>
                       </svg>
-                      यो शाखा कार्यालय भएकोले फाँट असाइन गर्न सकिदैन। केवल मुख्य कार्यालयमा मात्र फाँट व्यवस्थापन गर्न सकिन्छ。
+                      यो सामान्य कार्यालय भएकोले शाखा असाइन गर्न सकिदैन। केवल मुख्य कार्यालयमा मात्र शाखा व्यवस्थापन गर्न सकिन्छ。
                     </p>
                   </div>
                 );

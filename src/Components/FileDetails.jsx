@@ -36,7 +36,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
     present_date: "",
     related_guthi: "",
     related_department: "",
-    related_faat: "", // Add related_faat field
+    related_faat: "",
     file_type: "",
   });
 
@@ -54,7 +54,8 @@ const FileDetails = ({ setShowButton, clearData }) => {
   const [municipalities, setMunicipalities] = useState([]);
   const [officeData, setOfficeData] = useState([]);
   const [departments, setDepartments] = useState([]);
-  const [faats, setFaats] = useState([]); // Add faats state
+  const [faats, setFaats] = useState([]);
+  const [selectedOffice, setSelectedOffice] = useState(null); // Add state to track selected office
   const [fileTypes, setFileTypeData] = useState([]);
   const clearFields = () => {
     setFormData({
@@ -70,7 +71,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
       present_date: "",
       related_guthi: "",
       related_department: "",
-      related_faat: "", // Clear related_faat
+      related_faat: "",
       file_type: "",
     });
 
@@ -239,12 +240,15 @@ const FileDetails = ({ setShowButton, clearData }) => {
         related_faat: "",
       }));
 
-      // Find departments for the selected office
-      const selectedOffice = officeData.find(
+      // Find and store the selected office object
+      const selectedOfficeObj = officeData.find(
         (office) => office.id.toString() === value
       );
-      if (selectedOffice && selectedOffice.departments) {
-        setDepartments(selectedOffice.departments);
+      setSelectedOffice(selectedOfficeObj);
+
+      // Find departments for the selected office
+      if (selectedOfficeObj && selectedOfficeObj.departments) {
+        setDepartments(selectedOfficeObj.departments);
       } else {
         setDepartments([]);
       }
@@ -258,8 +262,12 @@ const FileDetails = ({ setShowButton, clearData }) => {
         related_faat: "",
       }));
 
-      // Fetch faats for the selected department
-      fetchFaats(value);
+      // Only fetch faats if it's a head office
+      if (selectedOffice?.is_head_office) {
+        fetchFaats(value);
+      } else {
+        setFaats([]);
+      }
     }
   };
 
@@ -580,31 +588,49 @@ const FileDetails = ({ setShowButton, clearData }) => {
                 label="कार्यालय"
                 name="related_guthi"
                 type="select"
-                options={officeData}
+                options={officeData.map(office => ({
+                  ...office,
+                  name: `${office.name} ${office.is_head_office ? "(मुख्य)" : "(शाखा)"}`
+                }))}
                 placeholder="कार्यालय छान्नुहोस्"
                 required={true}
                 icon={<FaBuilding />}
               />
 
               <FormField
-                label="विभाग"
+                label={selectedOffice?.is_head_office ? "महाशाखा" : "शाखा"}
                 name="related_department"
                 type="select"
                 options={departments}
-                placeholder="विभाग छान्नुहोस्"
+                placeholder={selectedOffice?.is_head_office ? "महाशाखा छान्नुहोस्" : "शाखा छान्नुहोस्"}
                 required={true}
                 icon={<FaBuilding />}
               />
 
-              <FormField
-                label="फाँट"
-                name="related_faat"
-                type="select"
-                options={faats}
-                placeholder="फाँट छान्नुहोस्"
-                required={false}
-                icon={<FaBuilding />}
-              />
+              {/* Only show faat field for head offices */}
+              {selectedOffice?.is_head_office && (
+                <FormField
+                  label="शाखा"
+                  name="related_faat"
+                  type="select"
+                  options={faats}
+                  placeholder="शाखा छान्नुहोस्"
+                  required={false}
+                  icon={<FaBuilding />}
+                />
+              )}
+
+              {/* Show notice for branch offices */}
+              {selectedOffice && !selectedOffice.is_head_office && (
+                <div className="col-span-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-yellow-800 text-sm flex items-center">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path>
+                    </svg>
+                    यो शाखा कार्यालय भएकोले महाशाखा छनोट उपलब्ध छैन
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
