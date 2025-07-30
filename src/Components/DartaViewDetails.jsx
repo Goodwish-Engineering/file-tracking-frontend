@@ -7,7 +7,8 @@ import {
   FaBuilding, 
   FaUser, 
   FaEye,
-  FaDownload
+  FaDownload,
+  FaMapMarkerAlt
 } from "react-icons/fa";
 import { BsFileEarmark } from "react-icons/bs";
 import { MdSubject } from "react-icons/md";
@@ -32,21 +33,21 @@ const DartaViewDetails = ({ dartaRecord }) => {
           primaryColor="[#E68332]"
         />
         <InfoItem
-          label="पत्र संख्या"
-          value={dartaRecord.patra_sankhya}
+          label="पाना संख्या"
+          value={dartaRecord.pana_sankhya}
           icon={<FaFileAlt />}
           primaryColor="[#E68332]"
         />
         <InfoItem
-          label="पत्र मिति"
-          value={dartaRecord.patra_miti}
-          icon={<FaCalendarAlt />}
+          label="पठाउने व्यक्ति"
+          value={dartaRecord.sender_name}
+          icon={<FaUser />}
           primaryColor="[#E68332]"
         />
         <InfoItem
-          label="चलानी नम्बर"
-          value={dartaRecord.chalani_number}
-          icon={<FaFileAlt />}
+          label="पठाउने ठेगाना"
+          value={dartaRecord.sender_address}
+          icon={<FaMapMarkerAlt />}
           primaryColor="[#E68332]"
         />
       </InfoCard>

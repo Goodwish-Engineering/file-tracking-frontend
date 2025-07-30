@@ -41,9 +41,15 @@ const SelectDepartment = ({
     ]
   };
 
-  const departmentList = departments.data.length > 0 
-    ? departments.data 
-    : (testDepartments[officeId] || []);
+  // Handle both array and nested object responses from API
+  let departmentList = [];
+  if (departments.data && Array.isArray(departments.data)) {
+    departmentList = departments.data;
+  } else if (departments.data && departments.data.departments) {
+    departmentList = departments.data.departments;
+  } else if (testDepartments[officeId]) {
+    departmentList = testDepartments[officeId];
+  }
 
   const isDisabled = disabled || !officeId;
   const isLoading = loading || departments.loading;
@@ -85,7 +91,7 @@ const SelectDepartment = ({
       )}
       {departments.error && officeId && (
         <p className="mt-1 text-sm text-yellow-600">
-          विभागहरू लोड गर्न समस्या भयो
+          विभागहरू लोड गर्न समस्या भयो। परीक्षण डाटा प्रयोग गरिँदै。
         </p>
       )}
     </div>

@@ -23,16 +23,11 @@ const AddDarta = ({ isOpen, onClose, onSuccess }) => {
     related_office: "",
     related_department: "",
     related_faat: "",
-    patra_sankhya: "",
-    patra_miti: "",
-    chalani_number: "",
     subject: "",
-    sending_department: "",
-    tok_aadesh_dine: "",
-    pana_sankhya: "",
+    sender_name: "", // Updated field name
+    sender_address: "", // Added from model
+    pana_sankhya: "", // From model
     remarks: "",
-    patra_bujaune_faat: "",
-    karmachari: "",
   });
 
   const [files, setFiles] = useState([]);
@@ -255,16 +250,11 @@ const AddDarta = ({ isOpen, onClose, onSuccess }) => {
       related_office: "",
       related_department: "",
       related_faat: "",
-      patra_sankhya: "",
-      patra_miti: "",
-      chalani_number: "",
       subject: "",
-      sending_department: "",
-      tok_aadesh_dine: "",
-      pana_sankhya: "",
+      sender_name: "", // Updated field name
+      sender_address: "", // Added from model
+      pana_sankhya: "", // From model
       remarks: "",
-      patra_bujaune_faat: "",
-      karmachari: "",
     });
     setErrors({});
     setDepartments([]);
@@ -448,35 +438,50 @@ const AddDarta = ({ isOpen, onClose, onSuccess }) => {
             </div>
           </div>
 
-          {/* Additional Information */}
+          {/* Sender Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                टोक आदेश दिने
+                पठाउने व्यक्ति
               </label>
               <input
                 type="text"
-                name="tok_aadesh_dine"
-                value={formData.tok_aadesh_dine}
+                name="sender_name"
+                value={formData.sender_name}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
-                placeholder="टोक आदेश दिने व्यक्तिको नाम"
+                placeholder="पठाउने व्यक्तिको नाम"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                कर्मचारी
+                पाना संख्या
               </label>
               <input
                 type="text"
-                name="karmachari"
-                value={formData.karmachari}
+                name="pana_sankhya"
+                value={formData.pana_sankhya}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
-                placeholder="कर्मचारीको नाम प्रविष्ट गर्नुहोस्"
+                placeholder="पाना संख्या प्रविष्ट गर्नुहोस्"
               />
             </div>
+          </div>
+
+          {/* Sender Address */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              पठाउने ठेगाना
+            </label>
+            <textarea
+              name="sender_address"
+              value={formData.sender_address}
+              onChange={handleInputChange}
+              rows={3}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all resize-vertical"
+              placeholder="पठाउने व्यक्तिको ठेगाना"
+            />
           </div>
 
           {/* Subject */}

@@ -184,10 +184,11 @@ const DartaList = () => {
           [
             record.darta_number?.toLowerCase() || "",
             record.subject?.toLowerCase() || "",
-            record.patra_sankhya?.toLowerCase() || "",
-            record.chalani_number?.toLowerCase() || "",
+            record.sender_name?.toLowerCase() || "", // Updated field name
+            record.sender_address?.toLowerCase() || "", // Added from model
             record.related_file_detail?.file_name?.toLowerCase() || "",
             record.remarks?.toLowerCase() || "",
+            record.pana_sankhya?.toLowerCase() || "", // From model
           ].some((field) => field.includes(query))
         );
 
@@ -457,12 +458,12 @@ const DartaList = () => {
                       </th>
                       <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[12%]">
                         <div className="flex items-center">
-                          <span>पत्र संख्या</span>
+                          <span>पठाउने व्यक्ति</span>
                         </div>
                       </th>
                       <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[12%]">
                         <div className="flex items-center">
-                          <span>पत्र मिति</span>
+                          <span>पाना संख्या</span>
                         </div>
                       </th>
                       <th className="p-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[15%]">
@@ -510,13 +511,13 @@ const DartaList = () => {
                           </div>
                         </td>
                         <td className="p-4 text-sm text-gray-600">
-                          {record.patra_sankhya || "N/A"}
+                          <div className="flex items-center">
+                            <FaUser className="text-gray-400 mr-2" />
+                            <TextWithTooltip text={record.sender_name} maxLength={15} />
+                          </div>
                         </td>
                         <td className="p-4 text-sm text-gray-600">
-                          <div className="flex items-center">
-                            <FaCalendarAlt className="text-gray-400 mr-2" />
-                            {record.patra_miti || "N/A"}
-                          </div>
+                          {record.pana_sankhya || "N/A"}
                         </td>
                         <td className="p-4 text-sm text-gray-600">
                           <div className="flex items-center">

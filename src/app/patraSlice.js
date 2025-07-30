@@ -84,31 +84,6 @@ export const fetchPatraById = createAsyncThunk(
   }
 );
 
-export const fetchPatraTracking = createAsyncThunk(
-  'patra/fetchTracking',
-  async (patraId, { getState, rejectWithValue }) => {
-    try {
-      const { login } = getState();
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${login.baseUrl}/patra/${patraId}/tracking/`, {
-        headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch patra tracking');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
 export const sendPatra = createAsyncThunk(
   'patra/send',
   async (patraData, { getState, rejectWithValue }) => {
@@ -224,18 +199,43 @@ export const fetchDepartmentsByOffice = createAsyncThunk(
       const { login } = getState();
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`${login.baseUrl}/offices/${officeId}/departments/`, {
-        headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Try multiple endpoints for departments
+      const endpoints = [
+        `${login.baseUrl}/offices/${officeId}/departments/`,
+        `${login.baseUrl}/offices/${officeId}/`,
+        `${login.baseUrl}/department/?office=${officeId}`
+      ];
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch departments');
+      let response;
+      let data;
+      
+      for (const endpoint of endpoints) {
+        try {
+          response = await fetch(endpoint, {
+            headers: {
+              'Authorization': `Token ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            data = await response.json();
+            // Normalize the response - extract departments array
+            if (Array.isArray(data)) {
+              return data;
+            } else if (data.departments && Array.isArray(data.departments)) {
+              return data.departments;
+            } else if (data.data && Array.isArray(data.data)) {
+              return data.data;
+            }
+          }
+        } catch (err) {
+          console.warn(`Failed to fetch from ${endpoint}:`, err);
+          continue;
+        }
       }
       
-      return await response.json();
+      throw new Error('Failed to fetch departments from all endpoints');
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -266,11 +266,6 @@ const initialState = {
   currentPatra: null,
   currentPatraLoading: false,
   currentPatraError: null,
-  tracking: {
-    data: null,
-    loading: false,
-    error: null
-  },
   sending: false,
   sendError: null,
   transferring: false,
@@ -278,7 +273,6 @@ const initialState = {
   filters: {
     search: '',
     status: '',
-    priority: '',
     dateRange: null,
     sender: '',
     department: ''
@@ -323,17 +317,12 @@ const patraSlice = createSlice({
       state.currentPatra = null;
       state.currentPatraError = null;
     },
-    clearTracking: (state) => {
-      state.tracking.data = null;
-      state.tracking.error = null;
-    },
     clearErrors: (state) => {
       state.inbox.error = null;
       state.sent.error = null;
       state.currentPatraError = null;
       state.sendError = null;
       state.transferError = null;
-      state.tracking.error = null;
     }
   },
   extraReducers: (builder) => {
@@ -390,20 +379,6 @@ const patraSlice = createSlice({
       .addCase(fetchPatraById.rejected, (state, action) => {
         state.currentPatraLoading = false;
         state.currentPatraError = action.payload;
-      })
-      
-      // Fetch Patra Tracking
-      .addCase(fetchPatraTracking.pending, (state) => {
-        state.tracking.loading = true;
-        state.tracking.error = null;
-      })
-      .addCase(fetchPatraTracking.fulfilled, (state, action) => {
-        state.tracking.loading = false;
-        state.tracking.data = action.payload;
-      })
-      .addCase(fetchPatraTracking.rejected, (state, action) => {
-        state.tracking.loading = false;
-        state.tracking.error = action.payload;
       })
       
       // Send Patra
@@ -474,14 +449,17 @@ const patraSlice = createSlice({
       .addCase(fetchDepartmentsByOffice.pending, (state) => {
         state.departments.loading = true;
         state.departments.error = null;
+        state.departments.data = []; // Clear previous data
       })
       .addCase(fetchDepartmentsByOffice.fulfilled, (state, action) => {
         state.departments.loading = false;
-        state.departments.data = action.payload.data || action.payload;
+        state.departments.data = Array.isArray(action.payload) ? action.payload : [];
+        state.departments.error = null;
       })
       .addCase(fetchDepartmentsByOffice.rejected, (state, action) => {
         state.departments.loading = false;
         state.departments.error = action.payload;
+        state.departments.data = []; // Clear data on error
       })
   }
 });
@@ -491,7 +469,6 @@ export const {
   clearFilters, 
   markAsRead, 
   clearCurrentPatra, 
-  clearTracking,
   clearErrors 
 } = patraSlice.actions;
 

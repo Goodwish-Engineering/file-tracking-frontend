@@ -189,8 +189,9 @@ const ChalaniList = () => {
             record.related_file?.file_name?.toLowerCase() || "",
             record.related_department?.name?.toLowerCase() || "",
             record.related_office?.name?.toLowerCase() || "",
-            record.sending_department?.name?.toLowerCase() || "",
+            record.sending_department?.name?.toLowerCase() || "", // From model
             record.remarks?.toLowerCase() || "",
+            record.pana_sankhya?.toLowerCase() || "", // From model
           ].some((field) => field.includes(query))
         );
 

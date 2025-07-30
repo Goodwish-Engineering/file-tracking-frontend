@@ -20,7 +20,6 @@ const PanjikaTippani = ({ isOpen, onClose }) => {
     remarks: "",
     approved_by: "",
     approved_date: "",
-    tippani_date: "",
     page_no: "",
     related_file: fileId,
   });
@@ -79,7 +78,6 @@ const PanjikaTippani = ({ isOpen, onClose }) => {
         remarks: "",
         approved_by: "",
         approved_date: "",
-        tippani_date: "",
         page_no: "",
         related_file: fileId,
       });
@@ -184,24 +182,9 @@ const PanjikaTippani = ({ isOpen, onClose }) => {
             />
           </div>
           <div>
-            <label className="block text-gray-800 font-medium">टिप्पणी मिति</label>
-            <NepaliDatePicker
-              inputClassName="w-full border border-gray-300 rounded-md shadow-sm p-2"
-              name="tippani_date"
-              value={currentTippani.tippani_date}
-              onSelect={(value) => {
-                handleNepaliDateChange("tippani_date", value);
-              }}
-              options={{
-                calenderLocale: "ne",
-                valueLocale: "en",
-              }}
-            />
-          </div>
-          <div>
             <label className="block text-gray-800 font-medium">पाना संख्या</label>
             <input
-              type="text"
+              type="number"
               name="page_no"
               value={currentTippani.page_no}
               onChange={handleChange}

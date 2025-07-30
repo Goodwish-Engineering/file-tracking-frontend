@@ -173,7 +173,6 @@ const TippaniTab = ({
         approved_by: "",
         approved_date: "",
         remarks: "",
-        tippani_date: "",
         page_no: "1",
         related_file: id,
       }));
@@ -234,6 +233,79 @@ const TippaniTab = ({
     }
   };
 
+  // Safe access function for tippani properties
+  const getTippaniValue = (tip, field, fallback = "N/A") => {
+    try {
+      if (!tip || typeof tip !== 'object') return fallback;
+      
+      // Handle different possible field names and structures
+      const value = tip[field] || tip[`${field}_date`] || tip[`${field}_by`];
+      
+      if (value === null || value === undefined || value === '') {
+        return fallback;
+      }
+      
+      return String(value);
+    } catch (error) {
+      console.warn(`Error accessing tippani field ${field}:`, error);
+      return fallback;
+    }
+  };
+
+  // Enhanced normalization function with better error handling
+  const normalizeAndSanitizeTippani = (tippaniData) => {
+    if (!tippaniData) return [];
+    
+    try {
+      if (!Array.isArray(tippaniData)) {
+        if (typeof tippaniData === "object") {
+          tippaniData = [tippaniData];
+        } else {
+          return [{
+            subject: String(tippaniData),
+            submitted_by: "",
+            submitted_date: "",
+            approved_by: "",
+            approved_date: "",
+            remarks: "",
+            page_no: "",
+            id: Math.random().toString(36)
+          }];
+        }
+      }
+
+      if (tippaniData.length === 0) return [];
+
+      return tippaniData.map((tip, index) => {
+        const normalizedTip = {
+          id: tip.id || Math.random().toString(36),
+          subject: getTippaniValue(tip, 'subject', ''),
+          submitted_by: getTippaniValue(tip, 'submitted_by', ''),
+          submitted_date: getTippaniValue(tip, 'submitted_date', ''),
+          approved_by: getTippaniValue(tip, 'approved_by', ''),
+          approved_date: getTippaniValue(tip, 'approved_date', ''),
+          remarks: getTippaniValue(tip, 'remarks', ''),
+          page_no: getTippaniValue(tip, 'page_no', ''),
+          sub_tippani: Array.isArray(tip.sub_tippani) ? tip.sub_tippani : []
+        };
+
+        // Handle any additional fields that might exist
+        if (typeof tip === "object" && tip !== null) {
+          Object.keys(tip).forEach((key) => {
+            if (normalizedTip[key] === undefined && tip[key] !== undefined) {
+              normalizedTip[key] = tip[key];
+            }
+          });
+        }
+        
+        return normalizedTip;
+      });
+    } catch (error) {
+      console.error('Error normalizing tippani data:', error);
+      return [];
+    }
+  };
+
   return (
     <motion.div
       variants={fadeIn}
@@ -284,7 +356,7 @@ const TippaniTab = ({
                 कैफियत
               </th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 md:w-28">
-                टिप्पणी मिति
+                पाना संख्या
               </th>
               {editable && (
                 <th scope="col" className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider w-24">
@@ -321,13 +393,13 @@ const TippaniTab = ({
                             clipRule="evenodd"
                           />
                         </svg>
-                        {tip.submitted_by || "N/A"}
+                        {getTippaniValue(tip, 'submitted_by')}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <span className="flex items-center text-gray-800">
                         <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
-                        {tip.submitted_date || "N/A"}
+                        {getTippaniValue(tip, 'submitted_date')}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm">
@@ -345,23 +417,20 @@ const TippaniTab = ({
                             clipRule="evenodd"
                           />
                         </svg>
-                        {tip.approved_by || "N/A"}
+                        {getTippaniValue(tip, 'approved_by')}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <span className="flex items-center text-gray-800">
                         <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
-                        {tip.approved_date || "N/A"}
+                        {getTippaniValue(tip, 'approved_date')}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      <div className="line-clamp-2">{tip.remarks || "N/A"}</div>
+                      <div className="line-clamp-2">{getTippaniValue(tip, 'remarks')}</div>
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      <span className="flex items-center text-gray-800">
-                        <FaCalendarAlt className="h-3 w-3 mr-1 text-gray-500" />
-                        {tip.tippani_date || "N/A"}
-                      </span>
+                      <span className="text-gray-900">{getTippaniValue(tip, 'page_no')}</span>
                     </td>
                     {editable && (
                       <td className="px-4 py-3 text-sm text-center">
@@ -586,12 +655,11 @@ const TippaniTab = ({
                     />
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <DateInputField
-                      name="tippani_date"
-                      value={row.tippani_date}
-                      onChange={(e) => handleNewTippaniChange(e, "tippani_date", index)}
-                      placeholder="टिप्पणी मिति"
-                      primaryColor="orange-500"
+                    <input
+                      type="text"
+                      value={row.page_no || ""}
+                      onChange={(e) => handleNewTippaniChange(e, "page_no", index)}
+                      placeholder="पाना संख्या"
                       className="w-full border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                     />
                   </td>

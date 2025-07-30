@@ -18,7 +18,7 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
     patra_sankhya: "",
     subject: "",
     sending_department: "",
-    pana_sankhya: "",
+    pana_sankhya: "", // Match model field name
     remarks: "",
   });
   
@@ -412,7 +412,7 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                पृष्ठ संख्या
+                पाना संख्या
               </label>
               <input
                 type="text"
@@ -420,7 +420,7 @@ const AddChalani = ({ isOpen, onClose, onSuccess }) => {
                 value={formData.pana_sankhya}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E68332] focus:border-transparent transition-all"
-                placeholder="पृष्ठ संख्या प्रविष्ट गर्नुहोस्"
+                placeholder="पाना संख्या प्रविष्ट गर्नुहोस्"
               />
             </div>
 

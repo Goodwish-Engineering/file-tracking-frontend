@@ -14,7 +14,6 @@ const FileInfoTab = ({ fileDetails }) => {
     file = "",
     present_date = "",
     days_submitted = "",
-    total_tippani_pages = "",
     total_documents_pages = "",
     total_page_count = "",
     province = "",
@@ -124,10 +123,6 @@ const FileInfoTab = ({ fileDetails }) => {
             पृष्ठ विवरण
           </h3>
           <div className="space-y-4">
-            <p className="flex justify-between items-center border-b pb-2">
-              <span className="font-medium text-gray-700">कुल टिप्पणी पृष्ठहरू:</span>
-              <span className="text-gray-900">{total_tippani_pages}</span>
-            </p>
             <p className="flex justify-between items-center border-b pb-2">
               <span className="font-medium text-gray-700">कुल कागजात पृष्ठहरू:</span>
               <span className="text-gray-900">{total_documents_pages}</span>

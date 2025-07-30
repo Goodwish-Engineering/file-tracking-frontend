@@ -76,34 +76,71 @@ const FileStatus = () => {
       });
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Handle different HTTP status codes
+        if (response.status === 500) {
+          throw new Error('सर्भर त्रुटि: कृपया पछि फेरि प्रयास गर्नुहोस्');
+        } else if (response.status === 404) {
+          throw new Error('डाटा फेला परेन');
+        } else {
+          throw new Error(`HTTP त्रुटि! स्थिति: ${response.status}`);
+        }
       }
       
       const data = await response.json();
       
-      // Handle paginated response structure
-      if (data.data) {
-        const filteredData = data.data.filter((file) => file.is_disabled === false);
-        setFileStatuses(filteredData);
-        
-        setPagination({
-          currentPage: data.current_page || 1,
-          totalPages: data.total_pages || 1,
-          totalItems: data.total_items || 0,
-          pageSize: data.page_size || 10,
-          hasNext: !!data.next,
-          hasPrevious: !!data.previous
-        });
+      // Handle paginated response structure with error checking
+      if (data && typeof data === 'object') {
+        if (data.data && Array.isArray(data.data)) {
+          // Filter out disabled files and handle missing properties gracefully
+          const filteredData = data.data
+            .filter((file) => file && file.is_disabled !== true)
+            .map(file => ({
+              ...file,
+              // Provide fallbacks for missing properties
+              file_name: file.file_name || 'नाम उपलब्ध छैन',
+              subject: file.subject || 'विषय उपलब्ध छैन',
+              file_type: file.file_type || 'अवर्गीकृत',
+              days_submitted: file.days_submitted || 0,
+              id: file.id || Math.random().toString(36),
+              file_number: file.file_number || 'N/A'
+            }));
+          
+          setFileStatuses(filteredData);
+          
+          setPagination({
+            currentPage: data.current_page || 1,
+            totalPages: data.total_pages || 1,
+            totalItems: data.total_items || 0,
+            pageSize: data.page_size || 10,
+            hasNext: !!data.next,
+            hasPrevious: !!data.previous
+          });
+        } else if (Array.isArray(data)) {
+          // Fallback for non-paginated response
+          const filteredData = data
+            .filter((file) => file && file.is_disabled !== true)
+            .map(file => ({
+              ...file,
+              file_name: file.file_name || 'नाम उपलब्ध छैन',
+              subject: file.subject || 'विषय उपलब्ध छैन',
+              file_type: file.file_type || 'अवर्गीकृत',
+              days_submitted: file.days_submitted || 0,
+              id: file.id || Math.random().toString(36),
+              file_number: file.file_number || 'N/A'
+            }));
+          
+          setFileStatuses(filteredData);
+          setPagination(prev => ({
+            ...prev,
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: filteredData.length
+          }));
+        } else {
+          throw new Error('अपेक्षित डाटा ढाँचा प्राप्त भएन');
+        }
       } else {
-        // Fallback for non-paginated response
-        const filteredData = Array.isArray(data) ? data.filter((file) => file.is_disabled === false) : [];
-        setFileStatuses(filteredData);
-        setPagination(prev => ({
-          ...prev,
-          currentPage: 1,
-          totalPages: 1,
-          totalItems: filteredData.length
-        }));
+        throw new Error('सर्भरबाट अमान्य डाटा प्राप्त भयो');
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -114,6 +151,11 @@ const FileStatus = () => {
         totalPages: 1,
         totalItems: 0
       }));
+      
+      // Show user-friendly error message
+      if (error.message.includes('Failed to fetch') || error.message.includes('Network')) {
+        console.error('नेटवर्क त्रुटि: कृपया आफ्नो इन्टरनेट जडान जाँच गर्नुहोस्');
+      }
     } finally {
       setLoading(false);
     }
