@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaArrowRight, FaCheckCircle, FaClock } from "react-icons/fa";
+import { isAdmin } from '../utils/constants';
 
 // Create a reusable history timeline component that can be used both standalone and in the tab
 export const FileHistoryTimeline = ({ historyData, isLoading }) => {
@@ -24,9 +25,6 @@ export const FileHistoryTimeline = ({ historyData, isLoading }) => {
       </div>
     );
   }
-
-  // Debug: Log the history items to see what data we're working with
-  console.log("History Items:", historyItems);
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -134,7 +132,7 @@ const FileHistory = () => {
 
   const level = localStorage.getItem("level");
   const handleNavigate = () => {
-    if (level === "5") {
+    if (isAdmin(level)) {
       navigate("/admindashboard");
     } else {
       navigate("/employeeheader");

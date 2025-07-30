@@ -6,6 +6,12 @@ export const USER_TYPES = {
   ADMIN: "5"
 };
 
+export const ADMIN_LEVEL = "5";
+
+export const isAdmin = (level) => {
+  return level === ADMIN_LEVEL || level === "admin";
+};
+
 export const USER_TYPE_LABELS = {
   [USER_TYPES.FAAT]: "फाँट",
   [USER_TYPES.BRANCH_HEAD]: "शाखा प्रमुख",

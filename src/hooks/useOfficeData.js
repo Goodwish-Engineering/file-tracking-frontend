@@ -21,7 +21,6 @@ export const useOfficeData = () => {
       const data = await response.json();
       setOffices(data);
     } catch (error) {
-      console.log("Error fetching offices:", error);
       setOffices([]);
     }
   };

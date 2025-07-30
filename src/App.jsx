@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { addLogin } from "./app/loginSlice"; // Import action
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { isAdmin } from "./utils/constants";
 
 const App = () => {
   const isLogin = useSelector((state) => state.login?.isLogin);
@@ -23,7 +24,7 @@ const App = () => {
     const currentPath = window.location.pathname; // Get current route
 
     if (isLogin) {
-      if (level === "5") {
+      if (isAdmin(level)) {
         navigate(currentPath !== "/" ? currentPath : "/admindashboard");
       } else {
         navigate(currentPath !== "/" ? currentPath : "/employeeheader");

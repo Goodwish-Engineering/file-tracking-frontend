@@ -36,14 +36,31 @@ const UniversalInput = ({
             {...props}
           >
             <option value="">{placeholder || `${label} छान्नुहोस्`}</option>
-            {options.map((option, index) => (
-              <option 
-                key={typeof option === 'object' ? option.id : index} 
-                value={typeof option === 'object' ? option.id : option}
-              >
-                {typeof option === 'object' ? option.name : option}
-              </option>
-            ))}
+            {options.map((option, index) => {
+              // Handle different object structures safely
+              let optionKey, optionValue, optionLabel;
+              
+              if (typeof option === 'string' || typeof option === 'number') {
+                optionKey = index;
+                optionValue = option;
+                optionLabel = option;
+              } else if (typeof option === 'object' && option !== null) {
+                optionKey = option.id || option.value || index;
+                optionValue = option.id || option.value || '';
+                optionLabel = option.name || option.file_name || option.label || option.text || '';
+              } else {
+                // Fallback for undefined, null, or other types
+                optionKey = index;
+                optionValue = '';
+                optionLabel = '';
+              }
+              
+              return (
+                <option key={optionKey} value={optionValue}>
+                  {optionLabel}
+                </option>
+              );
+            })}
           </select>
         );
       

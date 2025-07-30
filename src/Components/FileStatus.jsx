@@ -80,7 +80,6 @@ const FileStatus = () => {
       }
       
       const data = await response.json();
-      console.log("API Response:", data);
       
       // Handle paginated response structure
       if (data.data) {

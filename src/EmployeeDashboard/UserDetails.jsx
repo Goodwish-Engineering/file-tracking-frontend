@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { removeLogin, removeUser } from "../app/loginSlice"; 
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { isAdmin } from '../utils/constants';
 
 const UserDetails = () => {
   const [isLoggedin, setIsLoggedin] = useState(false);
@@ -44,17 +45,17 @@ const UserDetails = () => {
 
   const handleLogout = () => {
     // Clear all localStorage items
+    localStorage.removeItem("adminTab");
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("isLogin");
     localStorage.removeItem("token_expiry");
     localStorage.removeItem("level");
     localStorage.removeItem("userId");
+    localStorage.removeItem("empId");
     localStorage.removeItem("officeid");
     localStorage.removeItem("depart_id");
     localStorage.removeItem("username");
-    localStorage.removeItem("activeTab");
-    localStorage.removeItem("adminTab");
 
     // Update Redux state
     dispatch(removeUser());
@@ -89,7 +90,7 @@ const UserDetails = () => {
   const handleProfileClick = () => {
     setMenuOpen(false);
     // Navigate to different profile areas based on user level
-    if (userLevel === "5") {
+    if (isAdmin(userLevel)) {
       navigate("/admindashboard");
     } else {
       navigate("/employeeheader");

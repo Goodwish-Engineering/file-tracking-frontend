@@ -50,7 +50,7 @@ td {
 }
 
 .calender-container td.active {
-  background-color: #ED772F !important;
+  background-color: #E68332 !important;
   color: white !important;
 }
 

@@ -26,6 +26,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { ADMIN_LEVEL, isAdmin } from '../utils/constants';
 
 // Register Chart.js components
 ChartJS.register(
@@ -65,8 +66,6 @@ const EmployeeHome = () => {
         if (!baseUrl || !token) {
           throw new Error("API configuration missing. Please login again.");
         }
-
-        console.log("Fetching dashboard data with baseUrl:", baseUrl);
 
         // Fetch file statistics with better error handling
         let totalFiles = 0;
@@ -228,7 +227,9 @@ const EmployeeHome = () => {
         nontransfer: level === "2" ? "nontransfer" : "nontransfer3",
         transferred: "transfered",
         request: "filerequest",
-        notification: "notification"
+        notification: "notification",
+        "patra-inbox": "patra-inbox",
+        "patra-compose": "patra-compose"
       };
 
       const activeTab = tabMappings[action];
@@ -238,17 +239,35 @@ const EmployeeHome = () => {
         
         // Force a small delay to ensure localStorage is set before navigation
         setTimeout(() => {
-          // Use window.location for more reliable navigation
-          window.location.href = "/employeeheader";
+          // Check if admin or employee
+          if (isAdmin(level)) {
+            // Dispatch custom event for admin dashboard
+            localStorage.setItem("adminTab", activeTab);
+            window.dispatchEvent(new Event('adminTabChange'));
+            if (window.location.pathname !== "/admindashboard") {
+              window.location.href = "/admindashboard";
+            }
+          } else {
+            // Use window.location for more reliable navigation
+            window.location.href = "/employeeheader";
+          }
         }, 50);
       } else {
         console.warn(`No tab mapping found for action: ${action}`);
-        navigate("/employeeheader");
+        if (isAdmin(level)) {
+          navigate("/admindashboard");
+        } else {
+          navigate("/employeeheader");
+        }
       }
     } catch (error) {
       console.error("Navigation error:", error);
       // Ultimate fallback - direct page change
-      window.location.href = "/employeeheader";
+      if (isAdmin(level)) {
+        window.location.href = "/admindashboard";
+      } else {
+        window.location.href = "/employeeheader";
+      }
     }
   };
 
@@ -396,7 +415,7 @@ const EmployeeHome = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#ED772F] border-r-transparent"></div>
+        <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#E68332] border-r-transparent"></div>
         <span className="ml-3 text-gray-600">डाटा लोड हुँदैछ...</span>
       </div>
     );
@@ -410,7 +429,7 @@ const EmployeeHome = () => {
         <div className="flex gap-2">
           <button 
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-[#ED772F] text-white rounded-lg hover:bg-[#c36f2a]"
+            className="px-4 py-2 bg-[#E68332] text-white rounded-lg hover:bg-[#c36f2a]"
           >
             पुन: प्रयास गर्नुहोस्
           </button>
@@ -480,7 +499,7 @@ const EmployeeHome = () => {
         {/* Quick Actions */}
         <div className="bg-white p-6 rounded-xl shadow-md mb-6 lg:mb-0 col-span-1">
           <h2 className="text-lg font-semibold mb-4 text-gray-700 flex items-center gap-2">
-            <FaExchangeAlt className="text-[#ED772F]" /> द्रुत कार्यहरू
+            <FaExchangeAlt className="text-[#E68332]" /> द्रुत कार्यहरू
           </h2>
           
           <div className="grid grid-cols-1 gap-4">
@@ -540,10 +559,10 @@ const EmployeeHome = () => {
         <div className="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-              <FaChartLine className="text-[#ED772F]" /> हालैका फाइल गतिविधिहरू
+              <FaChartLine className="text-[#E68332]" /> हालैका फाइल गतिविधिहरू
             </h2>
-            {/* Only show chart toggle for level 4 (admin) users */}
-            {(level === "4" || level === "admin") && (
+            {/* Only show chart toggle for admin users */}
+            {isAdmin(level) && (
               <div className="flex items-center">
                 <button 
                   onClick={() => setShowChart(!showChart)}
@@ -555,8 +574,8 @@ const EmployeeHome = () => {
             )}
           </div>
 
-          {/* Show chart only for level 4 (admin) users AND when showChart is true */}
-          {(level === "4" || level === "admin") && showChart ? (
+          {/* Show chart only for admin users AND when showChart is true */}
+          {isAdmin(level) && showChart ? (
             <div className="mt-2">
               {stats.departmentFiles && stats.departmentFiles.length > 0 ? (
                 <div className="h-80 w-full">
@@ -621,11 +640,11 @@ const EmployeeHome = () => {
       <div className="bg-white p-6 rounded-xl shadow-md mt-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-            <FaBell className="text-[#ED772F]" /> हालैका सूचनाहरू
+            <FaBell className="text-[#E68332]" /> हालैका सूचनाहरू
           </h2>
           <button 
             onClick={() => handleAction("notification")}
-            className="text-sm text-[#ED772F] hover:underline"
+            className="text-sm text-[#E68332] hover:underline"
           >
             सबै हेर्नुहोस्
           </button>

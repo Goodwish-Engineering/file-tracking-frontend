@@ -7,3 +7,4 @@ export { useEmployeeData } from './useEmployeeData';
 export { useEmployeeFilters } from './useEmployeeFilters';
 export { useEmployeeModals } from './useEmployeeModals';
 export { useOfficeData } from './useOfficeData';
+export { usePatra } from './usePatra';

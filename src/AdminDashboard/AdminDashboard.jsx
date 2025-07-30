@@ -1,6 +1,29 @@
 import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { 
+  Box, 
+  Drawer, 
+  List, 
+  ListItem, 
+  ListItemIcon, 
+  ListItemText, 
+  Typography,
+  Badge,
+  Divider
+} from '@mui/material';
+import {
+  Dashboard as DashboardIcon,
+  People as PeopleIcon,
+  Business as BusinessIcon,
+  FilePresent as FileIcon,
+  Category as CategoryIcon,
+  Email as EmailIcon,
+  Inbox as InboxIcon,
+  Send as SendIcon,
+  Create as CreateIcon
+} from '@mui/icons-material';
 import EmployeeDetails from "./EmployeeDetails";
-import Registration from "../Components/Register";
+import Registration from "../Components/registration/Registration";
 import FileStatus from "../Components/FileStatus";
 import Notification from "../Components/Notification";
 import UserDetails from "../EmployeeDashboard/UserDetails";
@@ -21,16 +44,19 @@ import {
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import logo from "/logo192.png";
-import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { removeLogin, removeUser } from "../app/loginSlice";
 import NonTransferFile3 from "../Components/NonTransfer3";
 import TransferedFile from "../Components/TransferedFiles";
 import AdminDashboardHome from "./AdminDashboardHome";
 import FileTypeManagement from "./FileTypeManagement";
+import PatraInbox from "../Patra/PatraInbox";
+import PatraCompose from "../Patra/PatraCompose";
 
 const AdminDashboard = () => {
-  const [tab, setTab] = useState(localStorage.getItem("adminTab") || "dashboard");
+  const [activeTab, setActiveTab] = useState(
+    localStorage.getItem("adminTab") || "overview"
+  );
   const [menue, setMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -42,16 +68,19 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  // Get unread patra count from Redux
+  const { unreadCount: patraUnreadCount } = useSelector(state => state.patra);
+
   // Save selected tab to localStorage
   useEffect(() => {
-    localStorage.setItem("adminTab", tab);
-  }, [tab]);
+    localStorage.setItem("adminTab", activeTab);
+  }, [activeTab]);
   
   // Listen for tab change events from AdminDashboardHome
   useEffect(() => {
     const handleAdminTabChange = () => {
       const newTab = localStorage.getItem("adminTab");
-      setTab(newTab);
+      setActiveTab(newTab);
     };
     
     window.addEventListener('adminTabChange', handleAdminTabChange);
@@ -92,7 +121,7 @@ const AdminDashboard = () => {
   };
 
   const handleTabChange = (newTab) => {
-    setTab(newTab);
+    setActiveTab(newTab);
     setMenu(false);
   };
 
@@ -118,22 +147,30 @@ const AdminDashboard = () => {
   };
 
   // Sidebar navigation items
-  const navItems = [
-    { id: "dashboard", label: "डास्हबोर्ड", icon: <MdDashboard /> },
-    { id: "empdetails", label: "कर्मचारी विवरण", icon: <FaUserCog /> },
-    { id: "filedetails", label: "फाइल विवरण", icon: <FaFileAlt /> },
-    { id: "register", label: "कर्मचारी दर्ता", icon: <FaUserPlus /> },
-    { id: "add-office", label: "शाखा व्यवस्थापन", icon: <FaBuilding /> },
-    { id: "file-types", label: "फाइल प्रकार", icon: <FaFileAlt /> },
-    { id: "nontransfer3", label: "स्थानान्तरण नगरिएको", icon: <FaExchangeAlt /> },
-    { id: "transfered", label: "स्थानान्तरण गरिएको", icon: <FaExchangeAlt /> },
-    { id: "deleted-files", label: "मेटिएका फाइलहरू", icon: <FaTrashAlt /> },
-    { id: "notification", label: "सूचनाहरू", icon: <FaBell />, badge: unreadCount }
+  const menuItems = [
+    { key: "overview", label: "ओभरभ्यू", icon: <DashboardIcon /> },
+    { key: "empdetails", label: "कर्मचारी विवरण", icon: <FaUserCog /> },
+    { key: "filedetails", label: "फाइल विवरण", icon: <FaFileAlt /> },
+    { key: "register", label: "कर्मचारी दर्ता", icon: <PeopleIcon /> },
+    { key: "add-office", label: "कार्यालय व्यवस्थापन", icon: <BusinessIcon /> },
+    { key: "file-type", label: "फाइल प्रकार", icon: <CategoryIcon /> },
+    { 
+      key: "patra-inbox", 
+      label: "पत्र इनबक्स", 
+      icon: (
+        <Badge badgeContent={patraUnreadCount} color="error">
+          <InboxIcon />
+        </Badge>
+      )
+    },
+    { key: "patra-compose", label: "नयाँ पत्र", icon: <CreateIcon /> },
+    { key: "deleted-files", label: "मेटिएका फाइलहरू", icon: <FaTrashAlt /> },
+    { key: "notification", label: "सूचनाहरू", icon: <FaBell />, badge: unreadCount }
   ];
 
   const renderContent = () => {
-    switch (tab) {
-      case "dashboard": 
+    switch (activeTab) {
+      case "overview": 
         return <AdminDashboardHome />;
       case "empdetails":
         return <EmployeeDetails />;
@@ -145,7 +182,7 @@ const AdminDashboard = () => {
         return <Notification onNotificationRead={fetchNotifications} />;
       case "add-office":
         return <AddOffice />;
-      case "file-types":
+      case "file-type":
         return <FileTypeManagement />;
       case "nontransfer3":
         return <NonTransferFile3 />;
@@ -153,6 +190,10 @@ const AdminDashboard = () => {
         return <TransferedFile />;
       case "deleted-files":
         return <DeletedFile />;
+      case "patra-inbox":
+        return <PatraInbox />;
+      case "patra-compose":
+        return <PatraCompose />;
       default:
         return <AdminDashboardHome />;
     }
@@ -161,15 +202,15 @@ const AdminDashboard = () => {
   // NavItem Component for sidebar
   const NavItem = ({ item, onClick }) => (
     <div
-      onClick={() => onClick(item.id)}
+      onClick={() => onClick(item.key)}
       className={`cursor-pointer transition-all duration-200 mb-1 ${
-        tab === item.id
+        activeTab === item.key
           ? "bg-gradient-to-r from-[#E68332] to-[#FF9F4A] text-white shadow-md"
           : "text-gray-700 hover:bg-[#f0ebe7]"
       } font-medium px-4 py-3 rounded-md flex items-center justify-between`}
     >
       <div className="flex items-center gap-3">
-        <span className={`text-xl ${tab === item.id ? "text-white" : "text-[#E68332]"}`}>
+        <span className={`text-xl ${activeTab === item.key ? "text-white" : "text-[#E68332]"}`}>
           {item.icon}
         </span>
         <span>{item.label}</span>
@@ -204,8 +245,8 @@ const AdminDashboard = () => {
           {/* Navigation links */}
           <div className="flex-grow py-5 px-2">
             <div className="space-y-1">
-              {navItems.map(item => (
-                <NavItem key={item.id} item={item} onClick={handleTabChange} />
+              {menuItems.map(item => (
+                <NavItem key={item.key} item={item} onClick={handleTabChange} />
               ))}
             </div>
           </div>
@@ -284,8 +325,8 @@ const AdminDashboard = () => {
           {/* Mobile Navigation Links */}
           <div className="flex-grow overflow-y-auto p-4">
             <div className="space-y-1">
-              {navItems.map(item => (
-                <NavItem key={item.id} item={item} onClick={handleTabChange} />
+              {menuItems.map(item => (
+                <NavItem key={item.key} item={item} onClick={handleTabChange} />
               ))}
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import { FaCalendarAlt } from "react-icons/fa";
 
 const FormField = ({
@@ -15,6 +15,7 @@ const FormField = ({
   defaultValue,
   onChange,
   onBlur,
+  error,
 }) => {
   // Local state for date input to prevent focus loss
   const [localDateValue, setLocalDateValue] = useState(value || "");
@@ -92,18 +93,6 @@ const FormField = ({
     }
   }, [value]); // Only depend on value, not localDateValue to prevent infinite loops
 
-  // Memoize select options to prevent unnecessary re-renders
-  const selectOptions = useMemo(() => {
-    return options.map((option) => (
-      <option
-        key={option.id || option.value || option}
-        value={option.id || option.value || option}
-      >
-        {option.name || option.file_name || option.label || option}
-      </option>
-    ));
-  }, [options]);
-
   if (type === "select") {
     return (
       <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md">
@@ -127,9 +116,36 @@ const FormField = ({
           disabled={options.length === 0 && name !== "province"}
         >
           <option value="">{placeholder || `${label} छान्नुहोस्`}</option>
-          {selectOptions}
+          {options.map((option, index) => {
+            // Handle different object structures safely
+            let optionKey, optionValue, optionLabel;
+            
+            if (typeof option === 'string' || typeof option === 'number') {
+              optionKey = index;
+              optionValue = option;
+              optionLabel = option;
+            } else if (typeof option === 'object' && option !== null) {
+              optionKey = option.id || option.value || index;
+              optionValue = option.id || option.value || '';
+              optionLabel = option.name || option.file_name || option.label || option.text || '';
+            } else {
+              // Fallback for undefined, null, or other types
+              optionKey = index;
+              optionValue = '';
+              optionLabel = '';
+            }
+            
+            return (
+              <option key={optionKey} value={optionValue}>
+                {optionLabel}
+              </option>
+            );
+          })}
         </select>
-        {required && !value && (
+        {error && (
+          <p className="text-xs text-red-500 mt-1">{error}</p>
+        )}
+        {required && !value && !error && (
           <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
         )}
       </div>
@@ -139,7 +155,7 @@ const FormField = ({
       <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md">
         <label
           htmlFor={name}
-          className="block font-medium text-gray-700 mb-2 flex items-center"
+          className="flex font-medium text-gray-700 mb-2 items-center"
         >
           <FaCalendarAlt className="mr-2 text-[#E68332]" />
           {label}
@@ -174,7 +190,10 @@ const FormField = ({
           )}
         </div>
 
-        {required && !localDateValue && (
+        {error && (
+          <p className="text-xs text-red-500 mt-1">{error}</p>
+        )}
+        {required && !localDateValue && !error && (
           <p className="text-xs text-red-500 mt-1">यो फिल्ड आवश्यक छ</p>
         )}
 
@@ -189,7 +208,7 @@ const FormField = ({
       <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md">
         <label
           htmlFor={name}
-          className="block font-medium text-gray-700 mb-2 flex items-center"
+          className="flex font-medium text-gray-700 mb-2 items-center"
         >
           {icon && <span className="mr-2 text-[#E68332]">{icon}</span>}
           {label}
@@ -221,6 +240,11 @@ const FormField = ({
             required={required}
             autoComplete="off"
           />
+        )}
+        
+        {/* Error display for regular inputs and textareas */}
+        {error && (
+          <p className="text-xs text-red-500 mt-1">{error}</p>
         )}
       </div>
     );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { TABLE_HEADERS, PLACEHOLDER_VALUES, BUTTON_TITLES } from '../../constants/employeeConstants';
-import ActionButton from '../common/ActionButton';
+import ActionButton from '../Common/ActionButton';
 import { MdOutlineInfo } from 'react-icons/md';
 import { FaUserTie, FaBuilding } from 'react-icons/fa';
 

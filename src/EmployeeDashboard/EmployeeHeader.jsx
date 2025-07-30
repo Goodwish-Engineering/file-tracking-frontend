@@ -13,7 +13,7 @@ import Notification from "../Components/Notification";
 import DartaList from "../Components/DartaList";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { FaFile, FaRegFileAlt, FaUserCircle } from "react-icons/fa";
+import { FaFile, FaRegFileAlt, FaUserCircle, FaBell, FaInbox, FaPaperPlane, FaEdit, FaExchangeAlt } from "react-icons/fa";
 import { AiFillAppstore } from "react-icons/ai";
 import { IoIosNotifications } from "react-icons/io";
 import { FiShieldOff } from "react-icons/fi";
@@ -21,7 +21,9 @@ import { MdOutlineTurnRight, MdDashboard } from "react-icons/md";
 import { BsFileEarmark } from "react-icons/bs";
 import NonTransferFile3 from "../Components/NonTransfer3";
 import ChalaniList from "../Components/ChalaniList";
-import { FaPaperPlane } from "react-icons/fa";
+import PatraInbox from "../Patra/PatraInbox";
+import PatraCompose from "../Patra/PatraCompose";
+import PatraTracking from "../Patra/PatraTracking";
 
 const EmployeHeader = () => {
   // Get activeTab from localStorage if exists, otherwise default to notification
@@ -119,6 +121,9 @@ const EmployeHeader = () => {
     </div>
   );
 
+  // Get unread patra count from Redux
+  const { unreadCount: patraUnreadCount } = useSelector(state => state.patra);
+
   return (
     <div className="flex flex-col md:flex-row w-full relative">
       {/* Large Screen Sidebar - hidden on mobile */}
@@ -214,6 +219,30 @@ const EmployeHeader = () => {
               label="चलानी रेकर्डहरू"
             />
             
+            {/* Patra System Section */}
+            <SectionTitle title="पत्र प्रणाली" />
+            <NavItem
+              onClick={() => setTab("patra-inbox")}
+              isActive={tab === "patra-inbox"}
+              icon={<FaPaperPlane />}
+              label="पत्र इनबक्स"
+              badge={patraUnreadCount}
+            />
+            
+            <NavItem
+              onClick={() => setTab("patra-compose")}
+              isActive={tab === "patra-compose"}
+              icon={<FaPaperPlane />}
+              label="नयाँ पत्र"
+            />
+            
+            <NavItem
+              onClick={() => setTab("patra-tracking")}
+              isActive={tab === "patra-tracking"}
+              icon={<FaExchangeAlt />}
+              label="पत्र ट्र्याकिङ"
+            />
+
             {/* Notifications section */}
             <SectionTitle title="सूचना" />
             <NavItem
@@ -381,6 +410,30 @@ const EmployeHeader = () => {
             label="चलानी रेकर्डहरू"
           />
           
+          {/* Patra System Section */}
+          <SectionTitle title="पत्र प्रणाली" />
+          <NavItem
+            onClick={() => handleTabChange("patra-inbox")}
+            isActive={tab === "patra-inbox"}
+            icon={<FaPaperPlane />}
+            label="पत्र इनबक्स"
+            badge={patraUnreadCount}
+          />
+          
+          <NavItem
+            onClick={() => handleTabChange("patra-compose")}
+            isActive={tab === "patra-compose"}
+            icon={<FaPaperPlane />}
+            label="नयाँ पत्र"
+          />
+          
+          <NavItem
+            onClick={() => handleTabChange("patra-tracking")}
+            isActive={tab === "patra-tracking"}
+            icon={<FaExchangeAlt />}
+            label="पत्र ट्र्याकिङ"
+          />
+
           {/* Notifications section */}
           <SectionTitle title="सूचना" />
           <NavItem
@@ -413,9 +466,12 @@ const EmployeHeader = () => {
         {tab === "filerequest" && <FileRequest />}
         {tab === "notification" && <Notification onNotificationRead={fetchNotifications} />}
         {tab === "transfered" && <TransferedFile />}
-        {tab === "nontransfer3" && <NonTransferFile3 />}
         {tab === "dartalist" && <DartaList />}
         {tab === "chalanilist" && <ChalaniList />}
+        {tab === "nontransfer3" && <NonTransferFile3 />}
+        {tab === "patra-inbox" && <PatraInbox />}
+        {tab === "patra-compose" && <PatraCompose />}
+        {tab === "patra-tracking" && <PatraTracking />}
       </div>
     </div>
   );

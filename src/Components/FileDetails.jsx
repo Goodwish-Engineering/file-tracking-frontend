@@ -12,7 +12,7 @@ import {
 } from "react-icons/fa";
 import { BsFileEarmark } from "react-icons/bs";
 import { MdSubject } from "react-icons/md";
-import DateInputField from "./Common/DateInputField";
+import DateInputField from "../components/Common/DateInputField";
 
 const FileDetails = ({ setShowButton, clearData }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
@@ -476,7 +476,7 @@ const FileDetails = ({ setShowButton, clearData }) => {
             )}
 
             <div className="mb-6 transition-all duration-200 hover:shadow-md rounded-md">
-              <label className="block font-medium text-gray-700 mb-2 flex items-center">
+              <label className="font-medium text-gray-700 mb-2 flex items-center">
                 <FaCalendarAlt className="mr-2 text-[#ED772F]" />
                 हालको मिति
                 <span className="text-red-500 ml-1">*</span>

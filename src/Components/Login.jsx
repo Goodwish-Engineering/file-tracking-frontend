@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addLogin, addUser } from "../app/loginSlice";
 import logo from "/logo192.png";
 import { useNavigate } from "react-router-dom";
+import { isAdmin, ADMIN_LEVEL } from '../utils/constants';
 
 const Login = () => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);
@@ -40,7 +41,8 @@ const Login = () => {
         dispatch(addUser(storedUser));
         dispatch(addLogin(true));
         // Redirect based on user role
-        if (storedUser.is_admin) {
+        const level = localStorage.getItem("level");
+        if (isAdmin(level)) {
           navigate("/admindashboard"); // Redirect to admin dashboard if admin
         } else {
           navigate("/employeeheader"); // Redirect to employee page if employee
@@ -90,7 +92,7 @@ const Login = () => {
         // Allow admins to switch to lower levels for testing
         userLevel = selectedLevel;
       } else if (data.user.is_admin) {
-        userLevel = 5;
+        userLevel = ADMIN_LEVEL;
       } else {
         userLevel = data.user.user_type;
       }
@@ -98,7 +100,7 @@ const Login = () => {
       localStorage.setItem("level", userLevel);
       
       // Redirect based on level
-      if (userLevel == 5) {
+      if (isAdmin(userLevel)) {
         navigate("/admindashboard");
       } else {
         navigate("/employeeheader");

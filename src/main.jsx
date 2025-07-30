@@ -7,7 +7,7 @@ import { Provider } from "react-redux";
 import { store } from "./app/store.js";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./Components/Login.jsx";
-import Registration from "./Components/Register.jsx";
+import Registration from "./Components/registration/Registration.jsx";
 import AdminDashboard from "./AdminDashboard/AdminDashboard.jsx";
 import EmployeOne from "./EmployeeDashboard/EmployeOne.jsx";
 import VeiwMoreFileDetails from "./Components/VeiwMoreFileDetails.jsx";
@@ -19,6 +19,11 @@ import DartaList from "./Components/DartaList.jsx";
 import ChalaniList from "./Components/ChalaniList.jsx";
 import DartaDetails from "./Components/DartaDetails.jsx";
 import ChalaniDetails from "./Components/ChalaniDetails.jsx";
+import PatraInbox from "./Patra/PatraInbox.jsx";
+import PatraSent from "./Patra/PatraSent.jsx";
+import PatraCompose from "./Patra/PatraCompose.jsx";
+import PatraDetail from "./Patra/PatraDetail.jsx";
+import PatraTracking from "./Patra/PatraTracking.jsx";
 
 const router = createBrowserRouter([
   {
@@ -38,6 +43,11 @@ const router = createBrowserRouter([
       { element: <ChalaniList/>, path: "/chalani-list"},
       { element: <DartaDetails/>, path: "/darta-details/:id"},
       { element: <ChalaniDetails/>, path: "/chalani-details/:id"},
+      { element: <PatraInbox/>, path: "/patra/inbox"},
+      { element: <PatraSent/>, path: "/patra/sent"},
+      { element: <PatraCompose/>, path: "/patra/compose"},
+      { element: <PatraDetail/>, path: "/patra/:id"},
+      { element: <PatraTracking/>, path: "/patra/tracking"},
     ],
   },
 ]);

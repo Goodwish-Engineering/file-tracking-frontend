@@ -7,6 +7,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { MdClose } from "react-icons/md";
 import { FaFileAlt, FaRegClipboard, FaRegFileAlt, FaMapMarkerAlt, FaHistory, FaPencilAlt, FaSave } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { isAdmin } from '../utils/constants';
 
 // Import tab components
 import FileInfoTab from "./Tabs/FileInfoTab";
@@ -194,7 +195,7 @@ const ViewMoreFileDetails = () => {
   // Navigation handler
   const level = localStorage.getItem("level");
   const handleNavigate = () => {
-    navigate(level === "5" ? "/admindashboard" : "/employeeheader");
+    navigate(isAdmin(level) ? "/admindashboard" : "/employeeheader");
   };
 
   // Tab data
@@ -226,7 +227,7 @@ const ViewMoreFileDetails = () => {
           </svg>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">फाइल फेला परेन</h2>
           <p className="text-gray-600 mb-6">अनुरोध गरिएको फाइल उपलब्ध छैन वा हटाइएको हुन सक्छ।</p>
-          <button onClick={handleNavigate} className="px-6 py-2 bg-[#E68332] text-white rounded-md shadow-md hover:bg-[#d9773b] transition-all">
+          <button onClick={handleNavigate} className="px-6 py-2 bg-[#E68332] text-white rounded-md shadow-md hover:bg-[#c36f2a] transition-all">
             होम पृष्ठमा फर्कनुहोस्
           </button>
         </div>
@@ -244,7 +245,7 @@ const ViewMoreFileDetails = () => {
         onClick={handleNavigate}
         className="fixed top-4 left-4 z-10 group"
       >
-        <div className="flex items-center px-4 py-2 bg-[#E68332] text-white rounded-md shadow-md hover:bg-[#d9773b] cursor-pointer transition-all">
+        <div className="flex items-center px-4 py-2 bg-[#E68332] text-white rounded-md shadow-md hover:bg-[#c36f2a] cursor-pointer transition-all">
           <IoMdArrowRoundBack className="mr-2 group-hover:animate-pulse" />
           <span className="font-medium">होम</span>
         </div>
@@ -279,7 +280,7 @@ const ViewMoreFileDetails = () => {
       >
         <button
           className={`px-6 py-2 rounded-md shadow-md transition-all flex items-center ${
-            editable ? "bg-gray-500 text-white hover:bg-gray-600" : "bg-[#E68332] text-white hover:bg-[#d9773b]"
+            editable ? "bg-gray-500 text-white hover:bg-gray-600" : "bg-[#E68332] text-white hover:bg-[#c36f2a]"
           }`}
           onClick={handleEditToggle}
         >
