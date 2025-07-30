@@ -66,25 +66,3 @@ const SelectOffice = ({
 };
 
 export default SelectOffice;
-          officeList.map((office) => (
-            <MenuItem key={office.id} value={office.id}>
-              {office.name} ({office.code})
-            </MenuItem>
-          ))
-        )}
-      </Select>
-      {(error || helperText) && (
-        <FormHelperText>
-          {error ? helperText : helperText}
-        </FormHelperText>
-      )}
-      {offices.error && (
-        <FormHelperText error>
-          Failed to load offices. Using fallback data.
-        </FormHelperText>
-      )}
-    </FormControl>
-  );
-};
-
-export default SelectOffice;
