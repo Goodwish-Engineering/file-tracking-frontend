@@ -12,7 +12,7 @@ import {
 } from "react-icons/fa";
 import { BsFileEarmark } from "react-icons/bs";
 import { MdSubject } from "react-icons/md";
-import DateInputField from "../components/Common/DateInputField";
+import DateInputField from "../Components/Common/DateInputField";
 
 const FileDetails = ({ setShowButton, clearData }) => {
   const baseUrl = useSelector((state) => state.login?.baseUrl);

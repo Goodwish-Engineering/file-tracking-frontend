@@ -5,8 +5,8 @@ import { sendPatra } from '../app/patraSlice';
 import { FaPaperPlane, FaUser, FaFileAlt, FaTimes, FaPlus } from 'react-icons/fa';
 import { MdSubject, MdDescription } from 'react-icons/md';
 import { toast } from 'react-toastify';
-import SelectOffice from '../components/patra/SelectOffice';
-import SelectDepartment from '../components/patra/SelectDepartment';
+import SelectOffice from '../Components/patra/SelectOffice';
+import SelectDepartment from '../Components/patra/SelectDepartment';
 
 const PatraCompose = () => {
   const dispatch = useDispatch();
