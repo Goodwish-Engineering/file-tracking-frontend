@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPatraById, markAsRead, transferPatra, clearCurrentPatra } from '../app/patraSlice';
 import { FaArrowLeft, FaUser, FaCalendar, FaFlag, FaEye, FaPaperPlane, FaHistory } from 'react-icons/fa';
-import TransferDialog from '../components/patra/TransferDialog';
+import TransferDialog from '../Components/patra/TransferDialog';
 
 const PatraDetail = () => {
   const { id } = useParams();

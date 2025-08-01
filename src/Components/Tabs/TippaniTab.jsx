@@ -197,6 +197,7 @@ const TippaniTab = ({
     setNewTippaniRows([]);
     setAddingNewTippani(false);
   };
+  
 
   // Save new tippani
   const saveNewTippani = async () => {
