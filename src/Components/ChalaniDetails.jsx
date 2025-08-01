@@ -19,7 +19,7 @@ const ChalaniDetails = () => {
   const navigate = useNavigate();
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
-  
+
   const [chalaniRecord, setChalaniRecord] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,20 +59,20 @@ const ChalaniDetails = () => {
   const handleEdit = () => {
     setIsEditing(true);
     setEditFormData({
-      chalani_date: chalaniRecord.chalani_date || '',
-      darta_date: chalaniRecord.darta_date || '',
-      patra_sankhya: chalaniRecord.patra_sankhya || '',
-      subject: chalaniRecord.subject || '',
-      remarks: chalaniRecord.remarks || '',
-      karmachari: chalaniRecord.karmachari || '',
-      pana_sankhya: chalaniRecord.pana_sankhya || '',
-      pathaaune_thau: chalaniRecord.pathaaune_thau || '',
-      prapta_garne_byakti: chalaniRecord.prapta_garne_byakti || '',
-      related_office: chalaniRecord.related_office || '',
-      related_department: chalaniRecord.related_department || '',
-      related_faat: chalaniRecord.related_faat || '',
-      related_file: chalaniRecord.related_file || '',
-      sending_department: chalaniRecord.sending_department || '',
+      chalani_date: chalaniRecord.chalani_date || "",
+      darta_date: chalaniRecord.darta_date || "",
+      patra_sankhya: chalaniRecord.patra_sankhya || "",
+      subject: chalaniRecord.subject || "",
+      remarks: chalaniRecord.remarks || "",
+      karmachari: chalaniRecord.karmachari || "",
+      pana_sankhya: chalaniRecord.pana_sankhya || "",
+      pathaaune_thau: chalaniRecord.pathaaune_thau || "",
+      prapta_garne_byakti: chalaniRecord.prapta_garne_byakti || "",
+      related_office: chalaniRecord.related_office || "",
+      related_department: chalaniRecord.related_department || "",
+      related_faat: chalaniRecord.related_faat || "",
+      related_file: chalaniRecord.related_file || "",
+      sending_department: chalaniRecord.sending_department || "",
     });
   };
 
@@ -83,17 +83,17 @@ const ChalaniDetails = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditFormData(prev => ({
+    setEditFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleDateInputChange = (e) => {
     const { name, value } = e.target;
-    setEditFormData(prev => ({
+    setEditFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -101,25 +101,25 @@ const ChalaniDetails = () => {
     setUpdateLoading(true);
     try {
       const response = await fetch(`${baseUrl}/chalani/${id}/`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `token ${token}`,
         },
         body: JSON.stringify(editFormData),
       });
 
       if (!response.ok) {
-        throw new Error('चलानी रेकर्ड अपडेट गर्न असफल भयो');
+        throw new Error("चलानी रेकर्ड अपडेट गर्न असफल भयो");
       }
 
       const updatedData = await response.json();
       setChalaniRecord(updatedData);
       setIsEditing(false);
-      toast.success('चलानी रेकर्ड सफलतापूर्वक अपडेट भयो!');
+      toast.success("चलानी रेकर्ड सफलतापूर्वक अपडेट भयो!");
     } catch (error) {
-      console.error('Error updating chalani record:', error);
-      toast.error('चलानी रेकर्ड अपडेट गर्न असफल भयो।');
+      console.error("Error updating chalani record:", error);
+      toast.error("चलानी रेकर्ड अपडेट गर्न असफल भयो।");
     } finally {
       setUpdateLoading(false);
     }
@@ -166,7 +166,7 @@ const ChalaniDetails = () => {
             <FaArrowLeft />
             फिर्ता जानुहोस्
           </button>
-          
+
           <div className="flex gap-2">
             {isEditing ? (
               <>
@@ -175,8 +175,12 @@ const ChalaniDetails = () => {
                   disabled={updateLoading}
                   className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                 >
-                  {updateLoading ? <FaSpinner className="animate-spin" /> : <FaEdit />}
-                  {updateLoading ? 'सुरक्षित गर्दै...' : 'सुरक्षित गर्नुहोस्'}
+                  {updateLoading ? (
+                    <FaSpinner className="animate-spin" />
+                  ) : (
+                    <FaEdit />
+                  )}
+                  {updateLoading ? "सुरक्षित गर्दै..." : "सुरक्षित गर्नुहोस्"}
                 </button>
                 <button
                   onClick={handleCancelEdit}
@@ -202,20 +206,23 @@ const ChalaniDetails = () => {
             )}
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border-l-4 border-blue-500">
           <h1 className="text-3xl font-bold text-blue-600 mb-2">
             चलानी रेकर्ड विवरण
           </h1>
           <p className="text-gray-600">
-            चलानी नम्बर: <span className="font-semibold">{chalaniRecord.chalani_number}</span>
+            चलानी नम्बर:{" "}
+            <span className="font-semibold">
+              {chalaniRecord.chalani_number}
+            </span>
           </p>
         </div>
       </div>
 
       {/* Content Grid - Choose between view or edit mode */}
       {isEditing ? (
-        <ChalaniEditForm 
+        <ChalaniEditForm
           chalaniRecord={chalaniRecord}
           editFormData={editFormData}
           handleInputChange={handleInputChange}
@@ -234,12 +241,20 @@ const ChalaniDetails = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InfoItem
               label="सिर्जना मिति"
-              value={chalaniRecord.created_at ? new Date(chalaniRecord.created_at).toLocaleString('ne-NP') : null}
+              value={
+                chalaniRecord.created_at
+                  ? new Date(chalaniRecord.created_at).toLocaleString("ne-NP")
+                  : null
+              }
               icon={<FaCalendarAlt />}
             />
             <InfoItem
               label="अन्तिम अपडेट"
-              value={chalaniRecord.updated_at ? new Date(chalaniRecord.updated_at).toLocaleString('ne-NP') : null}
+              value={
+                chalaniRecord.updated_at
+                  ? new Date(chalaniRecord.updated_at).toLocaleString("ne-NP")
+                  : null
+              }
               icon={<FaCalendarAlt />}
             />
           </div>

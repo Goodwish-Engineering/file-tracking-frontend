@@ -1,25 +1,29 @@
 import React from "react";
 import InfoCard from "./Common/InfoCard";
 import InfoItem from "./Common/InfoItem";
-import { 
-  FaFileAlt, 
-  FaCalendarAlt, 
-  FaBuilding, 
-  FaUser, 
+import {
+  FaFileAlt,
+  FaCalendarAlt,
+  FaBuilding,
+  FaUser,
   FaEye,
   FaDownload,
-  FaMapMarkerAlt
+  FaMapMarkerAlt,
 } from "react-icons/fa";
 import { BsFileEarmark } from "react-icons/bs";
 import { MdSubject } from "react-icons/md";
 
 const DartaViewDetails = ({ dartaRecord }) => {
   if (!dartaRecord) return null;
-  
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Basic Information */}
-      <InfoCard title="आधारभूत जानकारी" icon={<BsFileEarmark />} borderColor="[#E68332]">
+      <InfoCard
+        title="आधारभूत जानकारी"
+        icon={<BsFileEarmark />}
+        borderColor="[#E68332]"
+      >
         <InfoItem
           label="दर्ता नम्बर"
           value={dartaRecord.darta_number}
@@ -53,7 +57,11 @@ const DartaViewDetails = ({ dartaRecord }) => {
       </InfoCard>
 
       {/* Office Information */}
-      <InfoCard title="कार्यालय जानकारी" icon={<FaBuilding />} borderColor="[#E68332]">
+      <InfoCard
+        title="कार्यालय जानकारी"
+        icon={<FaBuilding />}
+        borderColor="[#E68332]"
+      >
         <InfoItem
           label="सम्बन्धित विभाग"
           value={dartaRecord.related_department_detail?.name}
@@ -81,7 +89,11 @@ const DartaViewDetails = ({ dartaRecord }) => {
       </InfoCard>
 
       {/* Subject and Description */}
-      <InfoCard title="विषय र विवरण" icon={<MdSubject />} borderColor="[#E68332]">
+      <InfoCard
+        title="विषय र विवरण"
+        icon={<MdSubject />}
+        borderColor="[#E68332]"
+      >
         <div className="space-y-4">
           <div>
             <p className="text-sm font-medium text-gray-600 mb-2">विषय</p>
@@ -91,7 +103,7 @@ const DartaViewDetails = ({ dartaRecord }) => {
               </p>
             </div>
           </div>
-          
+
           <div>
             <p className="text-sm font-medium text-gray-600 mb-2">कैफियत</p>
             <div className="bg-gray-50 p-3 rounded-md">
@@ -134,7 +146,11 @@ const DartaViewDetails = ({ dartaRecord }) => {
       {/* File Information */}
       {dartaRecord.related_file_detail && (
         <div className="lg:col-span-2">
-          <InfoCard title="सम्बन्धित फाइल जानकारी" icon={<FaFileAlt />} borderColor="[#E68332]">
+          <InfoCard
+            title="सम्बन्धित फाइल जानकारी"
+            icon={<FaFileAlt />}
+            borderColor="[#E68332]"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoItem
                 label="फाइल नाम"
@@ -156,16 +172,25 @@ const DartaViewDetails = ({ dartaRecord }) => {
               />
               <InfoItem
                 label="स्थिति"
-                value={dartaRecord.related_file_detail.is_disabled ? "असक्षम" : "सक्षम"}
+                value={
+                  dartaRecord.related_file_detail.is_disabled
+                    ? "असक्षम"
+                    : "सक्षम"
+                }
                 icon={<FaFileAlt />}
                 primaryColor="[#E68332]"
               />
             </div>
-            
+
             {dartaRecord.related_file_detail.file_url && (
               <div className="mt-4 flex gap-2">
                 <button
-                  onClick={() => window.open(dartaRecord.related_file_detail.file_url, '_blank')}
+                  onClick={() =>
+                    window.open(
+                      dartaRecord.related_file_detail.file_url,
+                      "_blank"
+                    )
+                  }
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <FaEye />
@@ -173,7 +198,7 @@ const DartaViewDetails = ({ dartaRecord }) => {
                 </button>
                 <button
                   onClick={() => {
-                    const link = document.createElement('a');
+                    const link = document.createElement("a");
                     link.href = dartaRecord.related_file_detail.file_url;
                     link.download = dartaRecord.related_file_detail.file_name;
                     link.click();

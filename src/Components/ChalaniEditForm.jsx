@@ -2,26 +2,26 @@ import React from "react";
 import InfoCard from "./Common/InfoCard";
 import InfoItem from "./Common/InfoItem";
 import DateInputField from "./Common/DateInputField";
-import { 
-  FaFileAlt, 
-  FaCalendarAlt, 
-  FaBuilding, 
-  FaUser, 
-  FaPaperPlane, 
+import {
+  FaFileAlt,
+  FaCalendarAlt,
+  FaBuilding,
+  FaUser,
+  FaPaperPlane,
   FaSpinner,
   FaCheck,
-  FaTimes
+  FaTimes,
 } from "react-icons/fa";
 import { MdSubject } from "react-icons/md";
 
-const ChalaniEditForm = ({ 
+const ChalaniEditForm = ({
   chalaniRecord,
   editFormData,
   handleInputChange,
   handleDateInputChange,
   handleSaveEdit,
   handleCancelEdit,
-  updateLoading
+  updateLoading,
 }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -32,45 +32,49 @@ const ChalaniEditForm = ({
           value={chalaniRecord.chalani_number}
           icon={<FaFileAlt />}
         />
-        
+
         {/* Use DateInputField for chalani_date */}
         <div className="flex items-start">
           <div className="flex items-center min-w-0 flex-1">
-            <span className="mr-2 text-gray-400 flex-shrink-0"><FaCalendarAlt /></span>
+            <span className="mr-2 text-gray-400 flex-shrink-0">
+              <FaCalendarAlt />
+            </span>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-600">चलानी मिति</p>
-              <DateInputField 
+              <DateInputField
                 name="chalani_date"
-                value={editFormData.chalani_date || ''}
+                value={editFormData.chalani_date || ""}
                 onChange={handleDateInputChange}
                 primaryColor="blue-500"
               />
             </div>
           </div>
         </div>
-        
+
         <InfoItem
           label="दर्ता नम्बर"
           value={chalaniRecord.darta_number}
           icon={<FaFileAlt />}
         />
-        
+
         {/* Use DateInputField for darta_date */}
         <div className="flex items-start">
           <div className="flex items-center min-w-0 flex-1">
-            <span className="mr-2 text-gray-400 flex-shrink-0"><FaCalendarAlt /></span>
+            <span className="mr-2 text-gray-400 flex-shrink-0">
+              <FaCalendarAlt />
+            </span>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-gray-600">दर्ता मिति</p>
-              <DateInputField 
+              <DateInputField
                 name="darta_date"
-                value={editFormData.darta_date || ''}
+                value={editFormData.darta_date || ""}
                 onChange={handleDateInputChange}
                 primaryColor="blue-500"
               />
             </div>
           </div>
         </div>
-        
+
         <InfoItem
           label="पत्र संख्या"
           value={chalaniRecord.patra_sankhya}
@@ -125,14 +129,18 @@ const ChalaniEditForm = ({
       </InfoCard>
 
       {/* Subject and Description */}
-      <InfoCard title="विषय र विवरण" icon={<MdSubject />} className="lg:col-span-2">
+      <InfoCard
+        title="विषय र विवरण"
+        icon={<MdSubject />}
+        className="lg:col-span-2"
+      >
         <div className="space-y-4">
           <div>
             <p className="text-sm font-medium text-gray-600 mb-2">विषय</p>
             <div className="bg-gray-50 p-3 rounded-md">
               <textarea
                 name="subject"
-                value={editFormData.subject || ''}
+                value={editFormData.subject || ""}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
                 rows={3}
@@ -140,13 +148,13 @@ const ChalaniEditForm = ({
               />
             </div>
           </div>
-          
+
           <div>
             <p className="text-sm font-medium text-gray-600 mb-2">कैफियत</p>
             <div className="bg-gray-50 p-3 rounded-md">
               <textarea
                 name="remarks"
-                value={editFormData.remarks || ''}
+                value={editFormData.remarks || ""}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
                 rows={4}
@@ -183,7 +191,7 @@ const ChalaniEditForm = ({
           icon={<FaBuilding />}
         />
       </InfoCard>
-      
+
       {/* File Information - Display only */}
       {chalaniRecord.related_file_detail && (
         <InfoCard title="सम्बन्धित फाइल जानकारी" icon={<FaFileAlt />}>
@@ -204,7 +212,7 @@ const ChalaniEditForm = ({
           />
         </InfoCard>
       )}
-      
+
       {/* Save/Cancel buttons */}
       <div className="lg:col-span-2 flex justify-end gap-3 mt-4">
         <button
@@ -220,7 +228,7 @@ const ChalaniEditForm = ({
           className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
         >
           {updateLoading ? <FaSpinner className="animate-spin" /> : <FaCheck />}
-          {updateLoading ? 'सुरक्षित गर्दै...' : 'सुरक्षित गर्नुहोस्'}
+          {updateLoading ? "सुरक्षित गर्दै..." : "सुरक्षित गर्नुहोस्"}
         </button>
       </div>
     </div>

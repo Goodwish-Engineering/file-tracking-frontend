@@ -25,7 +25,7 @@ const DartaList = () => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [showFilters, setShowFilters] = useState(false);
   const [isAddDartaOpen, setIsAddDartaOpen] = useState(false);
-  
+
   // Pagination state
   const [pagination, setPagination] = useState({
     totalItems: 0,
@@ -87,13 +87,13 @@ const DartaList = () => {
           Authorization: `token ${token}`,
         },
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch darta records");
       }
-      
+
       const data = await response.json();
-      
+
       // Update pagination state
       setPagination({
         totalItems: data.total_items,
@@ -127,7 +127,7 @@ const DartaList = () => {
       if (filesRes.ok) {
         const filesData = await filesRes.json();
         const actualFiles = filesData.data || filesData;
-        setFilterOptions(prev => ({
+        setFilterOptions((prev) => ({
           ...prev,
           files: Array.isArray(actualFiles) ? actualFiles : [],
         }));
@@ -135,7 +135,7 @@ const DartaList = () => {
 
       if (officesRes.ok) {
         const officesData = await officesRes.json();
-        setFilterOptions(prev => ({
+        setFilterOptions((prev) => ({
           ...prev,
           offices: Array.isArray(officesData) ? officesData : [],
         }));
@@ -147,17 +147,17 @@ const DartaList = () => {
 
   // Handle pagination
   const handlePageChange = (newPage) => {
-    setPagination(prev => ({ ...prev, currentPage: newPage }));
+    setPagination((prev) => ({ ...prev, currentPage: newPage }));
   };
 
   // Handle filter changes
   const handleFilterChange = (filterKey, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [filterKey]: value,
     }));
     // Reset to first page when filters change
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
   };
 
   // Reset filters
@@ -169,7 +169,7 @@ const DartaList = () => {
       related_faat_id: "",
     });
     setSearchQuery("");
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
   };
 
   // Client-side search functionality
@@ -177,20 +177,22 @@ const DartaList = () => {
     if (!searchQuery) return dartaRecords;
 
     return dartaRecords.filter((record) => {
-      const matchesSearch = !searchQuery || searchQuery
-        .toLowerCase()
-        .split(" ")
-        .every((query) =>
-          [
-            record.darta_number?.toLowerCase() || "",
-            record.subject?.toLowerCase() || "",
-            record.sender_name?.toLowerCase() || "", // Updated field name
-            record.sender_address?.toLowerCase() || "", // Added from model
-            record.related_file_detail?.file_name?.toLowerCase() || "",
-            record.remarks?.toLowerCase() || "",
-            record.pana_sankhya?.toLowerCase() || "", // From model
-          ].some((field) => field.includes(query))
-        );
+      const matchesSearch =
+        !searchQuery ||
+        searchQuery
+          .toLowerCase()
+          .split(" ")
+          .every((query) =>
+            [
+              record.darta_number?.toLowerCase() || "",
+              record.subject?.toLowerCase() || "",
+              record.sender_name?.toLowerCase() || "", // Updated field name
+              record.sender_address?.toLowerCase() || "", // Added from model
+              record.related_file_detail?.file_name?.toLowerCase() || "",
+              record.remarks?.toLowerCase() || "",
+              record.pana_sankhya?.toLowerCase() || "", // From model
+            ].some((field) => field.includes(query))
+          );
 
       return matchesSearch;
     });
@@ -241,7 +243,8 @@ const DartaList = () => {
               marginBottom: "10px",
               maxWidth: "300px",
               wordBreak: "break-word",
-              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+              boxShadow:
+                "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
             }}
           >
             {text}
@@ -260,9 +263,16 @@ const DartaList = () => {
     <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
       <div className="flex items-center">
         <p className="text-sm text-gray-700">
-          देखाइएको <span className="font-medium">{((pagination.currentPage - 1) * pagination.pageSize) + 1}</span> देखि{" "}
+          देखाइएको{" "}
           <span className="font-medium">
-            {Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems)}
+            {(pagination.currentPage - 1) * pagination.pageSize + 1}
+          </span>{" "}
+          देखि{" "}
+          <span className="font-medium">
+            {Math.min(
+              pagination.currentPage * pagination.pageSize,
+              pagination.totalItems
+            )}
           </span>{" "}
           कुल <span className="font-medium">{pagination.totalItems}</span> मध्ये
         </p>
@@ -275,7 +285,7 @@ const DartaList = () => {
         >
           अघिल्लो
         </button>
-        
+
         <div className="flex space-x-1">
           {[...Array(Math.min(pagination.totalPages, 5))].map((_, index) => {
             const pageNum = index + 1;
@@ -361,7 +371,8 @@ const DartaList = () => {
 
           <div className="text-right text-gray-600 flex items-center justify-end">
             <FaFileAlt className="text-[#E68332] mr-2" />
-            <span className="font-medium">{pagination.totalItems}</span> दर्ता रेकर्डहरू फेला परे
+            <span className="font-medium">{pagination.totalItems}</span> दर्ता
+            रेकर्डहरू फेला परे
           </div>
         </div>
 
@@ -374,7 +385,9 @@ const DartaList = () => {
                 </label>
                 <select
                   value={filters.related_file_id}
-                  onChange={(e) => handleFilterChange("related_file_id", e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("related_file_id", e.target.value)
+                  }
                   className="w-full py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                 >
                   <option value="">सबै फाइलहरू</option>
@@ -392,7 +405,9 @@ const DartaList = () => {
                 </label>
                 <select
                   value={filters.related_office_id}
-                  onChange={(e) => handleFilterChange("related_office_id", e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("related_office_id", e.target.value)
+                  }
                   className="w-full py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E68332] focus:border-transparent"
                 >
                   <option value="">सबै कार्यालयहरू</option>
@@ -507,13 +522,19 @@ const DartaList = () => {
                         <td className="p-4 font-medium text-gray-900">
                           <div className="flex items-center">
                             <MdSubject className="text-gray-400 mr-2 flex-shrink-0" />
-                            <TextWithTooltip text={record.subject} maxLength={22} />
+                            <TextWithTooltip
+                              text={record.subject}
+                              maxLength={22}
+                            />
                           </div>
                         </td>
                         <td className="p-4 text-sm text-gray-600">
                           <div className="flex items-center">
                             <FaUser className="text-gray-400 mr-2" />
-                            <TextWithTooltip text={record.sender_name} maxLength={15} />
+                            <TextWithTooltip
+                              text={record.sender_name}
+                              maxLength={15}
+                            />
                           </div>
                         </td>
                         <td className="p-4 text-sm text-gray-600">
@@ -522,16 +543,22 @@ const DartaList = () => {
                         <td className="p-4 text-sm text-gray-600">
                           <div className="flex items-center">
                             <FaFileAlt className="text-gray-400 mr-2" />
-                            <TextWithTooltip 
-                              text={record.related_file_detail?.file_name || "कुनै फाइल छैन"} 
-                              maxLength={15} 
+                            <TextWithTooltip
+                              text={
+                                record.related_file_detail?.file_name ||
+                                "कुनै फाइल छैन"
+                              }
+                              maxLength={15}
                             />
                           </div>
                         </td>
                         <td className="p-4 text-sm text-gray-600">
                           <div className="flex items-center">
                             <FaExternalLinkAlt className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-2" />
-                            <TextWithTooltip text={record.remarks} maxLength={20} />
+                            <TextWithTooltip
+                              text={record.remarks}
+                              maxLength={20}
+                            />
                           </div>
                         </td>
                       </tr>
@@ -539,7 +566,7 @@ const DartaList = () => {
                   </tbody>
                 </table>
               </div>
-              
+
               {/* Pagination */}
               <PaginationComponent />
             </>
@@ -547,7 +574,9 @@ const DartaList = () => {
             <div className="py-12 text-center text-gray-500">
               <div className="flex flex-col items-center">
                 <BsFiles className="text-gray-300 text-6xl mb-4" />
-                <p className="text-xl font-medium mb-2">कुनै दर्ता रेकर्ड फेला परेन</p>
+                <p className="text-xl font-medium mb-2">
+                  कुनै दर्ता रेकर्ड फेला परेन
+                </p>
                 <p className="text-gray-500 max-w-md mx-auto">
                   तपाईंको खोज मापदण्ड अनुसार कुनै दर्ता रेकर्ड फेला परेन। कृपया
                   फिल्टरहरू परिवर्तन गर्नुहोस् वा अर्को खोज प्रयास गर्नुहोस्。
@@ -565,7 +594,7 @@ const DartaList = () => {
       )}
 
       {/* Add Darta Modal */}
-      <AddDarta 
+      <AddDarta
         isOpen={isAddDartaOpen}
         onClose={() => setIsAddDartaOpen(false)}
         onSuccess={handleAddDartaSuccess}

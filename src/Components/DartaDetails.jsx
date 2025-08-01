@@ -19,7 +19,7 @@ const DartaDetails = () => {
   const navigate = useNavigate();
   const baseUrl = useSelector((state) => state.login?.baseUrl);
   const token = localStorage.getItem("token");
-  
+
   const [dartaRecord, setDartaRecord] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,20 +59,20 @@ const DartaDetails = () => {
   const handleEdit = () => {
     setIsEditing(true);
     setEditFormData({
-      darta_date: dartaRecord.darta_date || '',
-      patra_sankhya: dartaRecord.patra_sankhya || '',
-      patra_miti: dartaRecord.patra_miti || '',
-      chalani_number: dartaRecord.chalani_number || '',
-      subject: dartaRecord.subject || '',
-      remarks: dartaRecord.remarks || '',
-      tok_aadesh_dine: dartaRecord.tok_aadesh_dine || '',
-      pana_sankhya: dartaRecord.pana_sankhya || '',
-      patra_bujaune_faat: dartaRecord.patra_bujaune_faat || '',
-      karmachari: dartaRecord.karmachari || '',
-      related_office: dartaRecord.related_office || '',
-      related_department: dartaRecord.related_department || '',
-      related_faat: dartaRecord.related_faat || '',
-      related_file: dartaRecord.related_file || '',
+      darta_date: dartaRecord.darta_date || "",
+      patra_sankhya: dartaRecord.patra_sankhya || "",
+      patra_miti: dartaRecord.patra_miti || "",
+      chalani_number: dartaRecord.chalani_number || "",
+      subject: dartaRecord.subject || "",
+      remarks: dartaRecord.remarks || "",
+      tok_aadesh_dine: dartaRecord.tok_aadesh_dine || "",
+      pana_sankhya: dartaRecord.pana_sankhya || "",
+      patra_bujaune_faat: dartaRecord.patra_bujaune_faat || "",
+      karmachari: dartaRecord.karmachari || "",
+      related_office: dartaRecord.related_office || "",
+      related_department: dartaRecord.related_department || "",
+      related_faat: dartaRecord.related_faat || "",
+      related_file: dartaRecord.related_file || "",
     });
   };
 
@@ -83,9 +83,9 @@ const DartaDetails = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditFormData(prev => ({
+    setEditFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -93,25 +93,25 @@ const DartaDetails = () => {
     setUpdateLoading(true);
     try {
       const response = await fetch(`${baseUrl}/darta/${id}/`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `token ${token}`,
         },
         body: JSON.stringify(editFormData),
       });
 
       if (!response.ok) {
-        throw new Error('दर्ता रेकर्ड अपडेट गर्न असफल भयो');
+        throw new Error("दर्ता रेकर्ड अपडेट गर्न असफल भयो");
       }
 
       const updatedData = await response.json();
       setDartaRecord(updatedData);
       setIsEditing(false);
-      toast.success('दर्ता रेकर्ड सफलतापूर्वक अपडेट भयो!');
+      toast.success("दर्ता रेकर्ड सफलतापूर्वक अपडेट भयो!");
     } catch (error) {
-      console.error('Error updating darta record:', error);
-      toast.error('दर्ता रेकर्ड अपडेट गर्न असफल भयो।');
+      console.error("Error updating darta record:", error);
+      toast.error("दर्ता रेकर्ड अपडेट गर्न असफल भयो।");
     } finally {
       setUpdateLoading(false);
     }
@@ -158,7 +158,7 @@ const DartaDetails = () => {
             <FaArrowLeft />
             फिर्ता जानुहोस्
           </button>
-          
+
           <div className="flex gap-2">
             {isEditing ? (
               <>
@@ -167,8 +167,12 @@ const DartaDetails = () => {
                   disabled={updateLoading}
                   className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                 >
-                  {updateLoading ? <FaSpinner className="animate-spin" /> : <FaEdit />}
-                  {updateLoading ? 'सुरक्षित गर्दै...' : 'सुरक्षित गर्नुहोस्'}
+                  {updateLoading ? (
+                    <FaSpinner className="animate-spin" />
+                  ) : (
+                    <FaEdit />
+                  )}
+                  {updateLoading ? "सुरक्षित गर्दै..." : "सुरक्षित गर्नुहोस्"}
                 </button>
                 <button
                   onClick={handleCancelEdit}
@@ -194,13 +198,14 @@ const DartaDetails = () => {
             )}
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-r from-[#f9f1ea] to-[#fcf8f5] p-6 rounded-lg border-l-4 border-[#E68332]">
           <h1 className="text-3xl font-bold text-[#E68332] mb-2">
             दर्ता रेकर्ड विवरण
           </h1>
           <p className="text-gray-600">
-            दर्ता नम्बर: <span className="font-semibold">{dartaRecord.darta_number}</span>
+            दर्ता नम्बर:{" "}
+            <span className="font-semibold">{dartaRecord.darta_number}</span>
           </p>
         </div>
       </div>
@@ -221,17 +226,29 @@ const DartaDetails = () => {
 
       {/* Timestamp Information */}
       <div className="mt-6">
-        <InfoCard title="समय जानकारी" icon={<FaCalendarAlt />} borderColor="[#E68332]">
+        <InfoCard
+          title="समय जानकारी"
+          icon={<FaCalendarAlt />}
+          borderColor="[#E68332]"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InfoItem
               label="सिर्जना मिति"
-              value={dartaRecord.created_at ? new Date(dartaRecord.created_at).toLocaleString('ne-NP') : null}
+              value={
+                dartaRecord.created_at
+                  ? new Date(dartaRecord.created_at).toLocaleString("ne-NP")
+                  : null
+              }
               icon={<FaCalendarAlt />}
               primaryColor="[#E68332]"
             />
             <InfoItem
               label="अन्तिम अपडेट"
-              value={dartaRecord.updated_at ? new Date(dartaRecord.updated_at).toLocaleString('ne-NP') : null}
+              value={
+                dartaRecord.updated_at
+                  ? new Date(dartaRecord.updated_at).toLocaleString("ne-NP")
+                  : null
+              }
               icon={<FaCalendarAlt />}
               primaryColor="[#E68332]"
             />
